@@ -1,0 +1,378 @@
+<?php
+/* $Id$ */
+
+/**
+ * @file
+ * A simple n-star voting widget, usable in other forms.
+ */
+
+if (module_exists('views')) {
+  include_once(drupal_get_path('module', 'fivestar') . '/fivestar_views.inc');
+}
+if (module_exists('content')) {
+  include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
+}
+
+function fivestar_menu($may_cache) {
+  $items = array();
+  if ($may_cache) {
+    $items[] = array(
+      'path'     => 'fivestar/vote',
+      'callback' => 'fivestar_vote',
+      'type'     => MENU_CALLBACK,
+      'access'   => user_access('rate content'),
+    );
+
+    $items[] = array(
+      'path'     => 'admin/voting/fivestar',
+      'title' => t('Five star voting'),
+      'description' => t('Configure the five star voting widget.'),
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('fivestar_settings'),
+    );
+  }
+  else {
+    drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
+  }
+  return $items;
+}
+
+function fivestar_settings() {
+  $form['types'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Enable voting for these content types'),
+  );
+
+  foreach(node_get_types('names') as $type => $name) {
+    $form['types']['fivestar_' . $type] = array(
+      '#type' => 'checkbox',
+      '#title' => $name,
+      '#return_value' => 1,
+      '#default_value' => variable_get('fivestar_' . $type, 0),
+    );
+  }
+
+  return system_settings_form($form);
+}
+
+function fivestar_perm() {
+  return array('rate content', 'use PHP for fivestar target');
+}
+
+function fivestar_vote($type, $cid, $value) {
+  $result = _fivestar_cast_vote($type, $cid, $value);
+  if (count($result)) {
+    $output = '';
+    $output .= '<?xml version="1.0" encoding="UTF-8"?>';
+    $output .= '<result>';
+    foreach ($result as $data) {
+      $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
+    }
+    $output .= '</result>';
+    
+    $output .= '<vote>';
+    $output .= '<value>' . $value . '</value>';
+    $output .= '<type>' . $type . '</type>';
+    $output .= '<id>' . $cid . '</id>';
+    $output .= '</vote>';
+  }
+  else {
+    $output = 'false';
+  }
+
+  exit($output);
+}
+
+function _fivestar_cast_vote($type, $cid, $value) {
+  global $user;
+
+  // Bail out if the user's trying to vote on an invalid object.
+  if (!_fivestar_validate_target($type, $cid)) {
+    return array();
+  }
+
+  // Prep variables for anonymous vs. registered voting
+  if ($user->uid) {
+    $uid = $user->uid;
+  }
+  else {
+    $uid = 0;
+    if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $hostname = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    else {
+      $hostname = $_SERVER['REMOTE_ADDR'];
+    }
+  }
+
+  // sanity-check the incoming values.
+  if (is_numeric($cid) && is_numeric($value)) {
+    if ($value > 100) {
+      $value = 100;
+    }
+
+    // If the vote value is 0, blindly nuke any votes for this content by the user.
+    if ($value == 0) {
+      if ($uid) {
+        // If the user is logged in, we'll look for votes from that uid.
+        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d";
+        db_query($sql, $type, $cid, $uid);
+        return votingapi_recalculate_results($type, $cid);
+      }
+      else {
+        // Otherwise, we'll look for votes from the same IP address in the past day.
+        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND hostname='%s' AND timestamp > %d";
+        db_query($sql, $type, $cid, $uid, $hostname,  time() - (60 * 60 * 24));
+        return votingapi_recalculate_results($type, $cid);
+      }
+    }
+    // If the vote ISN'T zero, check for existing botes in the database.
+    else {
+      if ($uid) {
+        // If the user is logged in, we'll look for votes from that uid.
+        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d";
+        $result = db_query($sql, $type, $cid, $uid);
+      }
+      else {
+        // Otherwise, we'll look for votes from the same IP address in the past day.
+        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND hostname='%s' AND timestamp > %d";
+        $result = db_query($sql, $type, $cid, $uid, $hostname, time() - (60 * 60 * 24));
+      }
+    }
+
+    // If the old vote exists, either delete it (if the new one is zero)
+    // or change it. If it doesn't exist and the vote is non-zero, cast
+    // it and recalculate.
+
+    if ($old_vote = db_fetch_object($result)) {
+      votingapi_change_vote($old_vote, $value);
+    }
+    elseif ($value != 0) {
+      votingapi_add_vote($type, $cid, $value, 'percent', 'vote', $uid);
+    }
+    return votingapi_recalculate_results($type, $cid);
+  }
+  else {
+    return array();
+  }
+}
+
+function _fivestar_validate_target($type, $id) {
+  switch ($type) {
+    case 'node':
+      if ($node = node_load($id)) {
+        if (variable_get('fivestar_' . $node->type, 0)) {
+          return TRUE;
+        }
+        else {
+          return FALSE;
+        }
+      }
+      else {
+        return FALSE;
+      }
+    default:
+      return FALSE;
+  }
+}
+
+function fivestar_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+    case 'view':
+      if ($teaser == false && user_access('rate content') && variable_get('fivestar_' . $node->type, 0)) {
+        $node->content['fivestar_widget'] = array(
+          '#value' => fivestar_widget_form($node),
+        );
+      }
+      break;
+  }
+}
+
+function fivestar_widget_form($node) {
+  if (strpos(drupal_get_js(), 'jquery.rating.js') === FALSE) {
+    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
+    drupal_add_js("jQuery(function(){jQuery('div.fivestar-widget').rating();});", 'inline');
+  }
+  if (strpos(drupal_get_js(), "jQuery('input.fivestar-submit').hide()") === FALSE) {
+    drupal_add_js("jQuery(function(){jQuery('input.fivestar-submit').hide();});", 'inline');
+  }
+  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid);
+}
+
+function fivestar_forms() {
+  $args = func_get_args();
+  if (is_string($args[0][0]) && is_string($args[0][1]) && is_string($args[0][2])) {
+    if ($args[0][0] == 'fivestar_form_' . $args[0][1] . '_' . $args[0][2]) {
+      $forms[$args[0][0]] = array(
+        'callback' => 'fivestar_form',
+      );
+      return $forms;
+    }
+  }
+}
+
+function fivestar_form($content_type, $content_id) {
+  global $user;
+  $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
+  $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
+  if ($user->uid) {
+    $current_vote = votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid);
+  }
+  else {
+    // If the user is anonymous, we never both loading their existing votes.
+    // Not only would it be hit-or-miss, it would break page caching. Safer to always
+    // show the 'fresh' version to anon users.
+    $current_vote = 0;
+  }
+
+  $form = array();
+
+  $form['content_type'] = array(
+    '#type' => 'hidden',
+    '#value' => $content_type,
+  );
+
+  $form['content_id'] = array(
+    '#type' => 'hidden',
+    '#value' => $content_id,
+  );
+
+  $form['vote'] = array(
+    '#type' => 'fivestar',
+    '#vote_count' => $current_count->value,
+    '#vote_average' => $current_avg->value,
+    '#default_value' => $current_vote->value,
+    '#auto_submit' => TRUE,
+    '#auto_submit_path' => 'fivestar/vote/' . $content_type . '/' . $content_id,
+    '#allow_clear' => TRUE,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit rating'),
+    '#attributes' => array('class' => 'fivestar-submit'),
+  );
+
+  $form['#attributes']['class'] = 'fivestar-widget';
+  $form['#base'] = 'fivestar_form';
+  $form['#redirect'] = FALSE;
+
+  return $form;
+}
+
+function fivestar_form_submit($form_id, $form_values) {
+  if ($form_id == 'fivestar_form_' . $form_values['content_type'] . '_' . $form_values['content_id']) {
+    _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
+  }
+}
+
+function fivestar_elements() {
+  $type['fivestar'] = array(
+    '#input' => TRUE,
+    '#stars' => 5,
+    '#allow_clear' => TRUE,
+    '#auto_submit' => FALSE,
+    '#auto_submit_path' => '',
+    '#process' => array('fivestar_expand' => array()),
+  );
+  return $type;
+}
+
+/**
+ * Format a dropdown menu or scrolling selection box.
+ *
+ * @param $element
+ *   An associative array containing the properties of the element.
+ *   Properties used: title, value, options, description, extra, multiple, required
+ * @return
+ *   A themed HTML string representing the form element.
+ *
+ * It is possible to group options together; to do this, change the format of
+ * $options to an associative array in which the keys are group labels, and the
+ * values are associative arrays in the normal $options format.
+ */
+function theme_fivestar($element) {
+  $element['#children'] = '<div class="fivestar-widget container-inline">'. $element['#children'] .'</div>';
+  if ($element['#title'] || $element['#description']) {
+    unset($element['#id']);
+    return theme('form_element', $element, $element['#children']);
+  }
+  else {
+    return $element['#children'];
+  }
+}
+
+/**
+ * Display a plain HTML VIEW ONLY version of the widget
+ * with the specified rating
+ * 
+ * @param $rating
+ *   The desired rating to display out of 100 (i.e. 80 is 4 out of 5 stars)
+ * @param $stars
+ *   The total number of stars this rating is out of
+ * @return
+ *   A themed HTML string representing the star widget
+ * 
+ */
+function theme_fivestar_static($rating, $stars = 5) {
+  $output = '';
+  $output .= '<div class="fivestar-widget-static">';
+  for ($n=1; $n <= $stars; $n++) {
+    $star_value = ceil((100/$stars) * $n);
+    $next_star_value = ceil((100/$stars) * ($n+1));
+    if ($rating > $star_value && $rating < $next_star_value) {
+      $percent = (1 - ($next_star_value - $rating) / ($next_star_value - $star_value)) * 100;
+      $output .= '<div class="star"><span class="on" style="width: '.$percent.'%">' . $n . '</span></div>';
+    }
+    elseif ($rating >= $star_value) {
+      $output .= '<div class="star"><span class="on">' . $n . '</span></div>';
+    }
+    else {
+      $output .= '<div class="star"><span class="off">' . $n . '</span></div>';
+    }
+  }
+  $output .= '</div>';
+  return $output;
+}
+
+function fivestar_expand($element) {
+  if (isset($element['#vote_count'])) {
+    $element['vote_count'] =  array(
+      '#type' => 'hidden',
+      '#value' => $element['#vote_count'],
+    );
+  }
+
+  if (isset($element['#vote_average'])) {
+    $element['vote_average'] =  array(
+      '#type' => 'hidden',
+      '#value' => $element['#vote_average'],
+    );
+  }
+
+  if ($element['#auto_submit'] && !empty($element['#auto_submit_path'])) {
+    $element['auto_submit_path'] =  array(
+      '#type' => 'hidden',
+      '#value' => url($element['#auto_submit_path']),
+      '#attributes' => array('class' => 'fivestar-path'),
+    );
+  }
+  
+  for ($i = ($element['#allow_clear'] == TRUE) ? 0 : 1; $i <= $element['#stars']; $i++) {
+    $this_value = ceil($i * 100/$element['#stars']);
+    $next_value = ceil(($i+1) * 100/$element['#stars']);
+    
+    $element['vote'][$i]['#type'] = 'radio';
+    $element['vote'][$i]['#return_value'] = $this_value;
+    $element['vote'][$i]['#attributes'] = $element['#attributes'];
+    $element['vote'][$i]['#parents'] = $element['#parents'];
+    $element['vote'][$i]['#spawned'] = TRUE;
+    
+    // If a default value is not exactly on a radio value, round up to the next one
+    if ($element['#default_value'] > $this_value && $element['#default_value'] <= $next_value) {
+      $element['vote'][$i+1]['#default_value'] = $next_value;
+    }
+  }
+  
+  return $element;
+}
