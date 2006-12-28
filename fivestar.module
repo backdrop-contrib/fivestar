@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /* $Id$ */
 
 /**
@@ -22,14 +22,6 @@ function fivestar_menu($may_cache) {
       'type'     => MENU_CALLBACK,
       'access'   => user_access('rate content'),
     );
-
-    $items[] = array(
-      'path'     => 'admin/voting/fivestar',
-      'title' => t('Five star voting'),
-      'description' => t('Configure the five star voting widget.'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('fivestar_settings'),
-    );
   }
   else {
     drupal_add_css(drupal_get_path('module', 'fivestar') .'/theme/fivestar.css');
@@ -37,22 +29,26 @@ function fivestar_menu($may_cache) {
   return $items;
 }
 
-function fivestar_settings() {
-  $form['types'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Enable voting for these content types'),
-  );
-
-  foreach(node_get_types('names') as $type => $name) {
-    $form['types']['fivestar_' . $type] = array(
+function fivestar_form_alter($form_id, &$form) {
+  if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
+    $form['workflow']['fivestar'] = array(
       '#type' => 'checkbox',
-      '#title' => $name,
+      '#title' => t('Use Five Star rating'),
+      '#default_value' => variable_get('fivestar_'. $form['#node_type']->type, 1),
       '#return_value' => 1,
-      '#default_value' => variable_get('fivestar_' . $type, 0),
+      '#description' => t('Allow users to rate this content type with a five star voting widget.'),
+    );
+    $form['workflow']['fivestar_position'] = array(
+      '#type' => 'select',
+      '#title' => t('Five Star widget location'),
+      '#default_value' => variable_get('fivestar_position_'. $form['#node_type']->type, 'above'),
+      '#options' => array(
+        'above' => t('Above the node body'),
+        'below' => t('Below the node body'),
+        'hidden' => t('Hidden -- my theme will display it'),
+      ),
     );
   }
-
-  return system_settings_form($form);
 }
 
 function fivestar_perm() {
@@ -179,10 +175,24 @@ function _fivestar_validate_target($type, $id) {
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($teaser == false && user_access('rate content') && variable_get('fivestar_' . $node->type, 0)) {
-        $node->content['fivestar_widget'] = array(
-          '#value' => fivestar_widget_form($node),
-        );
+      if ($teaser == FALSE && $node->in_preview == FALSE && user_access('rate content') && variable_get('fivestar_' . $node->type, 0)) {
+        switch (variable_get('fivestar_position_' . $node->type, 'above')) {
+          case 'above':
+            $node->content['fivestar_widget'] = array(
+              '#value' => fivestar_widget_form($node),
+              '#weight' => -10,
+            );
+            break;
+          case 'below':
+            $node->content['fivestar_widget'] = array(
+              '#value' => fivestar_widget_form($node),
+              '#weight' => 50,
+            );
+            break;
+          default:
+            // We'll do nothing.
+            break;
+        }
       }
       break;
   }
@@ -201,11 +211,9 @@ function fivestar_widget_form($node) {
 
 function fivestar_forms() {
   $args = func_get_args();
-  if (is_string($args[0][0]) && is_string($args[0][1]) && is_string($args[0][2])) {
+  if (strpos($args[0][0], 'fivestar_form') !== FALSE) {
     if ($args[0][0] == 'fivestar_form_' . $args[0][1] . '_' . $args[0][2]) {
-      $forms[$args[0][0]] = array(
-        'callback' => 'fivestar_form',
-      );
+      $forms[$args[0][0]] = array('callback' => 'fivestar_form');
       return $forms;
     }
   }
@@ -244,7 +252,7 @@ function fivestar_form($content_type, $content_id) {
     '#default_value' => $current_vote->value,
     '#auto_submit' => TRUE,
     '#auto_submit_path' => 'fivestar/vote/' . $content_type . '/' . $content_id,
-    '#allow_clear' => TRUE,
+    '#allow_clear' => variable_get('fivestar_allow_cancel', TRUE),
   );
   
   $form['submit'] = array(
@@ -279,7 +287,7 @@ function fivestar_elements() {
 }
 
 /**
- * Format a dropdown menu or scrolling selection box.
+ * Format a five star voting element.
  *
  * @param $element
  *   An associative array containing the properties of the element.
