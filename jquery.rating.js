@@ -134,12 +134,15 @@
             "class": 'fivestar-widget clear-block'
         });
         var $radios = $widget.find("input[@type='radio']");
+        var size = $radios.size() - 1;
+        var cancel = 1;
         for (var i = 0, radio; radio = $radios[i]; i++){
-            var size = $radios.size() - 1;
             if (radio.value == "0") {
-                $div = $('<div class="cancel"><a href="#0" title="Cancel Rating">Cancel Rating</a></div>');
-            } else {
-                $div = $('<div class="star"><a href="#' + radio.value + '" title="Give it ' + i + '/'+ size +'">' + radio.value + '</a></div>');
+              cancel = 0;
+              $div = $('<div class="cancel"><a href="#0" title="Cancel Rating">Cancel Rating</a></div>');
+            }
+            else {
+              $div = $('<div class="star"><a href="#' + radio.value + '" title="Give it ' + (i + cancel) + '/'+ (size + cancel) +'">' + radio.value + '</a></div>');
             }
             $container.append($div[0]);                    
         }
