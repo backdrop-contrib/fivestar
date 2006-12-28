@@ -325,14 +325,14 @@ function theme_fivestar($element) {
 function theme_fivestar_static($rating, $stars = 5) {
   $output = '';
   $output .= '<div class="fivestar-widget-static">';
-  for ($n=1; $n <= $stars; $n++) {
+  for ($n=0; $n < $stars; $n++) {
     $star_value = ceil((100/$stars) * $n);
     $next_star_value = ceil((100/$stars) * ($n+1));
     if ($rating > $star_value && $rating < $next_star_value) {
       $percent = (1 - ($next_star_value - $rating) / ($next_star_value - $star_value)) * 100;
       $output .= '<div class="star"><span class="on" style="width: '.$percent.'%">' . $n . '</span></div>';
     }
-    elseif ($rating >= $star_value) {
+    elseif ($rating >= $next_star_value) {
       $output .= '<div class="star"><span class="on">' . $n . '</span></div>';
     }
     else {
