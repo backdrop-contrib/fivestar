@@ -1,0 +1,116 @@
+/* Plain HTML Version */
+form.fivestar-widget {
+  clear: both;
+  display: block;
+}
+form.fivestar-widget select,
+form.fivestar-widget input {
+  margin: 0;
+}
+
+/* Combo Static and Rate Widget */
+.fivestar-combo-stars .fivestar-static-form-item {
+  float: left;
+  margin-right: 40px;
+}
+
+/* Fivestar form items */
+.fivestar-static-form-item .form-item,
+.fivestar-form-item .form-item {
+  margin: 0;
+}
+
+/* Static View-only Star Version */
+div.fivestar-widget-static {
+  display: block;
+}
+
+div.fivestar-widget-static br {
+  clear: left;
+}
+
+div.fivestar-widget-static .star {
+  float: left;
+  width: 17px;
+  height: 15px;
+  overflow: hidden;
+  text-indent: -999em;
+  background: url(widgets/default/star.gif) no-repeat 0 0px;
+}
+
+div.fivestar-widget-static .star span.on {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url(widgets/default/star.gif) no-repeat 0 -32px;
+}
+
+div.fivestar-widget-static .star span.off {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: url(widgets/default/star.gif) no-repeat 0 0px;
+}
+
+/* Javascript Star Version */
+div.fivestar-widget {
+  display: block;
+}
+
+div.fivestar-widget .cancel, div.fivestar-widget .star {
+  float: left;
+  width: 17px;
+  height: 15px;
+  overflow: hidden;
+  text-indent: -999em;
+}
+div.fivestar-widget .cancel, div.fivestar-widget .cancel a {
+  background: url(widgets/default/delete.gif) no-repeat 0 -16px;
+}
+
+div.fivestar-widget .star, div.fivestar-widget .star a {
+  background: url(widgets/default/star.gif) no-repeat 0 0px;
+}
+
+div.fivestar-widget .cancel a, div.fivestar-widget .star a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-position: 0 0px;
+  cursor: pointer;
+}
+
+div.fivestar-widget div.on a {
+  background-position: 0 -16px;
+}
+div.fivestar-widget div.hover a, div.rating div a:hover {
+  background-position: 0 -32px;
+}
+
+/* Fivestar Settings Preview */
+iframe.fivestar-preview {
+  border: none;
+  width: 200px;
+  height: 32px;
+}
+div.fivestar-widgets div.form-item {
+  float: left;
+}
+
+/* Fivestar Node Type Preview */
+#fivestar-comment-form,
+#fivestar-direct-form {
+  float: left;
+}
+#fivestar-comment-preview,
+#fivestar-direct-preview {
+  float: left;
+  margin-left: 40px;
+}
+#fivestar-node-type-form fieldset {
+  background: transparent;
+}
+.fivestar-preview {
+  border: 1px solid #CCC;
+  padding: 10px;
+}

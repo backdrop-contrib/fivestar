@@ -1,0 +1,91 @@
+<?php
+// $Id$
+
+function fivestar_install() {
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      db_query("CREATE TABLE {fivestar_comment} (
+        cid int NOT NULL default '0',
+        value tinyint unsigned NOT NULL default '0',
+        PRIMARY KEY (cid)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
+      break;
+
+    case 'pgsql':
+      db_query("CREATE TABLE {fivestar_comment} (
+        cid int NOT NULL default '0',
+        value smallint NOT NULL default '0',
+        PRIMARY KEY (cid)
+      )");
+      break;
+  }
+}
+
+function fivestar_uninstall() {
+  db_query("DROP TABLE {fivestar_comment}");
+  db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
+}
+
+/**
+ * Add the fivestar comment tables.
+ */
+function fivestar_update_1() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      db_query("CREATE TABLE {fivestar_comment} (
+        cid int NOT NULL default '0',
+        value tinyint unsigned NOT NULL default '0',
+        PRIMARY KEY (cid)
+      ) /*!40100 DEFAULT CHARACTER SET UTF8 */ ");
+      break;
+
+    case 'pgsql':
+      db_query("CREATE TABLE {fivestar_comment} (
+        cid int NOT NULL default '0',
+        value smallint NOT NULL default '0',
+        PRIMARY KEY (cid)
+      )");
+      break;
+  }
+
+  return $ret;
+}
+
+/**
+ * Convert previous fivestar widget settings to new format.
+ */
+function fivestar_update_2() {
+  $types = node_get_types('names');
+  foreach ($types as $key => $name) {
+    $style = variable_get('fivestar_style_'. $key, 'default');
+    $enabled = variable_get('fivestar_'. $key, FALSE);
+    // Split the display style into two variables for stars and text.
+    if ($enabled) {
+      switch ($style) {
+        case 'default':
+          variable_set('fivestar_style_'. $key, 'user');
+          variable_set('fivestar_text_'. $key, 'average');
+          break;
+        case 'compact':
+          variable_set('fivestar_style_'. $key, 'user');
+          variable_set('fivestar_text_'. $key, 'none');
+          break;
+        case 'dual':
+          variable_set('fivestar_text_'. $key, 'none');
+          break;
+      }
+    }
+    // We no longer save any settings if Fivestar is disabled.
+    else {
+      variable_del('fivestar_unvote_'. $key);
+      variable_del('fivestar_style_'. $key);
+      variable_del('fivestar_position_'. $key);
+      variable_del('fivestar_position_teaser_'. $key);
+    }
+  }
+  return array();
+}
