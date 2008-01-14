@@ -1,0 +1,23 @@
+/* Static View-only Star Version */
+div.fivestar-widget-static .star {
+  background: url(heart.png) no-repeat 0 0px;
+}
+
+div.fivestar-widget-static .star span.on {
+  background: url(heart.png) no-repeat 0 -32px;
+}
+
+div.fivestar-widget-static .star span.off {
+  background: url(heart.png) no-repeat 0 0px;
+}
+
+/* Javascript Star Version */
+div.fivestar-widget .star,
+div.fivestar-widget .star a {
+  background: url(heart.png) no-repeat 0 0px;
+}
+
+div.fivestar-widget div.hover a,
+div.rating div a:hover {
+  background: url(heart.png) no-repeat 0 -32px;
+}
