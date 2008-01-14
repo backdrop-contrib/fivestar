@@ -6,8 +6,8 @@
  * A simple n-star voting widget, usable in other forms.
  */
 
-function fivestar_help($section) {
-  switch ($section) {
+function fivestar_help($path, $arg) {
+  switch ($path) {
     case 'admin/settings/fivestar':
       $output = t('This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:');
       $steps = array(
@@ -25,36 +25,43 @@ function fivestar_help($section) {
  * Provides a callback url where votes can be submitted by the client-side
  * javascript.
  */
-function fivestar_menu($may_cache) {
+function fivestar_menu() {
   $items = array();
-  if ($may_cache) {
-    $items[] = array(
-      'path'     => 'admin/settings/fivestar',
-      'title'    => t('Fivestar'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('fivestar_settings'),
-      'type'     => MENU_NORMAL_ITEM,
-      'access'   => user_access('administer site configuration'),
-    );
-    $items[] = array(
-      'path'     => 'fivestar/preview/widget',
-      'callback' => 'fivestar_preview_page',
-      'type'     => MENU_CALLBACK,
-      'access'   => user_access('administer site configuration'),
-    );
-    $items[] = array(
-      'path'     => 'fivestar/preview/node',
-      'callback' => 'fivestar_preview',
-      'type'     => MENU_CALLBACK,
-      'access'   => user_access('administer content types'),
-    );
-    $items[] = array(
-      'path'     => 'fivestar/vote',
-      'callback' => 'fivestar_vote',
-      'type'     => MENU_CALLBACK,
-      'access'   => user_access('rate content'),
-    );
-  }
+  $items['admin/settings/votingapi'] = array(
+    'title'            => 'Voting API',
+    'description'      => 'Global settings for the Voting API.',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('votingapi_settings_form'),
+    'access callback'  => 'user_access',
+    'access arguments' => array('administer voting api'),
+    'type'             => MENU_NORMAL_ITEM
+  );
+  $items['admin/settings/fivestar'] = array(
+    'title'             => 'Fivestar',
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('fivestar_settings'),
+    'access callback'   => 'user_access',
+    'access arguments'  => array('administer site configuration'),
+    'type'              => MENU_NORMAL_ITEM,
+  );
+  $items['fivestar/preview/widget'] = array(
+    'page callback'     => 'fivestar_preview_page',
+    'access callback'   => 'user_access',
+    'access arguments'  => array('administer site configuration'),
+    'type'              => MENU_CALLBACK,
+  );
+  $items['fivestar/preview/node'] = array(
+    'page callback'     => 'fivestar_preview',
+    'access callback'   => 'user_access',
+    'access arguments'  => array('administer content types'),
+    'type'              => MENU_CALLBACK,
+  );
+  $items['fivestar/vote'] = array(
+    'page callback'     => 'fivestar_vote',
+    'access callback'   => 'user_access',
+    'access arguments'  => array('rate content'),
+    'type'              => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -86,11 +93,53 @@ function fivestar_perm() {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function fivestar_theme() {
+  return array(
+    // Fivestar theme functions.
+    'fivestar' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'fivestar_node_type_form' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'fivestar_preview' => array(
+      'arguments' => array('style' => NULL, 'text' => NULL, 'stars' => NULL, 'unvote' => NULL, 'title' => NULL, 'labels_enable' => TRUE, 'labels' => array()),
+    ),
+    'fivestar_preview_page' => array(
+      'arguments' => array(),
+    ),
+    'fivestar_preview_wrapper' => array(
+      'arguments' => array('content' => NULL, 'type' => 'direct'),
+    ),
+    'fivestar_select' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'fivestar_settings' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'fivestar_static' => array(
+      'arguments' => array('rating' => NULL, 'stars' => 5),
+    ),
+    'fivestar_static_element' => array(
+      'arguments' => array('star_display' => NULL, 'title' => NULL, 'text_display' => NULL),
+    ),
+    'fivestar_summary' => array(
+      'arguments' => array('user_rating' => NULL, 'average_rating' => NULL, 'votes' => 0, 'stars' => 5),
+    ),
+    'fivestar_widget' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_form_alter
  * Adds fivestar enaable and position to the node-type configuration form.
  * 
  */
-function fivestar_form_alter($form_id, &$form) {
+function fivestar_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
     // Goofy hack to get the buttons at the end of the array.
     $form['workflow']['#weight'] += 1;
@@ -260,36 +309,36 @@ function fivestar_form_alter($form_id, &$form) {
       $form['fivestar']['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['direct']['fivestar_direct_preview']['#value']);
     }
 
-    $form['#submit']['fivestar_node_type_form_submit'] = array();
+    $form['#submit'][] = 'fivestar_node_type_form_submit';
   }
 
   // Add comment form modifications.
   if (module_exists('comment')) {
-    fivestar_comment_form_alter($form_id, $form);
+    fivestar_comment_form_alter($form, $form_state, $form_id);
   }
 }
 
 /**
  * Additional submit handler for the node type form.
  */
-function fivestar_node_type_form_submit($form_id, &$form_values) {
+function fivestar_node_type_form_submit($form, &$form_state) {
   // Do not save any fivestar variables if fivestar is disabled.
-  if (isset($form_values['fivestar']) && $form_values['fivestar'] === 0) {
-    foreach ($form_values as $key => $value) {
+  if (isset($form_state['values']['fivestar']) && $form_state['values']['fivestar'] === 0) {
+    foreach ($form_state['values'] as $key => $value) {
       if (strpos($key, 'fivestar') === 0) {
-        variable_del($key .'_'. $form_values['type']);
+        variable_del($key .'_'. $form_state['values']['type']);
       }
     }
   }
   // Merge labels into a single variable.
   $labels = array();
   for ($n = 0; $n <= 10; $n++) {
-    $labels[] = $form_values['fivestar_label_'. $n];
-    variable_del('fivestar_label_'. $n .'_'. $form_values['type']);
+    $labels[] = $form_state['values']['fivestar_label_'. $n];
+    variable_del('fivestar_label_'. $n .'_'. $form_state['values']['type']);
   }
-  variable_del('fivestar_labels_'. $form_values['type']);
-  if ($form_values['fivestar_labels_enable']) {
-    variable_set('fivestar_labels_'. $form_values['type'], $labels);
+  variable_del('fivestar_labels_'. $form_state['values']['type']);
+  if ($form_state['values']['fivestar_labels_enable']) {
+    variable_set('fivestar_labels_'. $form_state['values']['type'], $labels);
   }
 }
 
@@ -499,6 +548,7 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
   // forms is also frowned upon, so this removes the wrapping form tag as well.
   $form = str_replace(array('<form', '</form>'), array('<div', '</div>'), $form);
   $form = preg_replace('/( method=".*?")|( action=".*?")|(<input.*?name="(form_token|form_id)".*?\/>)/', '', $form);
+  drupal_set_message($form);
   return $form;
 }
 
@@ -576,10 +626,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
     }
     else {
       $uid = 0;
-      $hostname = $_SERVER['REMOTE_ADDR'];
-      if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $hostname .= '-'. $_SERVER['HTTP_X_FORWARDED_FOR'];
-      }
+      $hostname = ip_address();
     }
   }
   $anon_interval = variable_get('fivestar_anonymous_vote_interval', 86400);
@@ -889,10 +936,10 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
 function fivestar_custom_widget($values, $settings) {
   $form = array(
     '#attributes' => array('class' => 'fivestar-widget'),
-    '#base' => 'fivestar_form',
     '#redirect' => FALSE,
     '#theme' => 'fivestar_widget',
   );
+  $form['#submit'][] = 'fivestar_form_submit'; 
 
   if (isset($settings['content_type'])) {
     $form['content_type'] = array(
@@ -999,16 +1046,16 @@ function fivestar_custom_widget($values, $settings) {
 /**
  * Submit handler for the above form (non-javascript version).
  */
-function fivestar_form_submit($form_id, $form_values) {
-  if ($form_id == 'fivestar_form_'. $form_values['content_type'] .'_'. $form_values['content_id']) {
+function fivestar_form_submit($form, &$form_state) {
+  if ($form_state['values']['form_id'] == 'fivestar_form_'. $form_state['values']['content_type'] .'_'. $form_state['values']['content_id']) {
     // Cast the vote.
-    $result = _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
+    $result = _fivestar_cast_vote($form_state['values']['content_type'], $form_state['values']['content_id'], $form_state['values']['vote']);
 
     // Set a message that the vote was received.
-    if ($form_values['vote'] === '0') {
+    if ($form_state['values']['vote'] === '0') {
       drupal_set_message(t('Your vote has been cleared.'));
     }
-    elseif (is_numeric($form_values['vote'])) {
+    elseif (is_numeric($form_state['values']['vote'])) {
       drupal_set_message(t('Thank you for your vote.'));
     }
     // Regenerate the page with a drupal_goto() to update the current values.
@@ -1283,8 +1330,8 @@ function fivestar_expand($element) {
   return $element;
 }
 
-function fivestar_validate($form) {
-  if ($form['#required'] && (empty($form['vote']['#value']) || $form['vote']['#value'] == '-')) {
+function fivestar_validate($form, &$form_state) {
+  if ($form['#required'] && (empty($form_state['values']['vote']) || $form_state['values']['vote'] == '-')) {
     form_error($form, t('!name field is required.', array('!name' => $form['#title'])));
   }
 }

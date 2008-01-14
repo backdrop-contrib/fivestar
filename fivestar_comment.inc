@@ -8,7 +8,7 @@ define('FIVESTAR_COMMENT_REQUIRED', 2);
 /**
  * Form alter specification for comments.
  */
-function fivestar_comment_form_alter($form_id, &$form) {
+function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
   // Comment settings.
   if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
     $form['fivestar']['comment'] = array(
