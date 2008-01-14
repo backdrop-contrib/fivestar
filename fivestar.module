@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+// $Id$
 
 /**
  * @file
@@ -68,11 +68,11 @@ function fivestar_init() {
   // ensure we are not serving a cached page
   if (function_exists('drupal_set_content')) {
     if (module_exists('content')) {
-      include_once(drupal_get_path('module', 'fivestar') . '/fivestar_field.inc');
+      include_once(drupal_get_path('module', 'fivestar') .'/fivestar_field.inc');
     }
   }
   if (module_exists('comment')) {
-    include_once(drupal_get_path('module', 'fivestar') . '/fivestar_comment.inc');
+    include_once(drupal_get_path('module', 'fivestar') .'/fivestar_comment.inc');
   }
 }
 
@@ -118,7 +118,7 @@ function fivestar_form_alter($form_id, &$form) {
     $form['fivestar']['fivestar_stars'] = array(
       '#type' => 'select',
       '#title' => t('Number of stars'),
-      '#options' => drupal_map_assoc(array(1,2,3,4,5,6,7,8,9,10)),
+      '#options' => drupal_map_assoc(range(1, 10)),
       '#default_value' => variable_get('fivestar_stars_'. $form['#node_type']->type, 5),
       '#weight' => -4,
     );
@@ -534,7 +534,7 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
   if (count($result)) {
     foreach ($result as $data) {
       if ($data->tag == $tag) {
-        $output .= '<'. $data->function .'>' . $data->value . '</'. $data->function .'>';
+        $output .= '<'. $data->function .'>'. $data->value .'</'. $data->function .'>';
         $summary[$data->tag][$data->function] = $data->value;
       }
     }
@@ -649,7 +649,7 @@ function _fivestar_validate_target($type, $id) {
   switch ($type) {
     case 'node':
       if ($node = node_load($id)) {
-        if (variable_get('fivestar_' . $node->type, 0)) {
+        if (variable_get('fivestar_'. $node->type, 0)) {
           return TRUE;
         }
         else {
@@ -695,7 +695,7 @@ function fivestar_fivestar_widgets() {
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($node->in_preview == FALSE && variable_get('fivestar_' . $node->type, 0)) {
+      if ($node->in_preview == FALSE && variable_get('fivestar_'. $node->type, 0)) {
         if ($teaser) {
           $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
         }
@@ -750,7 +750,7 @@ function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function fivestar_widget_form($node) {
-  return drupal_get_form('fivestar_form_node_' . $node->nid, 'node', $node->nid);
+  return drupal_get_form('fivestar_form_node_'. $node->nid, 'node', $node->nid);
 }
 
 /**
@@ -761,7 +761,7 @@ function fivestar_widget_form($node) {
 function fivestar_forms() {
   $args = func_get_args();
   if (strpos($args[0][0], 'fivestar_form') !== FALSE) {
-    if ($args[0][0] == 'fivestar_form_' . $args[0][1] . '_' . $args[0][2]) {
+    if ($args[0][0] == 'fivestar_form_'. $args[0][1] .'_'. $args[0][2]) {
       $forms[$args[0][0]] = array('callback' => 'fivestar_form');
       return $forms;
     }
@@ -916,7 +916,7 @@ function fivestar_custom_widget($values, $settings) {
     '#vote_count' => $values['count'],
     '#vote_average' => $values['average'],
     '#auto_submit' => isset($settings['autosubmit']) ? $settings['autosubmit'] : TRUE,
-    '#auto_submit_path' => 'fivestar/vote/' . $settings['content_type'] . '/' . $settings['content_id'],
+    '#auto_submit_path' => 'fivestar/vote/'. $settings['content_type'] .'/'. $settings['content_id'],
     '#allow_clear' => $settings['allow_clear'],
     '#content_id' => $settings['content_id'],
     '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
@@ -1000,7 +1000,7 @@ function fivestar_custom_widget($values, $settings) {
  * Submit handler for the above form (non-javascript version).
  */
 function fivestar_form_submit($form_id, $form_values) {
-  if ($form_id == 'fivestar_form_' . $form_values['content_type'] . '_' . $form_values['content_id']) {
+  if ($form_id == 'fivestar_form_'. $form_values['content_type'] .'_'. $form_values['content_id']) {
     // Cast the vote.
     $result = _fivestar_cast_vote($form_values['content_type'], $form_values['content_id'], $form_values['vote']);
 
@@ -1056,7 +1056,7 @@ function theme_fivestar($element) {
  */
 function theme_fivestar_select($element) {
   $select = '';
-  $size = $element['#size'] ? ' size="' . $element['#size'] . '"' : '';
+  $size = $element['#size'] ? ' size="'. $element['#size'] .'"' : '';
   _form_set_class($element, array('form-select'));
   $multiple = isset($element['#multiple']) && $element['#multiple'];
   return '<select name="'. $element['#name'] .''. ($multiple ? '[]' : '') .'"'. ($multiple ? ' multiple="multiple" ' : '') . drupal_attributes($element['#attributes']) .' id="'. $element['#id'] .'" '. $size .'>'. form_select_options($element) .'</select>';
@@ -1107,7 +1107,7 @@ function theme_fivestar_static($rating, $stars = 5) {
     $output .= '<div class="star star-'. $n .' star-'. $zebra . $first . $last .'">';
     if ($rating < $star_value && $rating > $prev_star_value) {
       $percent = (($rating - $prev_star_value) / ($star_value - $prev_star_value)) * 100;
-      $output .= '<span class="on" style="width: '.$percent.'%">';
+      $output .= '<span class="on" style="width: '. $percent .'%">';
     }
     elseif ($rating >= $star_value) {
       $output .= '<span class="on">';
@@ -1192,7 +1192,7 @@ function fivestar_add_js() {
 
   // Add necessary javascript only once per page.
   if (!$js_added) {
-    drupal_add_js(drupal_get_path('module', 'fivestar') . '/jquery.rating.js');
+    drupal_add_js(drupal_get_path('module', 'fivestar') .'/jquery.rating.js');
     drupal_add_js(array('fivestar' => array('titleUser' => t('Your rating') .':', 'titleAverage' => t('Average') .':')), 'setting');
     $js_added = TRUE;
   }

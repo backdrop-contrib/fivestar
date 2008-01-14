@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 define('FIVESTAR_COMMENT_DISABLED', 0);
 define('FIVESTAR_COMMENT_OPTIONAL', 1);

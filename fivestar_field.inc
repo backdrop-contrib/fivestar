@@ -1,6 +1,5 @@
 <?php
-
-/* $Id $ */
+// $Id$
 
 /**
  * @file
@@ -26,7 +25,7 @@ function fivestar_field_settings($op, $field) {
       $form['stars'] = array(
         '#type' => 'select',
         '#title' => t('Number of Options'),
-        '#options' => drupal_map_assoc(array(1,2,3,4,5,6,7,8,9,10)),
+        '#options' => drupal_map_assoc(range(1, 10)),
         '#default_value' => $field['stars'] ? $field['stars'] : 5,
         '#description' => t('The number of stars or radio buttons to display.'),
       );
@@ -51,7 +50,7 @@ function fivestar_field_settings($op, $field) {
       );
 
       if (user_access('use PHP for fivestar target')) {
-        $form['target']['#description'] .= ' ' . t(
+        $form['target']['#description'] .= ' '. t(
           ' Return the target node ID or use plain text. Enter PHP code between <em>&lt;?php ?&gt;</em>. Note that executing incorrect PHP-code can break your Drupal site.'
         );
         
@@ -93,7 +92,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
       return theme('field', $node, $field, $items, $teaser, $page);
     case 'insert':
     case 'update':
-      foreach($items as $delta => $item) {
+      foreach ($items as $delta => $item) {
         if ($field['dynamic_target'] && !empty($node->$field['dynamic_target'])) {
           $items[$delta]['target'] = $node->$field['dynamic_target'];
         }
@@ -112,7 +111,7 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
       }
       break;
     case 'delete':
-      foreach($items as $delta => $item) {
+      foreach ($items as $delta => $item) {
         if ($field['php'] && !empty($item['target'])) {
           $items[$delta]['target'] = drupal_eval($item['target']);
         }
