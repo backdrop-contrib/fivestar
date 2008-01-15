@@ -793,11 +793,10 @@ function fivestar_widget_form($node) {
  * forms appear on the same page, each requiring a separate form_id, but all
  * using the same underlying callbacks.
  */
-function fivestar_forms() {
-  $args = func_get_args();
-  if (strpos($args[0], 'fivestar_form') !== FALSE) {
-    if ($args[0] == 'fivestar_form_'. $args[1][0] .'_'. $args[1][1]) {
-      $forms[$args[0]] = array('callback' => 'fivestar_form');
+function fivestar_forms($form_id, $args) {
+  if (strpos($form_id, 'fivestar_form') !== FALSE) {
+    if ($form_id == 'fivestar_form_'. $args[0] .'_'. $args[1]) {
+      $forms[$form_id] = array('callback' => 'fivestar_form');
       return $forms;
     }
   }
