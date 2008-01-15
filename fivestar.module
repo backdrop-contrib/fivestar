@@ -67,19 +67,12 @@ function fivestar_menu() {
 
 /**
  * Implementation of hook_init().
- * Not that this will cause Drupal to post a warning on the admin screen
- * when agressive caching is activated. Like CCK, Fivestar's use of hook_init
- * IS compatible with agressive caching, we just need a way to annouce that.
+ * 
+ * These includes do not need to be loaded for cached pages.
  */
 function fivestar_init() {
-  // ensure we are not serving a cached page
-  if (function_exists('drupal_set_content')) {
-    if (module_exists('content')) {
-      include_once(drupal_get_path('module', 'fivestar') .'/fivestar_field.inc');
-    }
-  }
-  if (module_exists('comment')) {
-    include_once(drupal_get_path('module', 'fivestar') .'/fivestar_comment.inc');
+  if (module_exists('content')) {
+    module_load_include('inc', 'fivestar', 'fivestar_field');
   }
 }
 
@@ -123,7 +116,7 @@ function fivestar_theme() {
       'arguments' => array('rating' => NULL, 'stars' => 5),
     ),
     'fivestar_static_element' => array(
-      'arguments' => array('star_display' => NULL, 'title' => NULL, 'text_display' => NULL),
+      'arguments' => array('star_display' => NULL, 'title' => NULL, 'description' => NULL),
     ),
     'fivestar_summary' => array(
       'arguments' => array('user_rating' => NULL, 'average_rating' => NULL, 'votes' => 0, 'stars' => 5),
@@ -314,6 +307,7 @@ function fivestar_form_alter(&$form, &$form_state, $form_id) {
 
   // Add comment form modifications.
   if (module_exists('comment')) {
+    module_load_include('inc', 'fivestar', 'fivestar_comment');
     fivestar_comment_form_alter($form, $form_state, $form_id);
   }
 }
@@ -430,13 +424,6 @@ function fivestar_settings() {
     '#description' => t('Choose a widget set to be used on your site.'),
     '#attributes' => array('class' => 'fivestar-widgets clear-block'),
   );
-  $form['fivestar_anonymous_vote_interval'] = array(
-    '#type' => 'select',
-    '#title' => t('Anonymous vote interval'),
-    '#options' => array(0 => t('Immediately')) + drupal_map_assoc(array(300, 900, 1800, 3600, 10800, 21600, 32400, 43200, 86400, 172800, 345600, 604800), 'format_interval') + array(-1 => t('Never')),
-    '#default_value' => variable_get('fivestar_anonymous_vote_interval', 86400),
-    '#description' => t('Anonymous users may add another vote after this interval. Because the same IP addresses may be used by different people, allowing the same IP to vote again several days later may yeild more votes.'),
-  );
   return system_settings_form($form);
 }
 
@@ -548,7 +535,6 @@ function theme_fivestar_preview($style = NULL, $text = NULL, $stars = NULL, $unv
   // forms is also frowned upon, so this removes the wrapping form tag as well.
   $form = str_replace(array('<form', '</form>'), array('<div', '</div>'), $form);
   $form = preg_replace('/( method=".*?")|( action=".*?")|(<input.*?name="(form_token|form_id)".*?\/>)/', '', $form);
-  drupal_set_message($form);
   return $form;
 }
 
@@ -583,9 +569,9 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 
   if (count($result)) {
     foreach ($result as $data) {
-      if ($data->tag == $tag) {
-        $output .= '<'. $data->function .'>'. $data->value .'</'. $data->function .'>';
-        $summary[$data->tag][$data->function] = $data->value;
+      if ($data['tag'] == $tag) {
+        $output .= '<'. $data['function'] .'>'. $data['value'] .'</'. $data['function'] .'>';
+        $summary[$data['tag']][$data['function']] = $data['value'];
       }
     }
   }
@@ -613,75 +599,77 @@ function fivestar_vote($type, $cid, $value, $tag = 'vote') {
 function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
+  $uid = empty($uid) ? $user->uid : $uid;
 
   // Bail out if the user's trying to vote on an invalid object.
   if (!_fivestar_validate_target($type, $cid)) {
     return array();
   }
 
-  // Prep variables for anonymous vs. registered voting
-  if (!isset($uid)) {
-    if ($user->uid) {
-      $uid = $user->uid;
-    }
-    else {
-      $uid = 0;
-      $hostname = ip_address();
-    }
-  }
-  $anon_interval = variable_get('fivestar_anonymous_vote_interval', 86400);
-
-  // sanity-check the incoming values.
+  // Sanity-check the incoming values.
   if (is_numeric($cid) && is_numeric($value)) {
     if ($value > 100) {
       $value = 100;
     }
 
-    // If the vote value is 0, blindly nuke any votes for this content by the user.
+    // Get the user's current vote.
+    $criteria = array('content_type' => $type, 'content_id' => $cid, 'tag' => $tag);
+    $user_votes = votingapi_select_votes($criteria += array('uid' => $uid));
+
     if ($value == 0) {
-      if ($uid) {
-        // If the user is logged in, we'll delete votes from that uid.
-        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s'";
-        db_query($sql, $type, $cid, $uid, $tag);
-        return votingapi_recalculate_results($type, $cid);
-      }
-      else {
-        // Otherwise, we'll delete votes from the same IP address within the anonymous interval.
-        $sql = "DELETE FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag='%s' AND hostname='%s'";
-        $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
-        db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
-        return votingapi_recalculate_results($type, $cid);
-      }
+      votingapi_delete_votes($user_votes);
     }
-    // If the vote ISN'T zero, check for existing votes in the database.
     else {
-      if ($uid) {
-        // If the user is logged in, we'll look for votes from that uid.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s'";
-        $result = db_query($sql, $type, $cid, $uid, $tag);
-      }
-      else {
-        // Otherwise, we'll look for votes from the same IP address within the anonymous interval.
-        $sql = "SELECT vote_id FROM {votingapi_vote} WHERE content_type='%s' AND content_id=%d AND value_type='percent' AND uid=%d AND tag = '%s' AND hostname='%s'";
-        $sql .= $anon_interval != -1 ? " AND timestamp > %d" : '';
-        $result = db_query($sql, $type, $cid, $uid, $tag, $hostname, time() - $anon_interval);
-      }
+      votingapi_set_votes($criteria += array('value' => $value, 'uid' => $uid), $user_votes);
     }
 
-    // If the old vote exists, either delete it (if the new one is zero)
-    // or change it. If it doesn't exist and the vote is non-zero, cast
-    // it and recalculate.
-    if ($old_vote = db_fetch_object($result)) {
-      votingapi_change_vote($old_vote, $value);
-    }
-    elseif ($value != 0) {
-      votingapi_add_vote($type, $cid, $value, 'percent', $tag, $uid);
-    }
     return votingapi_recalculate_results($type, $cid);
   }
   else {
     return array();
   }
+}
+
+function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
+  global $user;
+  if (empty($uid)) {
+    $uid = $user->uid;
+  }
+
+  $criteria = array(
+    'content_type' => $type,
+    'content_id' => $cid,
+    'value_type' => 'percent',
+    'tag' => $tag,
+  );
+
+  $votes = array(
+    'average' => array(),
+    'count' => array(),
+    'user' => array(),
+  );
+
+  $results = votingapi_select_results($criteria);
+  foreach ($results as $result) {
+    if ($result['function'] == 'average') {
+      $votes['average'] = $result;
+    }
+    if ($result['function'] == 'count') {
+      $votes['count'] = $result;
+    }
+  }
+  if ($user->uid) {
+    $user_vote = votingapi_select_votes($criteria += array('uid' => $user->uid));
+    $votes['user'] = $user_vote[0];
+  }
+  else {
+    // If the user is anonymous, we never bother loading their existing votes.
+    // Not only would it be hit-or-miss, it would break page caching. Safer to always
+    // show the 'fresh' version to anon users.
+    $votes['user'] = array('value' => 0);
+  }
+
+  return $votes;
 }
 
 /**
@@ -807,9 +795,9 @@ function fivestar_widget_form($node) {
  */
 function fivestar_forms() {
   $args = func_get_args();
-  if (strpos($args[0][0], 'fivestar_form') !== FALSE) {
-    if ($args[0][0] == 'fivestar_form_'. $args[0][1] .'_'. $args[0][2]) {
-      $forms[$args[0][0]] = array('callback' => 'fivestar_form');
+  if (strpos($args[0], 'fivestar_form') !== FALSE) {
+    if ($args[0] == 'fivestar_form_'. $args[1][0] .'_'. $args[1][1]) {
+      $forms[$args[0]] = array('callback' => 'fivestar_form');
       return $forms;
     }
   }
@@ -820,7 +808,7 @@ function fivestar_forms() {
  * Note that this is not an implementation of hook_form(). We should probably
  * change the function to reflect that.
  */
-function fivestar_form($content_type, $content_id) {
+function fivestar_form(&$form_state, $content_type, $content_id) {
   global $user;
 
   if ($content_type == 'node') {
@@ -832,22 +820,13 @@ function fivestar_form($content_type, $content_id) {
     }
   }
 
-  $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
-  $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
-  if ($user->uid) {
-    $user_vote = votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid);
-  }
-  else {
-    // If the user is anonymous, we never bother loading their existing votes.
-    // Not only would it be hit-or-miss, it would break page caching. Safer to always
-    // show the 'fresh' version to anon users.
-    $user_vote->value = 0;
-  }
+
+  $votes = fivestar_get_votes($content_type, $content_id);
 
   $values = array(
-    'average' => $current_avg->value,
-    'user' => $user_vote->value,
-    'count' => $current_count->value,
+    'user' => $votes['user']['value'],
+    'average' => $votes['average']['value'],
+    'count' => $votes['count']['value'],
   );
 
   $settings = array(
@@ -863,15 +842,20 @@ function fivestar_form($content_type, $content_id) {
     'labels' => variable_get('fivestar_labels_'. $node->type, array()),
   );
 
-  return fivestar_custom_widget($values, $settings);  
+  return fivestar_custom_widget(&$form_state, $values, $settings);  
 }
 
 function fivestar_static($content_type, $content_id, $node_type = NULL) {
   global $user;
 
-  $current_avg = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'average');
-  $current_count = votingapi_get_voting_result($content_type, $content_id, 'percent', 'vote', 'count');
-  $user_vote = $user->uid ? votingapi_get_vote($content_type, $content_id, 'percent', 'vote', $user->uid) : 0;
+  $criteria = array(
+    'content_type' => $content_type,
+    'content_id' => $content_id,
+    'value_type' => 'percent',
+    'tag' => 'vote',
+  );
+
+  $votes = fivestar_get_votes($content_type, $content_id);
 
   if ($content_type == 'node') {
     $star_display = variable_get('fivestar_style_'. $node_type, 'average');
@@ -882,23 +866,23 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
     switch ($star_display) {
       case 'average':
       case 'dual':
-        $star_value = $current_avg->value;
+        $star_value = $votes['average']['value'];
         $title = $title_display ? t('Average') : NULL;
         break;
       case 'user':
-        $star_value = $user_vote->value;
+        $star_value = $votes['user']['value'];
         $title = $title_display ? t('Your rating') : NULL;
         break;
       case 'smart':
-        $star_value = $user_vote->value ? $user_vote->value : $current_avg->value;
-        $title = $title_display ? $user_vote->value ? t('Your rating') : t('Average') : NULL;
+        $star_value = $votes['user']['value'] ? $votes['user']['value'] : $votes['average']['value'];
+        $title = $title_display ? $votes['user']['value'] ? t('Your rating') : t('Average') : NULL;
         break;
     }
 
     // Set all text values, then unset the unnecessary ones.
-    $user_value = $user_vote->value;
-    $average_value = $current_avg->value;
-    $count_value = $current_count->value;
+    $user_value = $votes['user']['value'];
+    $average_value = $votes['average']['value'];
+    $count_value = $votes['count']['value'];
     switch ($text_display) {
       case 'average':
         $user_value = NULL;
@@ -907,7 +891,7 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
         $average_value = NULL;
         break;
       case 'smart':
-        if ($user_vote->value) {
+        if ($votes['user']['value']) {
           $average_value = NULL;
         }
         else {
@@ -921,10 +905,10 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
   // Possibly add other content types here (comment, user, etc).
   else {
     $stars = 5;
-    $star_value = $current_avg->value;
-    $user_value = $user_vote->value;
-    $average_value = $current_avg->value;
-    $count_value = $current_count->value;
+    $star_value = $votes['average']['value'];
+    $user_value = $votes['user']['value'];
+    $average_value = $votes['average']['value'];
+    $count_value = $votes['count']['value'];
   }
 
   $star_display = theme('fivestar_static', $star_value, $stars);
@@ -933,7 +917,7 @@ function fivestar_static($content_type, $content_id, $node_type = NULL) {
   return theme('fivestar_static_element', $star_display, $title, $text_display);
 }
 
-function fivestar_custom_widget($values, $settings) {
+function fivestar_custom_widget(&$form_state, $values, $settings) {
   $form = array(
     '#attributes' => array('class' => 'fivestar-widget'),
     '#redirect' => FALSE,
@@ -1077,7 +1061,7 @@ function fivestar_elements() {
     '#auto_submit' => FALSE,
     '#auto_submit_path' => '',
     '#labels_enable' => TRUE,
-    '#process' => array('fivestar_expand' => array()),
+    '#process' => array('fivestar_expand'),
   );
   return $type;
 }

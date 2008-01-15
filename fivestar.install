@@ -73,3 +73,15 @@ function fivestar_update_2() {
   }
   return array();
 }
+
+/**
+ * Upgrade to Drupal 6 and VotingAPI 2.
+ * 
+ * Remove anonymous vote interval from Fivestar, now handled by VotingAPI.
+ */
+function fivestar_update_6100() {
+  $ret = array();
+  variable_del('fivestar_anonymous_vote_interval');
+  $ret[] = array('success' => TRUE, 'query' => "variable_del('fivestar_anonymous_vote_interval')");
+  return $ret;
+}

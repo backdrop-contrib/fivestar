@@ -37,6 +37,17 @@ hook_init() -- and the caching advisor screen uses that as the only metric to
 determine whether a module will work with the caching system. Activate it
 without fear, friends -- Fivestar will continue to hum happily along.
 
+Upgrading from Drupal 5
+-----------------------
+The Drupal 6 version of VotingAPI has been significantly improved for both
+efficiency and flexibility. Because Fivestar depends on VotingAPI for much of
+its functionality, these changes have affected Fivestar.
+
+The Fivestar Anonymous vote interval set in admin/settings/fivestar is no
+longer available. We use the same setting as defined in VotingAPI now, set at
+admin/settings/votingapi. It has the same effect as the previous Fivestar
+setting.
+
 Configuration for Simple Rating
 -------------------------------
 
