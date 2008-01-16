@@ -954,6 +954,11 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     '#labels' => isset($settings['labels']) ? $settings['labels'] : NULL,
   );
 
+  $form['destination'] = array(
+    '#type' => 'hidden',
+    '#value' => $_GET['q'],
+  );
+
   $form['fivestar_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Rate'),
