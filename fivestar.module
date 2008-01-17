@@ -424,7 +424,10 @@ function fivestar_settings() {
     '#description' => t('Choose a widget set to be used on your site.'),
     '#attributes' => array('class' => 'fivestar-widgets clear-block'),
   );
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  // Manually setting #theme is a Drupal 6 bug: http://drupal.org/node/211015
+  $form['#theme'] = 'fivestar_settings';
+  return $form;
 }
 
 function theme_fivestar_settings($form) {
@@ -473,7 +476,8 @@ function theme_fivestar_preview_page() {
     '#allow_clear' => TRUE,
   );
 
-  $form = form_builder('fivestar_preview', $form);
+  $form_state = array();
+  $form = form_builder('fivestar_preview', $form, $form_state);
 
   $output = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n";
   $output .= '<html xmlns="http://www.w3.org/1999/xhtml">';
