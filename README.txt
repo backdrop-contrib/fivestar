@@ -74,6 +74,22 @@ Fivestar site settings page, and access permissions. To configure:
    "rate content" and "view ratings" checkboxes for the roles you'd like.
    You'll find these permission items under the "fivestar module" heading.
 
+Configuration for Reviews of Content
+------------------------------------
+
+Fivestar can be used to quickly setup a rating system for your site visitors to
+review a piece of content. When enabling the Comment widget, visitors will
+submit a rating on the *original piece of content* along with their comment.
+Visitors will not be rating the comments themselves. Fivestar does not allow for
+the rating of comments.
+
+1) If it's not already enabled, turn on comment module at Administer ->
+   Site Building -> Modules.
+
+2) Visit the content type you want to enable reviews, such as Administer ->
+   Content Management -> Content Types -> Story, and select an option under
+   the "Comment widget" section.
+
 Configuration as a CCK field / Advanced Rating
 ----------------------------------------------
 
