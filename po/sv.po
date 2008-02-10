@@ -62,7 +62,7 @@ msgid "Go to <a href=\"!types\">admin/content/types</a> and edit the type you wo
 msgstr "Gå till <a href=\"!types\">admin/content/types</a> och redigera den innehållstyp som du vill betygsätta."
 
 #: fivestar.module:16
-msgid "On the settings page for the content type, a set of options is available for fivestar, where you can enabled rating for that type and set rating options."
+msgid "On the settings page for the content type, a set of options is available for fivestar, where you can enable rating for that type and set rating options."
 msgstr "Gå till inställningssidan för innehållstypen. En uppsättning alternativ för Fivestar visas där du kan aktivera betygsättning för den aktuella innehållstypen och ange olika alternativ."
 
 #: fivestar.module:33

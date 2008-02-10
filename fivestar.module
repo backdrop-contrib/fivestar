@@ -7,13 +7,14 @@
  */
 
 function fivestar_help($path, $arg) {
+  $output = '';
   switch ($path) {
     case 'admin/settings/fivestar':
       $output = t('This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:');
       $steps = array(
         t('Configure site-wide settings for fivestar below.'),
         t('Go to <a href="!types">admin/content/types</a> and edit the type you would like to rate.', array('!types' => url('admin/content/types'))),
-        t('On the settings page for the content type, a set of options is available for fivestar, where you can enabled rating for that type and set rating options.'),
+        t('On the settings page for the content type, a set of options is available for fivestar, where you can enable rating for that type and set rating options.'),
       );
       $output .= theme('item_list', $steps, NULL, 'ol');
   }
