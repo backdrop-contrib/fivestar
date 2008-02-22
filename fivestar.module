@@ -735,7 +735,7 @@ function fivestar_fivestar_widgets() {
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if ($node->in_preview == FALSE && variable_get('fivestar_'. $node->type, 0)) {
+      if ($node->build_mode != NODE_BUILD_PREVIEW && variable_get('fivestar_'. $node->type, 0)) {
         if ($teaser) {
           $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
         }
