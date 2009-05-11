@@ -7,6 +7,48 @@
  */
 
 /**
+ * Menu callback function for fivestar/preview/color.
+ *
+ * Outputs a dynamically generated star or cancel png.
+ */
+function fivestar_preview_color() {
+  $args = func_get_args();
+  // Remove query string if it gets passed in as argument.
+  $filename = preg_replace('/\?.*$/', '', array_pop($args));
+  $type = array_pop($args);
+  $widget = array_pop($args);
+
+  // Convert args to our color scheme.
+  $color_scheme = array(
+    'on1' => $args[0],
+    'on2' => $args[1],
+    'hover1' => $args[2],
+    'hover2' => $args[3],
+    'off1' => $args[4],
+    'off2' => $args[5],
+    'matte' => $args[6],
+  );
+
+  // Find the source location of the desired widget.
+  $widgets = module_invoke_all('fivestar_widgets');
+  foreach ($widgets as $key => $name) {
+    if (drupal_strtolower($name) == $widget) {
+      $source_directory = str_replace($widget .'.css', '', $key);
+      break;
+    }
+  }
+
+  // Generate the requested image and exit.
+  $image = _fivestar_color_render($source_directory . str_replace('.png', '-template.png', $filename), $color_scheme, $type);
+  drupal_set_header('Content-type: image/png');
+  drupal_set_header("Expires: ". gmdate("D, d M Y H:i:s", time() + 300) ." GMT");
+  drupal_set_header("Last-Modified: ". gmdate("D, d M Y H:i:s") ." GMT");
+  drupal_set_header("Cache-Control: max-age=300");
+  imagepng($image);
+  exit();
+}
+
+/**
  * Form callback. Returns the configuration form.
  */
 function fivestar_color_form() {
@@ -158,8 +200,8 @@ function fivestar_color_form_validate($form, &$form_state) {
  * Submit handler for color change form.
  */
 function fivestar_color_form_submit($form, &$form_state) {
-  if ($form_state['values']['matte'] == t('none')) {
-    $form_state['values']['matte'] = '';
+  if ($form_state['values']['fivestar_colors']['matte'] == t('none')) {
+    $form_state['values']['fivestar_colors']['matte'] = '';
   }
 
   // Check if we're using a color-enabled set of stars.

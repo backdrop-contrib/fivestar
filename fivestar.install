@@ -208,7 +208,7 @@ function fivestar_update_6105() {
 
   // All CCK fields are disabled by Content module during the D6 upgrade.
   // Re-enable the Fivestar fields.
-  module_load_include('inc', 'fivestar', 'fivestar_field');
+  module_load_include('inc', 'fivestar', 'includes/fivestar.field');
   content_associate_fields('fivestar');
 
   $ret[] = array('success' => TRUE, 'query' => t('Re-enabled Fivestar CCK fields.'));

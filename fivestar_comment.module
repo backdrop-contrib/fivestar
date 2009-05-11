@@ -41,7 +41,6 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
         FIVESTAR_COMMENT_OPTIONAL => t('Optional rating'),
         FIVESTAR_COMMENT_REQUIRED => t('Required rating'),
       ),
-      //'#default_value' => variable_get('fivestar_comment_'. $form['#node_type']->type, FIVESTAR_COMMENT_DISABLED),
       '#default_value' => variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED),
 
     );
