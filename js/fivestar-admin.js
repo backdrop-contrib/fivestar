@@ -12,7 +12,7 @@ if (Drupal.jsEnabled) {
     nodePreview.displayTextfields();
 
     // Enable comments if available.
-    $comment = $('input[@name=fivestar_comment]');
+    $comment = $('input[name=fivestar_comment]');
     if ($comment.size()) {
       var commentPreview = new fivestarPreview($('#fivestar-comment-preview .fivestar-preview')[0]);
     }
@@ -21,6 +21,7 @@ if (Drupal.jsEnabled) {
     $enable = $('#edit-fivestar');
     $unvote = $('#edit-fivestar-unvote');
     $title  = $('#edit-fivestar-title');
+    $feedback = $('#edit-fivestar-feedback');
     $style  = $('#edit-fivestar-style');
     $text   = $('#edit-fivestar-text');
 
@@ -33,14 +34,14 @@ if (Drupal.jsEnabled) {
       nodePreview.disable();
     }
     else {
-      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
+      nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0, $feedback.attr('checked') ? 1 : 0);
     }
 
     // Add event handler for enable checkbox.
     $enable.change(function() {
       if ($(this).attr('checked')) {
         // Enable the node preview.
-        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0);
+        nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0, $feedback.attr('checked') ? 1 : 0);
         nodePreview.update()
 
         // Enable the comment preview if available.
@@ -52,7 +53,7 @@ if (Drupal.jsEnabled) {
             }
           });
           if (commentSetting != 0) {
-            commentPreview.enable(commentSetting == 1 ? 1 : 0, 'user', 'none', 0);
+            commentPreview.enable(commentSetting == 1 ? 1 : 0, 'user', 'none', 0, 0);
             commentPreview.update();
           }
         }
@@ -72,11 +73,12 @@ if (Drupal.jsEnabled) {
     $text.change(function() { nodePreview.setValue('text', this.value); });
     $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
     $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
+    $feedback.change(function() { nodePreview.setValue('feedback', $(this).attr('checked') ? 1 : 0); });
 
     if (commentPreview) {
       // Enable the comment preview.
       if ($enable.attr('checked')) {
-        commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0);
+        commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0, 0);
       }
       else {
         commentPreview.disable();
@@ -87,7 +89,7 @@ if (Drupal.jsEnabled) {
         if ($(this).attr('checked') && $enable.attr('checked')) {
           if (this.value != 0) {
             commentPreview.setValue('unvote', this.value == 1 ? 1 : 0);
-            commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0);
+            commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0, 0);
             commentPreview.update();
           }
           else {
@@ -116,6 +118,7 @@ var fivestarPreview = function(previewElement) {
   this.enabled = false;
   this.unvote = 0;
   this.title = 1;
+  this.feedback = 1;
   this.stars = this.elements.stars.val();
   this.style = '';
   this.text = '';
@@ -142,7 +145,7 @@ var fivestarPreview = function(previewElement) {
 /**
  * Enable the preview functionality and show the preview.
  */
-fivestarPreview.prototype.enable = function(unvote, style, text, title) {
+fivestarPreview.prototype.enable = function(unvote, style, text, title, feedback) {
   if (!this.enabled) {
     this.enabled = true;
 
@@ -158,6 +161,7 @@ fivestarPreview.prototype.enable = function(unvote, style, text, title) {
     // Update settings specific to this preview.
     this.unvote = unvote;
     this.title = title;
+    this.feedback = feedback;
     this.style = style;
     this.text = text;
 
@@ -200,13 +204,13 @@ fivestarPreview.prototype.update = function() {
         response = Drupal.parseJson(response);
       }
       $(self.preview).html(response.data).hide();
-      $('div.fivestar-form-item', self.preview).rating();
+      $('div.fivestar-form-item', self.preview).fivestar();
       $('input.fivestar-submit', self.preview).hide();
       $(self.preview).show();
     };
 
     // Prepare data to send to the server.
-    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title, labels_enable: this.labelsEnable }
+    var data = { style: this.style, text: this.text, stars: this.stars, unvote: this.unvote, title: this.title, feedback: this.feedback, labels_enable: this.labelsEnable };
 
     // Covert labels array format understood by PHP and add to data.
     for (n in this.labels) {
@@ -218,7 +222,7 @@ fivestarPreview.prototype.update = function() {
       type: 'POST',
       url: Drupal.settings.fivestar.preview_url,
       data: data,
-      success: updateSuccess,
+      success: updateSuccess
     });
   }
 };

@@ -1,0 +1,7 @@
+; $Id$
+name = Fivestar Comments
+description = Rate nodes by leaving comments.
+package = Voting
+core = 6.x
+dependencies[] = votingapi
+dependencies[] = fivestar

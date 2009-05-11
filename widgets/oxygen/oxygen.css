@@ -1,23 +1,27 @@
 /* Static View-only Star Version */
 div.fivestar-widget-static .star {
-  background: url(heart.png) no-repeat 0 0px;
+  background-image: url(star.png);
 }
 
 div.fivestar-widget-static .star span.on {
-  background: url(heart.png) no-repeat 0 -32px;
+  background-image: url(star.png);
 }
 
 div.fivestar-widget-static .star span.off {
-  background: url(heart.png) no-repeat 0 0px;
+  background-image: url(star.png);
 }
 
 /* Javascript Star Version */
+div.fivestar-widget .cancel,
+div.fivestar-widget .cancel a {
+  background-image: url(cancel.png);
+}
 div.fivestar-widget .star,
 div.fivestar-widget .star a {
-  background: url(heart.png) no-repeat 0 0px;
+  background-image: url(star.png);
 }
 
 div.fivestar-widget div.hover a,
 div.rating div a:hover {
-  background: url(heart.png) no-repeat 0 -32px;
+  background-image: url(star.png);
 }

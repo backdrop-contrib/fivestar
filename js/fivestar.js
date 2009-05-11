@@ -15,7 +15,7 @@
  * Create a degradeable star rating interface out of a simple form structure.
  * Returns a modified jQuery object containing the new interface.
  *   
- * @example jQuery('form.rating').rating();
+ * @example jQuery('form.rating').fivestar();
  * @cat plugin
  * @type jQuery 
  *
@@ -29,7 +29,8 @@
         var $widget = buildInterface($obj),
             $stars = $('.star', $widget),
             $cancel = $('.cancel', $widget),
-            $summary = $('.description', $obj).size() ? $('.description', $obj) : $($obj).siblings('.description'),
+            $summary = $('.fivestar-summary', $obj),
+            feedbackTimerId = 0,
             summaryText = $summary.html(),
             summaryHover = $obj.is('.fivestar-labels-hover'),
             currentValue = $("select", $obj).val(),
@@ -43,7 +44,7 @@
         }
         else if ($obj.is('.fivestar-average-stars')) {
           var starDisplay = 'average';
-          currentValue = $("input[@name=vote_average]", $obj).val();
+          currentValue = $("input[name=vote_average]", $obj).val();
         }
         else if ($obj.is('.fivestar-combo-stars')) {
           var starDisplay = 'combo';
@@ -58,14 +59,8 @@
         }
 
         // Record text display.
-        if ($obj.is('.fivestar-user-text')) {
-          var textDisplay = 'user';
-        }
-        else if ($obj.is('.fivestar-average-text')) {
-          var textDisplay = 'average';
-        }
-        else if ($obj.is('.fivestar-combo-text')) {
-          var textDisplay = 'combo';
+        if ($summary.size()) {
+          var textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*/, '$1').replace(/-/g, '_');
         }
         else {
           var textDisplay = 'none';
@@ -80,16 +75,17 @@
             .mouseout(function(){
                 event.drain();
                 event.reset();
-            })
+            });
+        $stars.children()
             .focus(function(){
                 event.drain();
-                event.fill(this)
+                event.fill(this.parentNode)
             })
             .blur(function(){
                 event.drain();
                 event.reset();
-            });
-        
+            }).end();
+
         // Cancel button events.
         $cancel
             .mouseover(function(){
@@ -99,28 +95,51 @@
             .mouseout(function(){
                 event.reset();
                 $(this).removeClass('on')
-            })
+            });
+        $cancel.children()
             .focus(function(){
                 event.drain();
-                $(this).addClass('on')
+                $(this.parentNode).addClass('on')
             })
             .blur(function(){
                 event.reset();
-                $(this).removeClass('on')
-            });
-        
+                $(this.parentNode).removeClass('on')
+            }).end();
+
         // Click events.
         $cancel.click(function(){
             currentValue = 0;
             event.reset();
             voteChanged = false;
+            // Inform a user that his vote is being processed
+            if ($("input.fivestar-path", $obj).size() && $summary.is('.fivestar-feedback-enabled')) {
+              setFeedbackText(Drupal.settings.fivestar.feedbackDeletingVote);
+            }
             // Save the currentValue in a hidden field.
             $("select", $obj).val(0);
             // Update the title.
             cancelTitle = starDisplay != 'smart' ? cancelTitle : Drupal.settings.fivestar.titleAverage;
             $('label', $obj).html(cancelTitle);
+            // Update the smart classes on the widget if needed.
+            if ($obj.is('.fivestar-smart-text')) {
+              $obj.removeClass('fivestar-user-text').addClass('fivestar-average-text');
+              $summary[0].className = $summary[0].className.replace(/-user/, '-average');
+              textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*/, '$1').replace(/-/g, '_');
+            }
+            if ($obj.is('.fivestar-smart-stars')) {
+              $obj.removeClass('fivestar-user-stars').addClass('fivestar-average-stars');
+            }
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + 0, success: voteHook }); });
+            $("input.fivestar-path", $obj).each(function() {
+              var token = $("input.fivestar-token", $obj).val();
+              $.ajax({
+                type: 'GET',
+                data: { token: token },
+                dataType: 'xml',
+                url: this.value + '/' + 0,
+                success: voteHook
+              });
+            });
             return false;
         });
         $stars.click(function(){
@@ -130,8 +149,30 @@
             // Update the display of the stars.
             voteChanged = true;
             event.reset();
+            // Inform a user that his vote is being processed.
+            if ($("input.fivestar-path", $obj).size() && $summary.is('.fivestar-feedback-enabled')) {
+              setFeedbackText(Drupal.settings.fivestar.feedbackSavingVote);
+            }
+            // Update the smart classes on the widget if needed.
+            if ($obj.is('.fivestar-smart-text')) {
+              $obj.removeClass('fivestar-average-text').addClass('fivestar-user-text');
+              $summary[0].className = $summary[0].className.replace(/-average/, '-user');
+              textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*/, '$1').replace(/-/g, '_');
+            }
+            if ($obj.is('.fivestar-smart-stars')) {
+              $obj.removeClass('fivestar-average-stars').addClass('fivestar-user-stars');
+            }
             // Submit the form if needed.
-            $("input.fivestar-path", $obj).each(function () { $.ajax({ type: 'GET', dataType: 'xml', url: this.value + '/' + currentValue, success: voteHook }); });
+            $("input.fivestar-path", $obj).each(function () {
+              var token = $("input.fivestar-token", $obj).val();
+              $.ajax({
+                type: 'GET',
+                data: { token: token },
+                dataType: 'xml',
+                url: this.value + '/' + currentValue,
+                success: voteHook
+              });
+            });
             return false;
         });
 
@@ -143,7 +184,7 @@
                 .children('a').css('width', '100%').end()
                 .filter(':lt(' + index + ')').addClass('hover').end();
               // Update the description text and label.
-              if (summaryHover) {
+              if (summaryHover && !feedbackTimerId) {
                 var summary = $("select option", $obj)[index + $cancel.size()].text;
                 var value = $("select option", $obj)[index + $cancel.size()].value;
                 $summary.html(summary != index + 1 ? summary : '&nbsp;');
@@ -156,8 +197,8 @@
                 .filter('.on').removeClass('on').end()
                 .filter('.hover').removeClass('hover').end();
               // Update the description text.
-              if (summaryHover) {
-                var cancelText = $("select option", $obj)[0].text;
+              if (summaryHover && !feedbackTimerId) {
+                var cancelText = $("select option", $obj)[1].text;
                 $summary.html(($cancel.size() && cancelText != 0) ? cancelText : '&nbsp');
                 if (!voteChanged) {
                   $('label', $obj).html(cancelTitle);
@@ -173,7 +214,7 @@
                 $stars.eq(Math.floor(starValue)).addClass('on').children('a').css('width', percent + "%").end().end();
               }
               // Restore the summary text and original title.
-              if (summaryHover) {
+              if (summaryHover && !feedbackTimerId) {
                 $summary.html(summaryText ? summaryText : '&nbsp;');
               }
               if (voteChanged) {
@@ -185,6 +226,13 @@
             }
         };
 
+        var setFeedbackText = function(text) {
+          // Kill previous timer if it isn't finished yet so that the text we
+          // are about to set will not get cleared too early.
+          feedbackTimerId = 1;
+          $summary.html(text);
+        };
+
         /**
          * Checks for the presence of a javascript hook 'fivestarResult' to be
          * called upon completion of a AJAX vote request.
@@ -194,10 +242,18 @@
             result: {
               count: $("result > count", data).text(),
               average: $("result > average", data).text(),
-              summary: { average: $("summary average", data).text(), user: $("summary user", data).text(), combo: $("summary combo", data).text() }
+              summary: {
+                average: $("summary average", data).text(),
+                average_count: $("summary average_count", data).text(),
+                user: $("summary user", data).text(),
+                user_count: $("summary user_count", data).text(),
+                combo: $("summary combo", data).text(),
+                count: $("summary count", data).text()
+              }
             },
             vote: {
               id: $("vote id", data).text(),
+              tag: $("vote tag", data).text(),
               type: $("vote type", data).text(),
               value: $("vote value", data).text()
             },
@@ -216,8 +272,19 @@
           }
           // Update the summary text.
           summaryText = returnObj.result.summary[returnObj.display.text];
+          if ($(returnObj.result.summary.average).is('.fivestar-feedback-enabled')) {
+            // Inform user that his/her vote has been processed.
+            if (returnObj.vote.value != 0) { // check if vote has been saved or deleted 
+              setFeedbackText(Drupal.settings.fivestar.feedbackVoteSaved);
+            }
+            else {
+              setFeedbackText(Drupal.settings.fivestar.feedbackVoteDeleted);
+            }
+            // Setup a timer to clear the feedback text after 3 seconds.
+            feedbackTimerId = setTimeout(function() { clearTimeout(feedbackTimerId); feedbackTimerId = 0; $summary.html(returnObj.result.summary[returnObj.display.text]); }, 2000);
+          }
           // Update the current star currentValue to the previous average.
-          if (returnObj.vote.value == 0 && starDisplay == 'average') {
+          if (returnObj.vote.value == 0 && (starDisplay == 'average' || starDisplay == 'smart')) {
             currentValue = returnObj.result.average;
             event.reset();
           }
@@ -252,11 +319,11 @@
               var last = count == size + cancel - 1 ? ' star-last' : '';
               $div = $('<div class="star star-' + count + ' star-' + zebra + first + last + '"><a href="#' + option.value + '" title="' + option.text + '">' + option.text + '</a></div>');
             }
-            $container.append($div[0]);                    
+            $container.append($div[0]);
         }
         $container.addClass('fivestar-widget-' + (size + cancel - 1));
         // Attach the new widget and hide the existing widget.
-        $('select', $widget).after($container).hide();
+        $('select', $widget).after($container).css('display', 'none');
         return $container;
     };
 
@@ -272,22 +339,30 @@
      * voteResult.result.summary.user The textual description of the user's current vote.
      * voteResult.vote.id The id of the item the vote was placed on (such as the nid)
      * voteResult.vote.type The type of the item the vote was placed on (such as 'node')
+     * voteResult.vote.tag The multi-axis tag the vote was placed on (such as 'vote')
      * voteResult.vote.average The average of the new vote saved
      * voteResult.display.stars The type of star display we're using. Either 'average', 'user', or 'combo'.
      * voteResult.display.text The type of text display we're using. Either 'average', 'user', or 'combo'.
      */
     function fivestarDefaultResult(voteResult) {
       // Update the summary text.
-      $('div.fivestar-summary-'+voteResult.vote.id).html(voteResult.result.summary[voteResult.display.text]);
+      $('div.fivestar-summary-'+voteResult.vote.tag+'-'+voteResult.vote.id).html(voteResult.result.summary[voteResult.display.text]);
       // If this is a combo display, update the average star display.
       if (voteResult.display.stars == 'combo') {
         $('div.fivestar-form-'+voteResult.vote.id).each(function() {
+          // Update stars.
           var $stars = $('.fivestar-widget-static .star span', this);
           var average = voteResult.result.average/100 * $stars.size();
           var index = Math.floor(average);
           $stars.removeClass('on').addClass('off').css('width', 'auto');
           $stars.filter(':lt(' + (index + 1) + ')').removeClass('off').addClass('on');
           $stars.eq(index).css('width', ((average - index) * 100) + "%");
+          // Update summary.
+          var $summary = $('.fivestar-static-form-item .fivestar-summary', this);
+          if ($summary.size()) {
+            var textDisplay = $summary.attr('class').replace(/.*?fivestar-summary-([^ ]+).*/, '$1').replace(/-/g, '_');
+            $summary.html(voteResult.result.summary[textDisplay]);
+          }
         });
       }
     };
@@ -295,7 +370,7 @@
     /**
      * Set up the plugin
      */
-    $.fn.rating = function() {
+    $.fn.fivestar = function() {
       var stack = [];
       this.each(function() {
           var ret = buildRating($(this));
@@ -310,11 +385,10 @@
       document.execCommand('BackgroundImageCache', false, true);
     } catch(err) {}
   }
-})(jQuery);
 
-if (Drupal.jsEnabled) {
-  $(document).ready(function() {
-    $('div.fivestar-form-item').rating();
-    $('input.fivestar-submit').hide();
-  });
-}
+  Drupal.behaviors.fivestar = function(context) {
+    $('div.fivestar-form-item:not(.fivestar-processed)', context).addClass('fivestar-processed').fivestar();
+    $('input.fivestar-submit', context).css('display', 'none');
+  }
+
+})(jQuery);
