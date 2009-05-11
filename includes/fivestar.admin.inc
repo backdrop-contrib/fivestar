@@ -127,6 +127,9 @@ function theme_fivestar_settings($form) {
   return drupal_render($form);
 }
 
+/**
+ * Show a preview of a widget using a custom CSS file.
+ */
 function theme_fivestar_preview_widget($css_file) {
   static $default_css_added = FALSE;
 
@@ -172,6 +175,267 @@ function theme_fivestar_preview_widget($css_file) {
   $output .= drupal_render($form);
   $output .= '</div>';
 
+  return $output;
+}
+
+/**
+ * Adds fivestar enaable and position to the node-type configuration form.
+ */
+function fivestar_node_type_tag_form(&$form_state, $type_name, $tag = 'vote') {
+  $form = array();
+
+  $settings = fivestar_get_settings($type_name, $tag);
+
+  $form_state['fivestar_tag'] = $tag;
+  $form_state['fivestar_node_type'] = $type_name;
+
+  $form['fivestar'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable Fivestar rating for the "@tag" tag', array('@tag' => $tag)),
+    '#default_value' => $settings['fivestar'],
+    '#return_value' => 1,
+    '#weight' => -5,
+  );
+
+  $form['fivestar_stars'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of stars'),
+    '#options' => drupal_map_assoc(range(1, 10)),
+    '#default_value' => $settings['stars'],
+    '#weight' => -4,
+  );
+
+  $form['labels'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Star Labels'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#description' => t('These star labels appear as the link title when javascript is enabled as well as the select list options when javascript is disabled.'),
+  );
+
+  $form['labels']['fivestar_labels_enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display labels on mouse over'),
+    '#default_value' => $settings['labels_enable'],
+    '#return_value' => 1,
+    '#weight' => -5,
+    '#description' => t('When enabled, the star labels will dynamically appear underneath the stars as the user hovers over each star to provide a more descriptive qualitative meaning for each star value.'),
+  );
+
+  // Create the Mouseover text forms for each of the rating options
+  // This form depends on the number of stars, and these extra textfields will be hidden with javascript
+  for ($n = 0; $n <= 10; $n++) {
+    $form['labels']['fivestar_label_'. $n] = array(
+      '#type' => 'textfield',
+      '#title' => $n > 0 ? t('Star @star label', array('@star' => $n)) : t('Cancel label'),
+      '#default_value' => $settings['labels'][$n],
+      '#prefix' => '<div id="fivestar-label-'. $n .'" class="fivestar-label">',
+      '#suffix' => '</div>',
+      '#size' => 30,
+    );
+  }
+
+  $form['direct'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Direct rating widget'),
+    '#collapsible' => FALSE,
+    '#description' => t('These settings allow you to display a rating widget to your users while they are viewing content of this type. Rating will immediately register a vote for that piece of content.'),
+    '#weight' => 2,
+  );
+
+  $form['direct']['fivestar_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Star display style'),
+    '#default_value' => $settings['star_display'],
+    '#options' => array(
+      'average' => t('Display average vote value'),
+      'user'    => t('Display user vote value'),
+      'smart'   => t('User vote if available, average otherwise'),
+      'dual'    => t('Both user and average vote'),
+    ),
+  );
+
+  $form['direct']['fivestar_text'] = array(
+    '#type' => 'select',
+    '#title' => t('Text display style'),
+    '#default_value' => $settings['text_display'],
+    '#options' => array(
+      'none'    => t('Display no text beneath stars'),
+      'average' => t('Current average in text'),
+      'user'    => t('User current vote in text'),
+      'smart'   => t('User vote if available, average otherwise'),
+      'dual'    => t('Both user and average vote'),
+    ),
+  );
+
+  $form['direct']['fivestar_title'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show widget title'),
+    '#default_value' => $settings['title_display'],
+    '#return_value' => 1,
+  );
+
+  $form['direct']['fivestar_feedback'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable feedback during vote saving and deletion'),
+    '#default_value' => $settings['feedback_enable'],
+    '#return_value' => 1
+  );
+
+  $form['direct']['fivestar_unvote'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow users to undo their votes'),
+    '#default_value' => $settings['unvote_enable'],
+    '#return_value' => 1,
+  );
+
+  $form['direct']['fivestar_position_teaser'] = array(
+    '#type' => 'select',
+    '#title' => t('Teaser display'),
+    '#default_value' => $settings['position_teaser'],
+    '#options' => array(
+      'above' => t('Clickable widget above teaser'),
+      'below' => t('Clickable widget below teaser'),
+      'above_static' => t('Static display above teaser'),
+      'below_static' => t('Static display below teaser'),
+      'link' => t('Teaser link to full node widget'),
+      'hidden' => '<'. t('hidden') .'>',
+    ),
+  );
+
+  $form['direct']['fivestar_position'] = array(
+    '#type' => 'select',
+    '#title' => t('Full node display'),
+    '#default_value' => $settings['position'],
+    '#options' => array(
+      'above' => t('Clickable widget above node body'),
+      'below' => t('Clickable widget below node body'),
+      'above_static' => t('Static display above node body'),
+      'below_static' => t('Static display below node body'),
+      'hidden' => '<'. t('hidden') .'>',
+    ),
+  );
+
+  $form['direct']['fivestar_direct_preview'] = array(
+    '#type' => 'item',
+    '#title' => t('Direct rating widget preview'),
+    '#value' => theme(
+      'fivestar_preview',
+      $form['direct']['fivestar_style']['#default_value'],
+      $form['direct']['fivestar_text']['#default_value'],
+      $form['fivestar_stars']['#default_value'],
+      $form['direct']['fivestar_unvote']['#default_value'],
+      $form['direct']['fivestar_title']['#default_value'] ? NULL : FALSE,
+      $form['labels']['fivestar_labels_enable']['#default_value'],
+      $settings['labels']
+    ),
+  );
+  if (!$form['fivestar']['#default_value']) {
+    $form['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', '');
+  }
+  else {
+    $form['direct']['fivestar_direct_preview']['#value'] = theme('fivestar_preview_wrapper', $form['direct']['fivestar_direct_preview']['#value']);
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Additional submit handler for the node type form.
+ */
+function fivestar_node_type_tag_form_submit($form, &$form_state) {
+  $tag = $form_state['fivestar_tag'];
+  $type_name = $form_state['fivestar_node_type'];
+  $suffix = fivestar_get_suffix($type_name, $tag);
+
+  // Do not save any fivestar variables if fivestar is disabled.
+  if (isset($form_state['values']['fivestar']) && $form_state['values']['fivestar'] === 0) {
+    foreach ($form_state['values'] as $key => $value) {
+      if (strpos($key, 'fivestar') === 0) {
+        variable_del($key . '_' . $suffix);
+      }
+    }
+  }
+  else {
+    if ($form_state['values']['fivestar_labels_enable']) {
+      // Merge labels into a single variable.
+      $labels = array();
+      for ($n = 0; $n <= 10; $n++) {
+        $labels[] = $form_state['values']['fivestar_label_' . $n];
+        unset($form_state['values']['fivestar_label_' . $n]);
+      }
+
+      variable_set('fivestar_labels_' . $suffix, $labels);
+    }
+    else {
+      variable_del('fivestar_labels_' . $suffix);
+    }
+
+    // Now save the remaining variables
+    foreach ($form_state['values'] as $key => $value) {
+      if (strpos($key, 'fivestar') === 0) {
+        variable_set($key . '_' . $suffix, $value);
+      }
+    }
+  }
+
+  drupal_set_message('Your changes have been saved.');
+}
+
+/**
+ * Theme function to add the Fivestar preview to the node type form.
+ */
+function theme_fivestar_node_type_tag_form($form) {
+  drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-admin.js');
+  drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
+  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar-admin.css', 'module', 'all', FALSE);
+
+  $output = '';
+  $output .= drupal_render($form['fivestar']);
+  $output .= drupal_render($form['fivestar_stars']);
+
+  // Star labels.
+  $output .= drupal_render($form['labels']);
+
+  // Direct rating settings form.
+  $direct = '';
+  $direct .= '<div id="fivestar-direct-form">';
+  $direct .= drupal_render($form['direct']['fivestar_style']);
+  $direct .= drupal_render($form['direct']['fivestar_text']);
+  $direct .= drupal_render($form['direct']['fivestar_title']);
+  $direct .= drupal_render($form['direct']['fivestar_unvote']);
+  $direct .= drupal_render($form['direct']['fivestar_feedback']);
+  $direct .= drupal_render($form['direct']['fivestar_position_teaser']);
+  $direct .= drupal_render($form['direct']['fivestar_position']);
+  $direct .= '</div>';
+  $direct .= '<div id="fivestar-direct-preview">';
+  $direct .= drupal_render($form['direct']['fivestar_direct_preview']);
+  $direct .= '</div>';
+
+  $form['direct']['#children'] = $direct;
+  $output .= drupal_render($form['direct']);
+
+  // Comment settings form.
+  if (module_exists('fivestar_comment')) {
+    $comment = '';
+    $comment .= '<div id="fivestar-comment-form">';
+    $comment .= drupal_render($form['comment']['fivestar_comment']);
+    $comment .= '</div>';
+    $comment .= '<div id="fivestar-comment-preview">';
+    $comment .= drupal_render($form['comment']['fivestar_comment_preview']);
+    $comment .= '</div>';
+
+    $form['comment']['#children'] = $comment;
+    $output .= drupal_render($form['comment']);
+  }
+
+  // Any remaining cruft (should be empty).
+  $output .= drupal_render($form);
   return $output;
 }
 

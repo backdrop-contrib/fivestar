@@ -25,15 +25,15 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'fivestar_node_type_tag_form') {
     $tag = $form_state['fivestar_tag'];
     $type_name = $form_state['fivestar_node_type'];
-    $var_suffix = fivestar_var_suffix($type_name, $tag);
+    $suffix = fivestar_get_suffix($type_name, $tag);
 
-    $form['fivestar']['comment'] = array(
+    $form['comment'] = array(
       '#type' => 'fieldset',
       '#title' => t('Comment widget'),
       '#description' => t('Enabling Fivestar for comments will display a rating widget when a user posts a comment. The rating of the comment will affect its parent content.'),
       '#weight' => 1,
     );
-    $form['fivestar']['comment']['fivestar_comment'] = array(
+    $form['comment']['fivestar_comment'] = array(
       '#type' => 'radios',
       '#title' => t('Fivestar comment settings'),
       '#options' => array(
@@ -41,19 +41,19 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
         FIVESTAR_COMMENT_OPTIONAL => t('Optional rating'),
         FIVESTAR_COMMENT_REQUIRED => t('Required rating'),
       ),
-      '#default_value' => variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED),
+      '#default_value' => variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED),
 
     );
-    $form['fivestar']['comment']['fivestar_comment_preview'] = array(
+    $form['comment']['fivestar_comment_preview'] = array(
       '#type' => 'item',
       '#title' => t('Comment widget preview'),
-      '#value' => theme('fivestar_preview', 'compact', 'none', $form['fivestar']['fivestar_stars']['#default_value'], $form['fivestar']['comment']['fivestar_comment']['#default_value'] == 1 ? 1 : 0),
+      '#value' => theme('fivestar_preview', 'compact', 'none', $form['fivestar_stars']['#default_value'], $form['comment']['fivestar_comment']['#default_value'] == 1 ? 1 : 0),
     );
-    if (!$form['fivestar']['fivestar']['#default_value'] || !$form['fivestar']['comment']['fivestar_comment']['#default_value']) {
-      $form['fivestar']['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', '', 'comment');
+    if (!$form['fivestar']['#default_value'] || !$form['comment']['fivestar_comment']['#default_value']) {
+      $form['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', '', 'comment');
     }
     else {
-      $form['fivestar']['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', $form['fivestar']['comment']['fivestar_comment_preview']['#value'], 'comment');
+      $form['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', $form['comment']['fivestar_comment_preview']['#value'], 'comment');
     }
   }
 
@@ -76,18 +76,18 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
           }
 
           if (fivestar_validate_target('node', $node->nid, $tag)) {
-            $var_suffix = fivestar_var_suffix($node->type, $tag);
+            $suffix = fivestar_get_suffix($node->type, $tag);
 
-            if (variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED)) {
+            if (variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED)) {
               $new_form['fivestar_rating']['fivestar_rating_tag_'. $tag] = array(
               '#type' => 'fivestar',
               '#title' => t($tag),
               '#stars' => variable_get('fivestar_stars_'. $node->type, 5),
-              '#allow_clear' => variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_OPTIONAL ? 1 : 0,
+              '#allow_clear' => variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_OPTIONAL ? 1 : 0,
               '#content_id' => $node->nid,
-              '#required' => variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_REQUIRED ? 1 : 0,
+              '#required' => variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED) == FIVESTAR_COMMENT_REQUIRED ? 1 : 0,
               '#default_value' => $default_value,
-              '#labels' => variable_get('fivestar_labels'. $var_suffix, array()),
+              '#labels' => variable_get('fivestar_labels_'. $suffix, array()),
               );
             }
           }
@@ -128,8 +128,8 @@ function fivestar_comment(&$comment, $op) {
   switch ($op) {
     case 'view':
       foreach (fivestar_get_tags() as $tag) {
-        $var_suffix = fivestar_var_suffix($node->type, $tag);
-        $fivestar_status = variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED);
+        $suffix = fivestar_get_suffix($node->type, $tag);
+        $fivestar_status = variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED);
 
         if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
           $fivestar_rating_tag = 'fivestar_rating_tag_'. $tag;
@@ -145,8 +145,8 @@ function fivestar_comment(&$comment, $op) {
       break;
     case 'insert':
       foreach (fivestar_get_tags() as $tag) {
-        $var_suffix = fivestar_var_suffix($node->type, $tag);
-        $fivestar_status = variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED);
+        $suffix = fivestar_get_suffix($node->type, $tag);
+        $fivestar_status = variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED);
 
         if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
           $fivestar_rating_tag = 'fivestar_rating_tag_'. $tag;
@@ -159,8 +159,8 @@ function fivestar_comment(&$comment, $op) {
       }
     case 'update':
       foreach (fivestar_get_tags() as $tag) {
-        $var_suffix = fivestar_var_suffix($node->type, $tag);
-        $fivestar_status = variable_get('fivestar_comment'. $var_suffix, FIVESTAR_COMMENT_DISABLED);
+        $suffix = fivestar_get_suffix($node->type, $tag);
+        $fivestar_status = variable_get('fivestar_comment_'. $suffix, FIVESTAR_COMMENT_DISABLED);
 
         if ($fivestar_status != FIVESTAR_COMMENT_DISABLED) {
           $fivestar_rating_tag = 'fivestar_rating_tag_'. $tag;

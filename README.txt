@@ -1,6 +1,7 @@
 // $Id$
 
-The Five Star voting module adds a clean, attractive voting widget to nodes in Drupal 5. It features:
+The Fivestar voting module adds a clean, attractive voting widget to nodes and
+comments in Drupal. It features:
 
  * jQuery rollover effects and AJAX no-reload voting
  * Customizable star sets
