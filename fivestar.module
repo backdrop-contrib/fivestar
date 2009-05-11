@@ -556,7 +556,11 @@ function theme_fivestar_preview_widget($css_file) {
     fivestar_add_inline_css($widget_name, $css);
   }
 
-  $form = array();
+  $form = array(
+    '#post' => array(),
+    '#programmed' => FALSE,
+    '#tree' => FALSE,
+  );
   $form_state = array();
   $form['vote'] = array(
     '#type' => 'fivestar',

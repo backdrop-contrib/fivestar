@@ -101,6 +101,8 @@ function theme_fivestar_color_form($form) {
 
   drupal_add_js(array('fivestar' => array('reference' => $default_colors, 'transparent' => t('none'), 'colorPreview' => url('fivestar/preview/color'))), 'setting');
 
+  $output = '';
+
   // Wrapper.
   $output .= '<div class="color-form clear-block">';
 
@@ -361,6 +363,7 @@ function _fivestar_color_unpack($hex, $normalize = FALSE) {
  * Convert an RGB triplet to a hex color.
  */
 function _fivestar_color_pack($rgb, $normalize = FALSE) {
+  $out = 0;
   foreach ($rgb as $k => $v) {
     $out |= (($v * ($normalize ? 255 : 1)) << (16 - $k * 8));
   }
