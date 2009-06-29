@@ -479,7 +479,6 @@ function fivestar_nodeapi(&$node, $op, $teaser, $page) {
             if (user_access('rate content')) {
               $content = '';
               foreach (fivestar_get_tags() as $tag) {
-                dsm($tag);
                 if (fivestar_validate_target('node', $node->nid, $tag)) {
                   $content .= fivestar_widget_form($node, $tag);
                 }
