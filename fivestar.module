@@ -571,17 +571,22 @@ function fivestar_widget_form($node, $tag = 'vote') {
 }
 
 /**
- * Get a private token used to protect links from spoofing - CSRF.
+ * Get a private token used to protect links from CSRF attacks.
  */
-function fivestar_get_token($seed) {
-  return drupal_get_token($seed);
+function fivestar_get_token($value) {
+  global $user;
+
+  // Anonymous users don't get a session ID, which breaks page caching.
+  $session_id = $user->uid ? session_id() : '';
+  $private_key = drupal_get_private_key();
+  return md5($session_id . $value . $private_key);
 }
 
 /**
  * Check to see if a token value matches the specified node.
  */
-function fivestar_check_token($token, $seed) {
-  return drupal_get_token($seed) == $token;
+function fivestar_check_token($token, $value) {
+  return fivestar_get_token($value) == $token;
 }
 
 /**
