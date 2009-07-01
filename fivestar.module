@@ -1283,20 +1283,36 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
     $content_id = $columns->nid;
     $node_type = isset($columns->node_type) ? $columns->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
 
-    $votes = fivestar_get_votes($content_type, $content_id, $tag);
-
     $values = array(
-      'user' => isset($votes['user']['value']) ? $votes['user']['value'] : 0,
-      'average' => isset($votes['average']['value']) ? $votes['average']['value'] : 0,
-      'count' => isset($votes['count']['value']) ? $votes['count']['value'] : 0,
+      'user' => 0,
+      'average' => 0,
+      'count' => 0,
     );
+
+    if ($field->table == 'votingapi_vote') {
+      $values['user'] = $value;
+    }
+
+    if ($field->table == 'votingapi_cache') {
+      $values['average'] = $value;
+    }
+
+    // Only pull in all the votes if we need to display the summary text.
+    if ($summary) {
+      $votes = fivestar_get_votes($content_type, $content_id, $tag);
+      if ($field->table != 'votingapi_vote') {
+        $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
+      }
+      if ($field->table != 'votingapi_cache') {
+        $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
+      }
+      $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
+    }
 
     $settings = array(
       'stars' => variable_get('fivestar_stars_'. $node_type, 5),
       'allow_clear' => variable_get('fivestar_unvote_'. $node_type, FALSE),
-      // If the user has setup this content type to use smart stars, display
-      // the smart version instead of just the average.
-      'style' => variable_get('fivestar_style_'. $node_type, 'average') != 'smart' ? 'average' : 'smart',
+      'style' => $field->table == 'votingapi_vote' ? 'user' : 'average',
       'text' => $summary ? variable_get('fivestar_text_'. $node_type, 'dual') : 'none',
       'content_type' => $content_type,
       'content_id' => $content_id,
