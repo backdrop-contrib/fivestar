@@ -466,7 +466,13 @@ function fivestar_fivestar_widgets() {
 function fivestar_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if (!in_array($node->build_mode, array(NODE_BUILD_PREVIEW, NODE_BUILD_SEARCH_INDEX, NODE_BUILD_SEARCH_RESULT)) && !isset($node->modr8_form_teaser) && variable_get('fivestar_'. $node->type, 0)) {
+      $exclude_modes = array(
+        NODE_BUILD_PREVIEW,
+        NODE_BUILD_SEARCH_INDEX,
+        NODE_BUILD_SEARCH_RESULT,
+        NODE_BUILD_RSS,
+      );
+      if (!in_array($node->build_mode, $exclude_modes) && !isset($node->modr8_form_teaser) && variable_get('fivestar_'. $node->type, 0)) {
         if ($teaser) {
           $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
         }
