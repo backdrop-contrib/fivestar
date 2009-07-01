@@ -1215,16 +1215,23 @@ function fivestar_validate($element, &$form_state) {
   }
 }
 
+/**
+ * Implementation of hook_votingapi_views_formatters().
+ */
 function fivestar_votingapi_views_formatters($details = array()) {
   if ($details->field == 'value') {
     return array(
       'fivestar_views_value_display_handler' => t('Fivestar Stars (display only)'),
+      'fivestar_views_value_text_handler' => t('Fivestar Stars (text star count)'),
       'fivestar_views_widget_compact_handler' => t('Fivestar Stars (clickable, no text)'),
       'fivestar_views_widget_normal_handler' => t('Fivestar Stars (clickable, with text)'),
     );
   }
 }
 
+/**
+ * VotingAPI Views formatter for displaying static stars.
+ */
 function fivestar_views_value_display_handler($value, $field, $columns) {
   // Determine number of stars to display
   // TODO need to get the tag here to support >1 tag
@@ -1252,14 +1259,40 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
   return theme('fivestar_static', $value, $stars, $tag);
 }
 
+/**
+ * VotingAPI Views formatter for displaying number of stars as text.
+ */
+function fivestar_views_value_text_handler($value, $field, $columns) {
+  // Get the number of stars for this node type.
+  $node_type = isset($columns->node_type) ? $columns->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
+  $stars = variable_get('fivestar_stars_'. $node_type, 5);
+
+  // If displaying a user's vote, always display a whole value.
+  if ($field->table == 'votingapi_vote') {
+    return ceil(($value / 100) * $stars);
+  }
+  else {
+    return round(($value / 100) * $stars, 1);
+  }
+}
+
+/**
+ * VotingAPI Views formatter for displaying rating widget without text.
+ */
 function fivestar_views_widget_compact_handler($value, $field, $columns) {
   return fivestar_views_widget_handler($value, $field, $columns, FALSE);
 }
 
+/**
+ * VotingAPI Views formatter for displaying rating widget with text.
+ */
 function fivestar_views_widget_normal_handler($value, $field, $columns) {
   return fivestar_views_widget_handler($value, $field, $columns, TRUE);
 }
 
+/**
+ * Generic VotingAPI Views formatter for displaying rating widget.
+ */
 function fivestar_views_widget_handler($value, $field, $columns, $summary) {
 
   // If the user can't rate, use the display handler.
