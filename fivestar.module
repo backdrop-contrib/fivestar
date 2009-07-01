@@ -738,7 +738,6 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     $form['content_type'] = array(
       '#type' => 'hidden',
       '#value' => $settings['content_type'],
-      '#id' => $settings['content_id'] ? 'edit-content-type-'. $settings['content_id'] : NULL,
     );
   }
 
@@ -746,7 +745,6 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     $form['content_id'] = array(
       '#type' => 'hidden',
       '#value' => $settings['content_id'],
-      '#id' => $settings['content_id'] ? 'edit-content-id-'. $settings['content_id'] : NULL,
     );
   }
 
@@ -776,14 +774,12 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
   $form['destination'] = array(
     '#type' => 'hidden',
     '#value' => $_GET['q'],
-    '#id' => isset($settings['content_id']) ? 'edit-destination-'. $settings['content_id'] : NULL,
   );
 
   $form['fivestar_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Rate'),
     '#attributes' => array('class' => 'fivestar-submit'),
-    '#id' => isset($settings['content_id']) ? 'edit-fivestar-submit-'. $settings['content_id'] : NULL,
   );
 
   $form['vote']['#attributes']['class'] = isset($form['vote']['#attributes']['class']) ? $form['vote']['#attributes']['class'] : '';
@@ -1120,13 +1116,11 @@ function fivestar_get_inline_css() {
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
-  static $fivestar_id = 0;
 
   if (isset($element['#vote_count'])) {
     $element['vote_count'] =  array(
       '#type' => 'hidden',
       '#value' => $element['#vote_count'],
-      '#id' => 'edit-vote-count-'. $fivestar_id,
     );
   }
 
@@ -1134,7 +1128,6 @@ function fivestar_expand($element) {
     $element['vote_average'] =  array(
       '#type' => 'hidden',
       '#value' => $element['#vote_average'],
-      '#id' => 'edit-vote-average-'. $fivestar_id,
     );
   }
 
@@ -1143,13 +1136,11 @@ function fivestar_expand($element) {
       '#type' => 'hidden',
       '#value' => url($element['#auto_submit_path']),
       '#attributes' => array('class' => 'fivestar-path'),
-      '#id' => 'edit-auto-submit-path-'. $fivestar_id,
     );
     $element['auto_submit_token'] = array(
       '#type' => 'hidden',
       '#value' => fivestar_get_token($element['#auto_submit_path']),
       '#attributes' => array('class' => 'fivestar-token'),
-      '#id' => 'edit-auto-submit-token-'. $fivestar_id,
     );
   }
 
@@ -1188,7 +1179,6 @@ function fivestar_expand($element) {
     '#required' => $element['#required'],
     '#default_value' => $default_value,
     '#parents' => $element['#parents'],
-    '#id' => 'edit-vote-'. $fivestar_id,
     '#theme' => 'fivestar_select',
     '#weight' => $element['#weight'],
   );
@@ -1201,14 +1191,12 @@ function fivestar_expand($element) {
   // Set a class for the display of label text on hover.
   $label_class = $element['#labels_enable'] ? ' fivestar-labels-hover' : '';
 
-  $element['#id'] = 'edit-vote-'. $fivestar_id;
   $element['#prefix'] = '<div class="fivestar-form-item '. (isset($element['#attributes']['class']) ? $element['#attributes']['class'] : '') . $label_class .'">';
   $element['#suffix'] = '</div>';
 
   // Add validation function that considers a 0 value as empty.
   $element['#element_validate'] = array('fivestar_validate');
 
-  $fivestar_id++;
   return $element;
 }
 
