@@ -387,7 +387,7 @@ function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
  * @return boolean
  */
 function fivestar_validate_target($type, $id, $tag, $uid = NULL) {
-  if (!isset($account)) {
+  if (!isset($uid)) {
     $uid = $GLOBALS['user']->uid;
   }
 
@@ -415,8 +415,8 @@ function fivestar_validate_target($type, $id, $tag, $uid = NULL) {
  *   Identifier within the type (in this case nid).
  * @param $tag
  *   The VotingAPI tag string.
- * @param $account
- *   The user trying to cast the vote.
+ * @param $uid
+ *   The user ID trying to cast the vote.
  *
  * @return boolean or NULL
  *   Returns TRUE if voting is supported on this object.
@@ -539,7 +539,6 @@ function fivestar_link($type, $node = NULL, $teaser = FALSE) {
 
 
 function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
-  global $user;
   switch ($op) {
     case 'list':
       $blocks[0]['info'] = t('Fivestar: Rate this node');
