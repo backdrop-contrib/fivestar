@@ -41,9 +41,10 @@ function fivestar_field_settings($op, $field) {
         $dynamic_options['comment_target_nid'] = t('Node Comment Parent');
       }
       if (module_exists('nodereference')) {
-        $fields = content_fields(NULL, $field['type_name']);
-        foreach ($fields as $content_field) {
-          if ($content_field['type'] == 'nodereference' && $content_field['type_name'] == $field['type_name']) {
+        $fields = content_fields();
+        foreach ($fields as $field_name => $content_field) {
+          // Make sure that this field exists for this type.
+          if ($content_field['type'] == 'nodereference' && $content_field = content_fields($field_name, $field['type_name'])) {
             $dynamic_options[$content_field['field_name']] = t('Node reference: @field', array('@field' => $content_field['field_name']));
           }
         }
@@ -118,11 +119,11 @@ function fivestar_field($op, &$node, $field, &$items, $teaser, $page) {
         } else {
           $rating = $items[$delta]['rating'];
         }
-        $target = fivestar_field_target($node, $field, $item);
+        $items[$delta]['target'] = fivestar_field_target($node, $field, $item);
 
-        if (is_numeric($target)) {
-          _fivestar_cast_vote('node', $target, $rating, $field['axis'], $node->uid, FALSE, TRUE);
-          votingapi_recalculate_results('node', $target);
+        if (is_numeric($items[$delta]['target'])) {
+          _fivestar_cast_vote('node', $items[$delta]['target'], $rating, $field['axis'], $node->uid, FALSE, TRUE);
+          votingapi_recalculate_results('node', $items[$delta]['target']);
         }
       }
       break;
