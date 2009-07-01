@@ -63,6 +63,11 @@ function fivestar_color_form() {
     '#description' => t('A custom color widget must be selected to choose colors. Only the selected widget will be previewed.'),
   );
 
+  $disabled = variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC) == FILE_DOWNLOADS_PRIVATE;
+  if ($disabled) {
+    $form['#description'] = t('Custom colors are only supported when the <a href="!url">download method</a> is set to public.', array('!url' => url('admin/settings/file-system')));
+  }
+
   // Create the list of available schemes.
   $options = array(
     '#fff633,#f5d000,#d2e7f9,#027AC6,#cccccc,#dfdfdf' => t('Blue Lagoon (default)'),
@@ -91,6 +96,7 @@ function fivestar_color_form() {
     '#title' => t('Color display'),
     '#options' => array('default' => t('Default display'), 'solid' => t('Solid color'), 'gradient' => t('Gradient')),
     '#default_value' => variable_get('fivestar_color_type', 'solid'),
+    '#access' => !$disabled,
   );
 
   // Add scheme selector.
@@ -99,6 +105,7 @@ function fivestar_color_form() {
     '#title' => t('Color set'),
     '#options' => $options,
     '#default_value' => isset($options[$scheme_default]) ? $scheme_default : '',
+    '#access' => !$disabled,
   );
 
   // Add palette fields.
@@ -112,8 +119,10 @@ function fivestar_color_form() {
     'matte' => t('Matte color'),
   );
 
-  $form['fivestar_colors']['#tree'] = TRUE;
-  $form['fivestar_colors']['#theme'] = 'fivestar_color_palette';
+  $form['fivestar_colors'] = array(
+    '#tree' => TRUE,
+    '#access' => !$disabled,
+  );
   foreach ($names as $key => $name) {
     $form['fivestar_colors'][$key] = array(
       '#type' => 'textfield',
@@ -123,6 +132,10 @@ function fivestar_color_form() {
     );
   }
 
+  if ($disabled) {
+    $form['fivestar_color_type']['#value'] = 'default';
+  }
+
   return $form;
 }
 
@@ -130,6 +143,10 @@ function fivestar_color_form() {
  * Theme color form.
  */
 function theme_fivestar_color_form($form) {
+  if ($form['#access'] == FALSE) {
+    return '';
+  }
+
   // Add Farbtastic color picker.
   drupal_add_css('misc/farbtastic/farbtastic.css', 'module', 'all', FALSE);
   drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-color.js');
