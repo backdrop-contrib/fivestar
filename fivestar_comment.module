@@ -141,7 +141,7 @@ function fivestar_comment(&$comment, $op) {
           $comment->fivestar_view .= theme('fivestar_static', $comment->$fivestar_rating_tag, variable_get('fivestar_stars_'. $node->type, 5));
         }
       }
-      $comment->comment .= theme('fivestar_comment_view', $comment->comment, $comment->fivestar_view);
+      $comment->comment = theme('fivestar_comment_view', $comment->comment, $comment->fivestar_view);
       break;
     case 'insert':
       foreach (fivestar_get_tags() as $tag) {
