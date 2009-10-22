@@ -983,6 +983,9 @@ function theme_fivestar_widget($form) {
 function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
   $output = '';
   $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $tag .' fivestar-widget-static-'. $stars .' clear-block">';
+  if (empty($stars)) {
+    $stars = 5;
+  }
   $numeric_rating = $rating/(100/$stars);
   for ($n=1; $n <= $stars; $n++) {
     $star_value = ceil((100/$stars) * $n);
