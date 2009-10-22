@@ -1278,7 +1278,10 @@ function fivestar_views_value_text_handler($value, $field, $columns) {
     return ceil(($value / 100) * $stars);
   }
   else {
-    return round(($value / 100) * $stars, 1);
+    if ($field->options['set_precision']) {
+      return round(($value / 100) * $stars, $field->options['precision']);
+    }
+    return ($value / 100) * $stars;
   }
 }
 
