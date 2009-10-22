@@ -30,6 +30,7 @@ function fivestar_uninstall() {
  */
 function fivestar_enable() {
   if (module_exists('content')) {
+    module_load_include('inc', 'fivestar', 'fivestar_field');
     content_notify('enable', 'fivestar');
   }
 }
