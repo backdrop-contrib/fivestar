@@ -124,11 +124,11 @@ msgid "Percentage (i.e. 92)"
 msgstr "Procenta (např. 92)"
 
 #: fivestar.module:12
-msgid "This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:"
+msgid "This page is used to configure site-wide features of the Fivestar module. To setup Fivestar to rate content:"
 msgstr "Na této stránce můžete nakonfigurovat nastavení pro celý web. Pro nastavení modulu FIVESTAR pro hodnocení obsahu:"
 
 #: fivestar.module:14
-msgid "Configure site-wide settings for fivestar below."
+msgid "Configure site-wide settings for Fivestar below."
 msgstr "Níže nastavte volby pro celý web."
 
 #: fivestar.module:15

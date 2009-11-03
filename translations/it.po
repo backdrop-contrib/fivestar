@@ -208,7 +208,7 @@ msgid ""
 msgstr "Modifica le impostazioni Fivestar per l'insieme del sito. Per configurare il voto con Fivestar:"
 
 #: fivestar.module:15
-msgid "Configure site-wide settings for fivestar below."
+msgid "Configure site-wide settings for Fivestar below."
 msgstr "Configura le opzioni Fivestar globali."
 
 #: fivestar.module:16

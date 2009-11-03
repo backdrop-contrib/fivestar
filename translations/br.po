@@ -82,11 +82,11 @@ msgid "Percentage (i.e. 92)"
 msgstr "Percentual (ex: 92)"
 
 #: fivestar.module:12
-msgid "This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:"
+msgid "This page is used to configure site-wide features of the Fivestar module. To setup Fivestar to rate content:"
 msgstr "Essa página é usada para configurar os recursos globais do Fivestar. Para configurar o Fivestar para pontuar conteúdo:"
 
 #: fivestar.module:14
-msgid "Configure site-wide settings for fivestar below."
+msgid "Configure site-wide settings for Fivestar below."
 msgstr "Defina as configurações globais para o Fivestar abaixo."
 
 #: fivestar.module:15
@@ -103,11 +103,11 @@ msgid "Fivestar"
 msgstr "Fivestar"
 
 #: fivestar.module:93
-msgid "Five Star ratings"
+msgid "Fivestar ratings"
 msgstr "Pontuação cinco estrelas"
 
 #: fivestar.module:99
-msgid "Enable Five Star rating"
+msgid "Enable Fivestar rating"
 msgstr "Ativar a pontuação cinco estrelas"
 
 #: fivestar.module:106
@@ -119,7 +119,7 @@ msgid "Number of stars"
 msgstr "Número de estrelas"
 
 #: fivestar.module:120
-msgid "Five Star display style"
+msgid "Fivestar display style"
 msgstr "Estilo de exibição cinco estrelas"
 
 #: fivestar.module:123

@@ -213,7 +213,7 @@ msgstr ""
 "fivestar модуля. Установите настройки fivestar для оценок содержания:"
 
 #: fivestar.module:15
-msgid "Configure site-wide settings for fivestar below."
+msgid "Configure site-wide settings for Fivestar below."
 msgstr "Настройки конфигурации fivestar ниже"
 
 #: fivestar.module:16
@@ -664,7 +664,7 @@ msgstr ""
 #~ msgid "Display a button to clear the user's current vote."
 #~ msgstr "Показывать кнопку, чтобы удалить пользователя этого голосования."
 
-#~ msgid "Five Star ratings"
+#~ msgid "Fivestar ratings"
 #~ msgstr "Пяти Звездный рейтинг"
 
 #~ msgid "Nothing but the stars"

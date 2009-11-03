@@ -26,7 +26,7 @@ Fivestar also provides additional features for both the CCK and Views modules.
 
 Install
 -------
-Installing the Five Star voting module is simple:
+Installing the Fivestar voting module is simple:
 
 1) Copy the fivestar folder to the modules folder in your installation.
 
@@ -66,8 +66,8 @@ Fivestar site settings page, and access permissions. To configure:
 
 2) Activate voting on each content type. For example, if you want Fivestar to
    appear on story nodes, use Administer -> Content Management ->
-   Content Types -> Story, and check the "Enable Five Star rating" box under
-   the "Five Star ratings" heading. Repeat for each content type desired.
+   Content Types -> Story, and check the "Enable Fivestar rating" box under
+   the "Fivestar ratings" heading. Repeat for each content type desired.
 
 3) Enable anonymous voting.
    If you want to allow anonymous voting, you'll need to set permissions for

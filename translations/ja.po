@@ -183,11 +183,11 @@ msgid "Percentage (i.e. 92)"
 msgstr "パーセント表示 (i.e. 92)"
 
 #: fivestar.module:13
-msgid "This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:"
+msgid "This page is used to configure site-wide features of the Fivestar module. To setup Fivestar to rate content:"
 msgstr "このページでは、fivestartモジュールのサイト全体の機能を設定します。コンテンツの投票にfivestarを設定するには:"
 
 #: fivestar.module:15
-msgid "Configure site-wide settings for fivestar below."
+msgid "Configure site-wide settings for Fivestar below."
 msgstr "以下でfivestartのサイト全体の設定を指定して下さい。"
 
 #: fivestar.module:16

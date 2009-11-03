@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: Fivestar 1.7\n"
 "POT-Creation-Date: 2007-09-21 14:50+0200\n"
 "PO-Revision-Date: 2007-09-21 15:55+0100\n"
-"Last-Translator: Henrik Sjškvist <henrik.sjokvist@gmail.com>\n"
+"Last-Translator: Henrik Sjï¿½kvist <henrik.sjokvist@gmail.com>\n"
 "Language-Team: Swedish <henrik.sjokvist@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -27,7 +27,7 @@ msgstr "Antal alternativ"
 
 #: fivestar_field.inc:30
 msgid "The number of stars or radio buttons to display."
-msgstr "Antalet stjŠrnor eller radioknappar som skall visas."
+msgstr "Antalet stjï¿½rnor eller radioknappar som skall visas."
 
 #: fivestar_field.inc:34
 msgid "Node ID"
@@ -35,35 +35,35 @@ msgstr "Nod-ID"
 
 #: fivestar_field.inc:36
 msgid "A single node ID on which this field will register the vote. If no ID is specified, the vote will be registered on the created node."
-msgstr "Det nod-ID som det hŠr fŠltet ska registrera ršsten fšr. Om inget ID anges kommer ršsten att registeras fšr den skapade noden."
+msgstr "Det nod-ID som det hï¿½r fï¿½ltet ska registrera rï¿½sten fï¿½r. Om inget ID anges kommer rï¿½sten att registeras fï¿½r den skapade noden."
 
 #: fivestar_field.inc:43
 msgid " Return the target node ID or use plain text. Enter PHP code between <em>&lt;?php ?&gt;</em>. Note that executing incorrect PHP-code can break your Drupal site."
-msgstr "Returnera mŒlnodens ID eller anvŠnd vanlig text. Ange PHP-kod mellan <em>&lt;?php ?&gt;</em>. Observera att felaktig PHP-kod kan gšra att din webbplats slutar fungera."
+msgstr "Returnera mï¿½lnodens ID eller anvï¿½nd vanlig text. Ange PHP-kod mellan <em>&lt;?php ?&gt;</em>. Observera att felaktig PHP-kod kan gï¿½ra att din webbplats slutar fungera."
 
 #: fivestar_field.inc:120
 msgid "Allow Clearing"
-msgstr "TillŒt ŒterstŠllning"
+msgstr "Tillï¿½t ï¿½terstï¿½llning"
 
 #: fivestar_field.inc:123
 msgid "Display a button to clear the user's current vote."
-msgstr "Visa en knapp fšr att ŒterstŠlla den aktuella anvŠndarens ršst."
+msgstr "Visa en knapp fï¿½r att ï¿½terstï¿½lla den aktuella anvï¿½ndarens rï¿½st."
 
 #: fivestar.module:12
-msgid "This page is used to configure site-wide features of the fivestar module. To setup fivestar to rate content:"
-msgstr "Den hŠr sidan anvŠnds fšr att ange webbplatsomfattande instŠllningar fšr modulen Fivestar. Om du vill stŠlla in Fivestar fšr betygsŠttning av innehŒll gšr du sŒ hŠr:"
+msgid "This page is used to configure site-wide features of the Fivestar module. To setup Fivestar to rate content:"
+msgstr "Den hï¿½r sidan anvï¿½nds fï¿½r att ange webbplatsomfattande instï¿½llningar fï¿½r modulen Fivestar. Om du vill stï¿½lla in Fivestar fï¿½r betygsï¿½ttning av innehï¿½ll gï¿½r du sï¿½ hï¿½r:"
 
 #: fivestar.module:14
-msgid "Configure site-wide settings for fivestar below."
-msgstr "Ange de instŠllningar fšr modulen Fivestar som omfattar hela webbplatsen nedan."
+msgid "Configure site-wide settings for Fivestar below."
+msgstr "Ange de instï¿½llningar fï¿½r modulen Fivestar som omfattar hela webbplatsen nedan."
 
 #: fivestar.module:15
 msgid "Go to <a href=\"!types\">admin/content/types</a> and edit the type you would like to rate."
-msgstr "GŒ till <a href=\"!types\">admin/content/types</a> och redigera den innehŒllstyp som du vill betygsŠtta."
+msgstr "Gï¿½ till <a href=\"!types\">admin/content/types</a> och redigera den innehï¿½llstyp som du vill betygsï¿½tta."
 
 #: fivestar.module:16
 msgid "On the settings page for the content type, a set of options is available for fivestar, where you can enable rating for that type and set rating options."
-msgstr "GŒ till instŠllningssidan fšr innehŒllstypen. En uppsŠttning alternativ fšr Fivestar visas dŠr du kan aktivera betygsŠttning fšr den aktuella innehŒllstypen och ange olika alternativ."
+msgstr "Gï¿½ till instï¿½llningssidan fï¿½r innehï¿½llstypen. En uppsï¿½ttning alternativ fï¿½r Fivestar visas dï¿½r du kan aktivera betygsï¿½ttning fï¿½r den aktuella innehï¿½llstypen och ange olika alternativ."
 
 #: fivestar.module:33
 #: fivestar.info:0
@@ -71,36 +71,36 @@ msgid "Fivestar"
 msgstr "Fivestar"
 
 #: fivestar.module:88
-msgid "Five Star ratings"
-msgstr "BetygsŠttning med Fivestar"
+msgid "Fivestar ratings"
+msgstr "Betygsï¿½ttning med Fivestar"
 
 #: fivestar.module:94
-msgid "Enable Five Star rating"
-msgstr "Aktivera betygsŠttning med Fivestar"
+msgid "Enable Fivestar rating"
+msgstr "Aktivera betygsï¿½ttning med Fivestar"
 
 #: fivestar.module:101
 msgid "Allow users to undo their votes"
-msgstr "TillŒt att anvŠndare Œngrar sina ršster"
+msgstr "Tillï¿½t att anvï¿½ndare ï¿½ngrar sina rï¿½ster"
 
 #: fivestar.module:108
 msgid "Number of stars"
-msgstr "Antal stjŠrnor"
+msgstr "Antal stjï¿½rnor"
 
 #: fivestar.module:115
-msgid "Five Star display style"
-msgstr "Utseende fšr Fivestar"
+msgid "Fivestar display style"
+msgstr "Utseende fï¿½r Fivestar"
 
 #: fivestar.module:118
 msgid "Nothing but the stars"
-msgstr "Bara stjŠrnor"
+msgstr "Bara stjï¿½rnor"
 
 #: fivestar.module:119
 msgid "Stars and average"
-msgstr "StjŠrnor och genomsnitt"
+msgstr "Stjï¿½rnor och genomsnitt"
 
 #: fivestar.module:120
 msgid "Two sets of stars"
-msgstr "TvŒ uppsŠttningar stjŠrnor"
+msgstr "Tvï¿½ uppsï¿½ttningar stjï¿½rnor"
 
 #: fivestar.module:126
 msgid "Widget location (teaser)"
@@ -108,11 +108,11 @@ msgstr "Widget-placering (ingress)"
 
 #: fivestar.module:129
 msgid "Above the teaser body"
-msgstr "Ovanfšr ingressens bršdtext"
+msgstr "Ovanfï¿½r ingressens brï¿½dtext"
 
 #: fivestar.module:130
 msgid "Below the teaser body"
-msgstr "Nedanfšr ingressens bršdtext"
+msgstr "Nedanfï¿½r ingressens brï¿½dtext"
 
 #: fivestar.module:131;142
 msgid "Hidden"
@@ -124,11 +124,11 @@ msgstr "Widget-placering (fulltext)"
 
 #: fivestar.module:140
 msgid "Above the node body"
-msgstr "Ovanfšr nodens bršdtext"
+msgstr "Ovanfï¿½r nodens brï¿½dtext"
 
 #: fivestar.module:141
 msgid "Below the node body"
-msgstr "Nedanfšr nodens bršdtext"
+msgstr "Nedanfï¿½r nodens brï¿½dtext"
 
 #: fivestar.module:155
 msgid "Widget display"
@@ -140,19 +140,19 @@ msgstr "Standard"
 
 #: fivestar.module:158
 msgid "Choose a widget set to be used on your site."
-msgstr "VŠlj den widget-uppsŠttning som du vill anvŠnda."
+msgstr "Vï¿½lj den widget-uppsï¿½ttning som du vill anvï¿½nda."
 
 #: fivestar.module:169;175
 msgid "Preview"
-msgstr "ser ut sŒ hŠr"
+msgstr "ser ut sï¿½ hï¿½r"
 
 #: fivestar.module:214
 msgid "Fivestar Preview"
-msgstr "Fšrhandsvisa Fivestar"
+msgstr "Fï¿½rhandsvisa Fivestar"
 
 #: fivestar.module:508;513
 msgid "Your vote"
-msgstr "Din ršst"
+msgstr "Din rï¿½st"
 
 #: fivestar.module:516
 msgid "Current rating"
@@ -164,15 +164,15 @@ msgstr "Spara betyg"
 
 #: fivestar.module:637
 msgid "No votes yet"
-msgstr "Inga ršster Šnnu"
+msgstr "Inga rï¿½ster ï¿½nnu"
 
 #: fivestar.module:640
 msgid "vote"
-msgstr "ršst"
+msgstr "rï¿½st"
 
 #: fivestar.module:640
 msgid "votes"
-msgstr "ršster"
+msgstr "rï¿½ster"
 
 #: fivestar.module:641
 msgid "Average: !stars (!votes !vote_text)"
@@ -184,7 +184,7 @@ msgstr "Fivestar-betyg"
 
 #: fivestar.module:76
 msgid "rate content"
-msgstr "betygsŠtt innehŒll"
+msgstr "betygsï¿½tt innehï¿½ll"
 
 #: fivestar.module:76
 msgid "view ratings"
@@ -192,7 +192,7 @@ msgstr "visa betyg"
 
 #: fivestar.module:76
 msgid "use PHP for fivestar target"
-msgstr "anvŠnd PHP fšr Fivestar-mŒl"
+msgstr "anvï¿½nd PHP fï¿½r Fivestar-mï¿½l"
 
 #: fivestar.module:0
 msgid "fivestar"
@@ -200,8 +200,8 @@ msgstr "fivestar"
 
 #: fivestar.info:0
 msgid "A simple five-star voting widget for nodes."
-msgstr "En enkel femstjŠrnig ršstnings-widget fšr noder."
+msgstr "En enkel femstjï¿½rnig rï¿½stnings-widget fï¿½r noder."
 
 #: fivestar.info:0
 msgid "Voting"
-msgstr "Ršstning"
+msgstr "Rï¿½stning"
