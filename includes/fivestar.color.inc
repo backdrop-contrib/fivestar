@@ -53,7 +53,6 @@ function fivestar_preview_color() {
  */
 function fivestar_color_form() {
   $form = array(
-    '#submit' => array('fivestar_color_form_submit'),
     '#tree' => FALSE,
     '#theme' => 'fivestar_color_form',
     '#type' => 'fieldset',
@@ -143,7 +142,7 @@ function fivestar_color_form() {
  * Theme color form.
  */
 function theme_fivestar_color_form($form) {
-  if ($form['#access'] == FALSE) {
+  if (isset($form['#access']) && $form['#access'] == FALSE) {
     return '';
   }
 
