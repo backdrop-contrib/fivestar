@@ -6,6 +6,9 @@
  * A simple n-star voting widget, usable in other forms.
  */
 
+/**
+ * Implementation of hook_help().
+ */
 function fivestar_help($path, $arg) {
   $output = '';
   switch ($path) {
@@ -29,9 +32,6 @@ function fivestar_help($path, $arg) {
 
 /**
  * Implementation of hook_menu().
- *
- * Provides a callback url where votes can be submitted by the client-side
- * javascript.
  */
 function fivestar_menu() {
   $items = array();
@@ -327,6 +327,27 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
   }
 }
 
+/**
+ * Utility function to retreive VotingAPI votes.
+ *
+ * Note that this should not be used for general vote retreival, instead the
+ * VotingAPI function votingapi_select_results() should be used, which is more
+ * efficient when retrieving multiple votes.
+ *
+ * @param $type
+ *   The content type for which to retreive votes.
+ * @param $cid
+ *   The content ID for which to retreive votes.
+ * @param $tag
+ *   The VotingAPI tag for which to retreive votes.
+ * @param $uid
+ *   Optional. A user ID for which to retreive votes.
+ * @return
+ *   An array of the following keys:
+ *   - average: An array of VotingAPI results, including the average 'value'.
+ *   - count: An array of VotingAPI results, including the count 'value'.
+ *   - user: An array of VotingAPI results, including the user's vote 'value'.
+ */
 function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
   global $user;
 
@@ -664,6 +685,20 @@ function fivestar_form(&$form_state, $content_type, $content_id, $tag) {
   return fivestar_custom_widget($form_state, $values, $settings);
 }
 
+/**
+ * Retreive and print out a static display of stars for a piece of content.
+ *
+ * @param $content_type
+ *   The type of content that will have its vote retreived. i.e. "node".
+ * @param $content_id
+ *   The ID of the content that will have its vote retreived.
+ * @param $node_type
+ *   Optional. If retreiving a node's rating, passing in the node type will
+ *   prevent Fivestar from doing an additional query to find it.
+ * @param $tag
+ *   Optional. The voting tag that will be retreived. Defaults to "vote" if none
+ *   is specified.
+ */
 function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = 'vote') {
   global $user;
 
@@ -741,6 +776,43 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
   return theme('fivestar_static_element', $star_display, $title, $text_display);
 }
 
+/**
+ * Form builder; Build a custom Fivestar rating widget with arbitrary settings.
+ *
+ * This function is usually not called directly, instead call
+ * drupal_get_form('fivestar_custom_widget', $values, $settings) when wanting
+ * to display a widget.
+ *
+ * @param $form_state
+ *   The form state provided by Form API.
+ * @param $values
+ *   An array of current vote values from 0 to 100, with the following array
+ *   keys:
+ *   - user: The user's current vote.
+ *   - average: The average vote value.
+ *   - count: The total number of votes so far on this content.
+ * @param $settings
+ *   An array of settings that configure the properties of the rating widget.
+ *   Available keys for the settings include:
+ *   - content_type: The type of content which will be voted upon.
+ *   - content_id: The content ID which will be voted upon.
+ *   - stars: The number of stars to display in this widget, from 2 to 10.
+ *     Defaults to 5.
+ *   - autosubmit: Whether the form should be submitted upon star selection.
+ *     Defaults to TRUE.
+ *   - allow_clear: Whether or not to show the "Clear current vote" icon when
+ *     showing the widget. Defaults to FALSE.
+ *   - required: Whether this field is required before the form can be
+ *     submitted. Defaults to FALSE.
+ *   - feedback_enable: Toggles the option to show the "Vote is being saved"
+ *     text while a vote is being registered through AJAX. Defaults to TRUE.
+ *   - labels_enable: Toggles the option to show the "Give it 2/5 stars" text
+ *     while hovering over the stars with the mouse.
+ *   - labels: An array of labels to be used. The number of labels should match
+ *     the number of stars.
+ *   - tag: The VotingAPI tag that will be registered by this widget. Defaults
+ *     to "vote".
+ */
 function fivestar_custom_widget(&$form_state, $values, $settings) {
   $form = array(
     '#attributes' => array('class' => 'fivestar-widget'),
@@ -967,18 +1039,16 @@ function theme_fivestar_widget($form) {
 }
 
 /**
- * Display a plain HTML VIEW ONLY version of the widget
- * with the specified rating
+ * Display a plain HTML view-only version of the widget with a specified rating.
  *
  * @param $rating
- *   The desired rating to display out of 100 (i.e. 80 is 4 out of 5 stars)
+ *   The desired rating to display out of 100 (i.e. 80 is 4 out of 5 stars).
  * @param $stars
- *   The total number of stars this rating is out of
+ *   The total number of stars this rating is out of.
  * @param $tag
- *   Allows multiple ratings per node
+ *   Allows multiple ratings per node.
  * @return
- *   A themed HTML string representing the star widget
- *
+ *   A themed HTML string representing the star widget.
  */
 function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
   $output = '';
@@ -1011,6 +1081,29 @@ function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
   return $output;
 }
 
+/**
+ * Display the text associated with a static star display.
+ *
+ * Note that passing in explicit data types is extremely important when using
+ * this function. A NULL value will exclude the value entirely from display,
+ * while a 0 value indicates that the text should be shown but it has no value
+ * yet.
+ *
+ * All ratings are from 0 to 100.
+ *
+ * @param $user_rating
+ *   The current user's rating.
+ * @param $average
+ *   The average rating.
+ * @param $votes
+ *   The total number of votes.
+ * @param $stars
+ *   The number of stars being displayed.
+ * @param $feedback
+ *   A toggle that enables AJAX indicator message when a vote is being saved.
+ * @return
+ *   A themed HTML string representing the star widget.
+ */
 function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 5, $feedback = TRUE) {
   $output = '';
   $div_class = '';
@@ -1218,6 +1311,9 @@ function fivestar_expand($element) {
   return $element;
 }
 
+/**
+ * An #element_validate function for "fivestar" elements.
+ */
 function fivestar_validate($element, &$form_state) {
   if ($element['#required'] && (empty($element['#value']) || $element['#value'] == '-')) {
     form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
