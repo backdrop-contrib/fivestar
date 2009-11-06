@@ -26,7 +26,7 @@ if (Drupal.jsEnabled) {
     $text   = $('#edit-fivestar-text');
 
     // All the form elements except the enable checkbox.
-    $options = $('#fivestar-node-type-tag-form input:not(#edit-fivestar), #fivestar-node-type-tag-form select');
+    $options = $('#fivestar-node-type-tag-form input:not(#edit-fivestar, #edit-submit), #fivestar-node-type-tag-form select');
 
     // Disable the settings if not enabled.
     if (!$enable.attr('checked')) {
