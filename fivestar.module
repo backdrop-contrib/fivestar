@@ -6,25 +6,27 @@
  * A simple n-star voting widget, usable in other forms.
  */
 
+include_once dirname(__FILE__) . '/includes/fivestar.field.inc';
+
 /**
  * Implementation of hook_help().
  */
 function fivestar_help($path, $arg) {
   $output = '';
   switch ($path) {
-    case 'admin/settings/fivestar':
+    case 'admin/config/content/fivestar':
       $output = t('This page is used to configure site-wide features of the Fivestar module. To setup Fivestar to rate content:');
       $steps = array(
         t('Configure site-wide settings for Fivestar below.'),
-        t('Go to <a href="!types">admin/content/types</a> and edit the type you would like to rate.', array('!types' => url('admin/content/types'))),
+        t('Go to <a href="!types">admin/structure/types</a> and edit the type you would like to rate.', array('!types' => url('admin/structure/types'))),
         t('On the settings page for the content type, a set of options is available for fivestar, where you can enable rating for that type and set rating options.'),
       );
-      $output .= theme('item_list', $steps, NULL, 'ol');
+      $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
       break;
     case 'admin/content/node-type/'. $arg[3] .'/fivestar':
       $arg[5] = 'vote';
     case 'admin/content/node-type/'. $arg[3] .'/fivestar/'. $arg[5]:
-      $output = t('Use the settings on this page to set up Fivestar rating for the %type content type. These settings specifically affect the %axis rating axis. If needing to set up different criteria for voting, see the main <a href="@url">Fivestar settings page</a>.', array('%type' => node_get_types('name', $arg[3]), '%axis' => $arg[5], '@url' => url('admin/settings/fivestar')));
+      $output = t('Use the settings on this page to set up Fivestar rating for the %type content type. These settings specifically affect the %axis rating axis. If needing to set up different criteria for voting, see the main <a href="@url">Fivestar settings page</a>.', array('%type' => node_get_types('name', $arg[3]), '%axis' => $arg[5], '@url' => url('admin/config/content/fivestar')));
       break;
   }
   return $output;
@@ -35,7 +37,7 @@ function fivestar_help($path, $arg) {
  */
 function fivestar_menu() {
   $items = array();
-  $items['admin/settings/fivestar'] = array(
+  $items['admin/config/content/fivestar'] = array(
     'title'             => 'Fivestar',
     'description'       => 'Configure site-wide widgets used for Fivestar rating.',
     'page callback'     => 'drupal_get_form',
@@ -70,30 +72,25 @@ function fivestar_menu() {
   // We can't yet add it to the "operations" column in content types, due to a TODO in CCK
   // (content.admin.inc line 32)
 
-  foreach (node_get_types() as $type) {
-    $type_name = $type->type;
-    $type_url_str = str_replace('_', '-', $type_name);
-    $items['admin/content/node-type/'. $type_url_str .'/fivestar'] = array(
-      'title' => 'Fivestar voting',
+  $items['admin/structure/types/manage/%node_type/fivestar'] = array(
+    'title' => 'Fivestar voting',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fivestar_node_type_tag_form', 4),
+    'access arguments' => array('administer content types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+    'file' => 'includes/fivestar.admin.inc',
+  );
+  foreach (fivestar_get_tags() as $tag) {
+    $items['admin/structure/types/manage/%node_type/fivestar/' . urlencode($tag)] = array(
+      'title' => $tag,
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('fivestar_node_type_tag_form', $type_name),
+      'page arguments' => array('fivestar_node_type_tag_form', 4, $tag),
       'access arguments' => array('administer content types'),
-      'type' => MENU_LOCAL_TASK,
-      'weight' => 5,
+      'type' => $tag == 'vote' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
+      'weight' => $tag == 'vote' ? 0 : 1,
       'file' => 'includes/fivestar.admin.inc',
     );
-    foreach (fivestar_get_tags() as $tag) {
-      $items['admin/content/node-type/'. $type_url_str .'/fivestar/' . urlencode($tag)] = array(
-        'title' => $tag,
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('fivestar_node_type_tag_form', $type_name, $tag),
-        'access arguments' => array('administer content types'),
-        'type' => $tag == 'vote' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK,
-        'weight' => $tag == 'vote' ? 0 : 1,
-        'file' => 'includes/fivestar.admin.inc',
-      );
-
-    }
   }
 
   return $items;
@@ -105,9 +102,7 @@ function fivestar_menu() {
  * These includes do not need to be loaded for cached pages.
  */
 function fivestar_init() {
-  if (module_exists('content')) {
-    module_load_include('inc', 'fivestar', 'includes/fivestar.field');
-  }
+  module_load_include('inc', 'fivestar', 'includes/fivestar.field');
 
   // Add necessary CSS and JS.
   // TODO: These shouldn't be loaded on every page, but block caching omits
@@ -117,13 +112,22 @@ function fivestar_init() {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implementation of hook_permission().
  *
  * Exposes permissions for rating content, viewing aggregate ratings, and using PHP
  * snippets when configuring fivestar CCK fields.
  */
-function fivestar_perm() {
-  return array('rate content', 'use PHP for fivestar target');
+function fivestar_permission() {
+  return array(
+    'rate content' => array(
+      'title' => t('rate content'),
+      'description' => 'TODO: write description for rate content',
+    ),
+    'use PHP for fivestar target' => array(
+      'title' => t('use PHP for fivestar target'),
+      'description' => 'TODO: write description for use PHP for fivestar target',
+    ),
+  );
 }
 
 /**
@@ -133,80 +137,83 @@ function fivestar_theme() {
   return array(
     // Fivestar theme functions.
     'fivestar' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'fivestar_select' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'fivestar_static' => array(
-      'arguments' => array('rating' => NULL, 'stars' => 5),
+      'variables' => array('rating' => NULL, 'stars' => 5, 'tag' => 'vote'),
     ),
     'fivestar_static_element' => array(
-      'arguments' => array('star_display' => NULL, 'title' => NULL, 'description' => NULL),
+      'variables' => array('star_display' => NULL, 'title' => NULL, 'description' => NULL),
     ),
     'fivestar_summary' => array(
-      'arguments' => array('user_rating' => NULL, 'average_rating' => NULL, 'votes' => 0, 'stars' => 5),
+      'variables' => array('user_rating' => NULL, 'average_rating' => NULL, 'votes' => 0, 'stars' => 5, 'feedback_enable' => TRUE),
     ),
     'fivestar_widget' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
     ),
     // fivestar.admin.inc.
     'fivestar_preview' => array(
-      'arguments' => array('style' => NULL, 'text' => NULL, 'stars' => NULL, 'unvote' => NULL, 'title' => NULL, 'labels_enable' => TRUE, 'labels' => array()),
+      'variables' => array('style' => NULL, 'text' => NULL, 'stars' => NULL, 'unvote' => NULL, 'title' => NULL, 'feedback_enable' => TRUE, 'labels_enable' => TRUE, 'labels' => array()),
       'file' => 'includes/fivestar.admin.inc',
     ),
     'fivestar_preview_widget' => array(
-      'arguments' => array('css_file' => NULL),
+      'variables' => array('css_file' => NULL),
       'file' => 'includes/fivestar.admin.inc',
     ),
     'fivestar_preview_wrapper' => array(
-      'arguments' => array('content' => NULL, 'type' => 'direct'),
+      'variables' => array('content' => NULL, 'type' => 'direct'),
       'file' => 'includes/fivestar.admin.inc',
     ),
     'fivestar_settings' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
       'file' => 'includes/fivestar.admin.inc',
     ),
     'fivestar_node_type_tag_form' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
       'file' => 'includes/fivestar.admin.inc',
     ),
     // fivestar.color.inc.
     'fivestar_color_form' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
     ),
     // fivestar.field.inc.
     'fivestar_formatter_default' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'fivestar_formatter_rating' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
     'fivestar_formatter_percentage' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
     ),
   );
 }
 
 /**
- * Implementation of hook_node_types().
+ * Implementation of hook_node_type_delete().
  */
-function fivestar_node_type($op, $info) {
+function fivestar_node_type_delete($info) {
   $type = $info->type;
-  $variables = array('fivestar', 'fivestar_unvote', 'fivestar_style', 'fivestar_stars', 'fivestar_comment', 'fivestar_position', 'fivestar_position_teaser', 'fivestar_labels_enable', 'fivestar_labels', 'fivestar_text', 'fivestar_title', 'fivestar_feedback');
 
   // Be responsible and cleanup unneeded variables.
-  if ($op == 'delete') {
-    foreach ($variables as $variable) {
-      foreach (fivestar_get_tags() as $tag) {
-        $suffix = fivestar_get_suffix($type, $tag);
-        variable_del($variable . '_' . $suffix);
-      }
+  foreach (_fivestar_variables() as $variable) {
+    foreach (fivestar_get_tags() as $tag) {
+      $suffix = fivestar_get_suffix($type, $tag);
+      variable_del($variable . '_' . $suffix);
     }
   }
+}
+
+/**
+ * Implementation of hook_node_type_update().
+ */
+function fivestar_node_type_update($info) {
   // When changing the type name, update the variables.
-  elseif ($op == 'update' && !empty($info->old_type) && $info->old_type != $info->type) {
-    foreach ($variables as $variable) {
+  if (!empty($info->old_type) && $info->old_type != $info->type) {
+    foreach (_fivestar_variables() as $variable) {
       foreach (fivestar_get_tags() as $tag) {
         $oldvarname = $variable . '_' . fivestar_get_suffix($info->old_type, $tag);
         $newvarname = $variable . '_' . fivestar_get_suffix($info->type, $tag);
@@ -218,6 +225,10 @@ function fivestar_node_type($op, $info) {
       }
     }
   }
+}
+
+function _fivestar_variables() {
+  return array('fivestar', 'fivestar_unvote', 'fivestar_style', 'fivestar_stars', 'fivestar_comment', 'fivestar_position', 'fivestar_position_teaser', 'fivestar_labels_enable', 'fivestar_labels', 'fivestar_text', 'fivestar_title', 'fivestar_feedback');
 }
 
 /**
@@ -236,7 +247,7 @@ function fivestar_node_type($op, $info) {
  *  javascript code.
  */
 function fivestar_vote($type, $cid, $tag, $value) {
-  drupal_set_header("Content-Type: text/xml");
+  drupal_add_http_header("Content-Type", "text/xml");
   $output = '';
   $output .= '<?xml version="1.0" encoding="UTF-8"?>';
 
@@ -244,7 +255,8 @@ function fivestar_vote($type, $cid, $tag, $value) {
   $path = preg_replace('/\/'. $value .'$/', '', $_GET['q']);
   if (!isset($_GET['token']) || !fivestar_check_token($_GET['token'], $path)) {
     $output .= '<xml><error>'. t('Invalid token') .'</error></xml>';
-    exit($output);
+    echo $output;
+    drupal_exit();
   }
 
   $result = _fivestar_cast_vote($type, $cid, $value, $tag, NULL, TRUE);
@@ -269,13 +281,25 @@ function fivestar_vote($type, $cid, $tag, $value) {
       }
     }
   }
+  $arguments = array(
+    'user_rating' => $value,
+    'average_rating' => $summary[$tag]['average'],
+    'votes' => $summary[$tag]['count'],
+    'stars' => $stars,
+    'feedback_enable' => $feedback_enable,
+  );
+  $skip_map = array(
+    'average' => array('user_rating', 'votes'),
+    'average_count' => array('user_rating'),
+    'user' => array('average_rating', 'votes'),
+    'user_count' => array('average_rating'),
+    'combo' => array(),
+    'count' => array('user_rating', 'average_rating'),
+  );
   $output .= '<summary>';
-  $output .= '<average><![CDATA['. theme('fivestar_summary', NULL, $summary[$tag]['average'], NULL, $stars, $feedback_enable) .']]></average>';
-  $output .= '<average_count><![CDATA['. theme('fivestar_summary', NULL, $summary[$tag]['average'], $summary[$tag]['count'], $stars, $feedback_enable) .']]></average_count>';
-  $output .= '<user><![CDATA['. theme('fivestar_summary', $value, NULL, NULL, $stars, $feedback_enable) .']]></user>';
-  $output .= '<user_count><![CDATA['. theme('fivestar_summary', $value, NULL, $summary[$tag]['count'], $stars, $feedback_enable) .']]></user_count>';
-  $output .= '<combo><![CDATA['. theme('fivestar_summary', $value, $summary[$tag]['average'], $summary[$tag]['count'], $stars, $feedback_enable) .']]></combo>';
-  $output .= '<count><![CDATA['. theme('fivestar_summary', NULL, NULL, $summary[$tag]['count'], $stars, $feedback_enable) .']]></count>';
+  foreach ($skip_map as $tag => $skip) {
+    $output .= "<$tag>![CDATA[". theme('fivestar_summary', array_diff_key($arguments, array_flip($skip))) . "]]></$tag>";
+  }
   $output .= '</summary>';
   $output .= '</result>';
 
@@ -286,8 +310,9 @@ function fivestar_vote($type, $cid, $tag, $value) {
   $output .= '<tag>'. $tag .'</tag>';
   $output .= '</vote></xml>';
 
-  drupal_set_header("Content-Type: text/xml");
-  exit($output);
+  drupal_add_http_header("Content-Type", "text/xml");
+  echo $output;
+  drupal_exit();
 }
 
 /**
@@ -311,7 +336,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
     }
 
     // Get the user's current vote.
-    $criteria = array('content_type' => $type, 'content_id' => $cid, 'tag' => $tag, 'uid' => $uid);
+    $criteria = array('entity_type' => $type, 'entity_id' => $cid, 'tag' => $tag, 'uid' => $uid);
     // Get the unique identifier for the user (IP Address if anonymous).
     $user_criteria = votingapi_current_user_identifier();
     $user_votes = votingapi_select_votes($criteria + $user_criteria);
@@ -356,8 +381,8 @@ function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
   }
 
   $criteria = array(
-    'content_type' => $type,
-    'content_id' => $cid,
+    'entity_type' => $type,
+    'entity_id' => $cid,
     'value_type' => 'percent',
     'tag' => $tag,
   );
@@ -468,79 +493,67 @@ function fivestar_fivestar_access($type, $id, $tag, $uid) {
  */
 function fivestar_fivestar_widgets() {
   $widgets_directory = drupal_get_path('module', 'fivestar') .'/widgets';
-  $files = file_scan_directory($widgets_directory, '\.css$');
+  $files = file_scan_directory($widgets_directory, '/\.css$/');
 
   $widgets = array();
   foreach ($files as $file) {
     if (strpos($file->filename, '-rtl.css') === FALSE) {
-      $widgets[$file->filename] = drupal_ucfirst(str_replace('-color', '', $file->name));
+      $widgets[$file->uri] = drupal_ucfirst(str_replace('-color', '', $file->name));
     }
   }
   return $widgets;
 }
 
 /**
- * Implementation of hook_nodeapi().
+ * Implementation of hook_node_view().
  *
  * Adds the fievestar widget to the node view.
  */
-function fivestar_nodeapi(&$node, $op, $teaser, $page) {
-  switch ($op) {
-    case 'view':
-      $exclude_modes = array(
-        NODE_BUILD_PREVIEW,
-        NODE_BUILD_SEARCH_INDEX,
-        NODE_BUILD_SEARCH_RESULT,
-        NODE_BUILD_RSS,
-      );
-      if (!in_array($node->build_mode, $exclude_modes) && !isset($node->modr8_form_teaser) && variable_get('fivestar_'. $node->type, 0)) {
-        if ($teaser) {
-          $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
-        }
-        else {
-          $position = variable_get('fivestar_position_'. $node->type, 'above');
-        }
+function fivestar_node_view($node, $view_mode) {
+  $exclude_modes = array(
+    'preview',
+    'search_index',
+    'search_result',
+    'rss',
+  );
+  if (!in_array($view_mode, $exclude_modes) && !isset($node->modr8_form_teaser) && variable_get('fivestar_'. $node->type, 0)) {
+    if ($view_mode == 'teaser') {
+      $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
+    }
+    else {
+      $position = variable_get('fivestar_position_'. $node->type, 'above');
+    }
 
-        switch ($position) {
-          case 'above':
-          case 'below':
-            if (user_access('rate content')) {
-              $content = '';
-              foreach (fivestar_get_tags() as $tag) {
-                if (fivestar_validate_target('node', $node->nid, $tag)) {
-                  $content .= fivestar_widget_form($node, $tag);
-                }
-              }
-              if ($content) {
-                $node->content['fivestar_widget'] = array(
-                  '#value' => $content,
-                  '#weight' => $position == 'above' ? -10 : 50,
-                );
-              }
-              break;
-            } // Fall through to static if not allowed to rate.
-            $position .= '_static';
-          case 'above_static':
-          case 'below_static':
-            $content = '';
-            foreach (fivestar_get_tags() as $tag) {
-              if (fivestar_validate_target('node', $node->nid, $tag)) {
-                $content .= fivestar_static('node', $node->nid, $node->type, $tag);
-              }
+    switch ($position) {
+      case 'above':
+      case 'below':
+        if (user_access('rate content')) {
+          $content = '';
+          foreach (fivestar_get_tags() as $tag) {
+            if (fivestar_validate_target('node', $node->nid, $tag)) {
+              $node->content['fivestar_widget'][$tag]['form'] = fivestar_widget_form($node, $tag);
+              $node->content['fivestar_widget'][$tag]['#weight'] = $position == 'above' ? -10 : 50;
             }
-            if ($content) {
-              $node->content['fivestar_widget'] = array(
-                '#value' => $content,
-                '#weight' => strpos($position, 'above') === 0 ? -10 : 50,
-              );
-            }
-            break;
-          default:
-            // We'll do nothing.
-            break;
+          }
+          break;
+        } // Fall through to static if not allowed to rate.
+        $position .= '_static';
+      case 'above_static':
+      case 'below_static':
+        $content = '';
+        foreach (fivestar_get_tags() as $tag) {
+          if (fivestar_validate_target('node', $node->nid, $tag)) {
+            $content .= fivestar_static('node', $node->nid, $node->type, $tag);
+          }
         }
-      }
-      break;
+        if ($content) {
+          $node->content['fivestar_widget'] = array(
+            '#value' => $content,
+            '#weight' => strpos($position, 'above') === 0 ? -10 : 50,
+          );
+        }
+        break;
+    }
   }
 }
 
@@ -566,30 +579,20 @@ function fivestar_link($type, $node = NULL, $teaser = FALSE) {
 }
 
 
-function fivestar_block($op = 'list', $delta = 0, $edit = array()) {
-  switch ($op) {
-    case 'list':
-      $blocks[0]['info'] = t('Fivestar: Rate this node');
-      return $blocks;
+function fivestar_block_info() {
+  $blocks[0]['info'] = t('Fivestar: Rate this node');
+  return $blocks;
+}
 
-    case 'view':
-      if (user_access('access content') && user_access('rate content')) {
-        if (arg(0) == 'node' && is_numeric(arg(1)) && (arg(2) == '' || arg(2) == 'view')) {
-          $node = node_load(arg(1));
-          $block = array();
-          foreach (fivestar_get_tags() as $tag) {
-            if (fivestar_validate_target('node', $node->nid, $tag)) {
-              if (!$block) {
-                $block['subject'] = t('Rate This');
-                $block['content'] = '';
-              }
-              $block['content'] .= fivestar_widget_form($node, $tag);
-            }
-          }
-          return $block;
-        }
+function fivestar_block_view($delta = 0) {
+  if (user_access('access content') && user_access('rate content') && (arg(2) == '' || arg(2) == 'view') && ($node = menu_get_object())) {
+    $block = array('subject' => t('Rate This'));
+    foreach (fivestar_get_tags() as $tag) {
+      if (fivestar_validate_target('node', $node->nid, $tag)) {
+        $block['content'][$tag] = fivestar_widget_form($node, $tag);
       }
-      break;
+    }
+    return $block;
   }
 }
 
@@ -636,7 +639,7 @@ function fivestar_forms($form_id, $args) {
  * Note that this is not an implementation of hook_form(). We should probably
  * change the function to reflect that.
  */
-function fivestar_form(&$form_state, $content_type, $content_id, $tag) {
+function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
   global $user;
 
   if ($content_type == 'node') {
@@ -682,7 +685,7 @@ function fivestar_form(&$form_state, $content_type, $content_id, $tag) {
     'tag' => $tag,
   );
 
-  return fivestar_custom_widget($form_state, $values, $settings);
+  return fivestar_custom_widget(array(), $form_state, $values, $settings);
 }
 
 /**
@@ -770,8 +773,17 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
     $count_value = $votes['count']['value'];
   }
 
-  $star_display = theme('fivestar_static', $star_value, $stars);
-  $text_display = $settings['text_display'] == 'none' ? NULL : theme('fivestar_summary', $user_value, $average_value, $count_value, $stars, FALSE);
+  $star_display = theme('fivestar_static', array(
+    'rating' => $star_value,
+    'stars' => $stars,
+  ));
+  $text_display = $settings['text_display'] == 'none' ? NULL : theme('fivestar_summary', array(
+    'user_rating' => $user_value,
+    'average_rating' => $average_value,
+    'votes' => $count_value,
+    'stars'=> $stars,
+    'feedback_enable' =>FALSE,
+  ));
 
   return theme('fivestar_static_element', $star_display, $title, $text_display);
 }
@@ -813,9 +825,9 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
  *   - tag: The VotingAPI tag that will be registered by this widget. Defaults
  *     to "vote".
  */
-function fivestar_custom_widget(&$form_state, $values, $settings) {
+function fivestar_custom_widget($form, &$form_state, $values, $settings) {
   $form = array(
-    '#attributes' => array('class' => 'fivestar-widget'),
+    '#attributes' => array('class' => array('fivestar-widget')),
     '#redirect' => FALSE,
     '#theme' => 'fivestar_widget',
   );
@@ -866,27 +878,50 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
   $form['fivestar_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Rate'),
-    '#attributes' => array('class' => 'fivestar-submit'),
+    '#attributes' => array('class' => array('fivestar-submit')),
   );
 
-  $form['vote']['#attributes']['class'] = isset($form['vote']['#attributes']['class']) ? $form['vote']['#attributes']['class'] : '';
+  $form['vote']['#attributes']['class'] = isset($form['vote']['#attributes']['class']) ? $form['vote']['#attributes']['class'] : array();
   $settings['feedback_enable'] = isset($settings['feedback_enable']) ? $settings['feedback_enable'] : TRUE;
   switch ($settings['text']) {
     case 'user':
-      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], NULL, $settings['style'] == 'dual' ? NULL : $values['count'], $settings['stars'], $settings['feedback_enable']);
-      $form['vote']['#attributes']['class'] .= ' fivestar-user-text';
+      $form['vote']['#description'] = theme('fivestar_summary', array(
+        'user_rating' => $values['user'],
+        'votes' => $settings['style'] == 'dual' ? NULL : $values['count'],
+        'stars' => $settings['stars'],
+        'feedback_enable' => $settings['feedback_enable'],
+      ));
+      $form['vote']['#attributes']['class'][] = 'fivestar-user-text';
       break;
     case 'average':
-      $form['vote']['#description'] = $settings['style'] == 'dual' ? NULL : theme('fivestar_summary', NULL, $values['average'], $values['count'], $settings['stars'], $settings['feedback_enable']);
-      $form['vote']['#attributes']['class'] .= ' fivestar-average-text';
+      $form['vote']['#description'] = $settings['style'] == 'dual' ? NULL : theme('fivestar_summary', array(
+        'average_rating' => $values['average'],
+        'votes' => $values['count'],
+        'stars' => $settings['stars'],
+        'feedback_enable' => $settings['feedback_enable'],
+      ));
+      $form['vote']['#attributes']['class'][] = 'fivestar-average-text';
       break;
     case 'smart':
-      $form['vote']['#description'] = ($settings['style'] == 'dual' && !$values['user']) ? NULL : theme('fivestar_summary', $values['user'], $values['user'] ? NULL : $values['average'], $settings['style'] == 'dual' ? NULL : $values['count'], $settings['stars'], $settings['feedback_enable']);
-      $form['vote']['#attributes']['class'] .= ' fivestar-smart-text '. ($values['user'] ? 'fivestar-user-text' : 'fivestar-average-text');
+      $form['vote']['#description'] = ($settings['style'] == 'dual' && !$values['user']) ? NULL : theme('fivestar_summary', array(
+        'user_rating' => $values['user'],
+        'average_rating' => $values['user'] ? NULL : $values['average'],
+        'votes' => $settings['style'] == 'dual' ? NULL : $values['count'],
+        'stars' => $settings['stars'],
+        'feedback_enable' => $settings['feedback_enable'],
+      ));
+      $form['vote']['#attributes']['class'][] = 'fivestar-smart-text';
+      $form['vote']['#attributes']['class'][] = $values['user'] ? 'fivestar-user-text' : 'fivestar-average-text';
       break;
     case 'dual':
-      $form['vote']['#description'] = theme('fivestar_summary', $values['user'], $settings['style'] == 'dual' ? NULL : $values['average'], $settings['style'] == 'dual' ? NULL : $values['count'], $settings['stars'], $settings['feedback_enable']);
-      $form['vote']['#attributes']['class'] .= ' fivestar-combo-text';
+      $form['vote']['#description'] = theme('fivestar_summary', array(
+        'user_rating' => $values['user'],
+        'average_rating' => $settings['style'] == 'dual' ? NULL : $values['average'],
+        'votes' => $settings['style'] == 'dual' ? NULL : $values['count'],
+        'stars' => $settings['stars'],
+        'feedback_enable' => $settings['feedback_enable'],
+      ));
+      $form['vote']['#attributes']['class'][] = ' fivestar-combo-text';
       break;
   }
 
@@ -894,36 +929,49 @@ function fivestar_custom_widget(&$form_state, $values, $settings) {
     case 'average':
       $form['vote']['#title'] = t('Average');
       $form['vote']['#default_value'] = $values['average'];
-      $form['vote']['#attributes']['class'] .= ' fivestar-average-stars';
+      $form['vote']['#attributes']['class'][] = 'fivestar-average-stars';
       break;
     case 'user':
       $form['vote']['#title'] = t('Your rating');
       $form['vote']['#default_value'] = $values['user'];
-      $form['vote']['#attributes']['class'] .= ' fivestar-user-stars';
+      $form['vote']['#attributes']['class'][] = 'fivestar-user-stars';
       break;
     case 'smart':
       $form['vote']['#title'] = $values['user'] ? t('Your rating') : t('Average');
       $form['vote']['#default_value'] = $values['user'] ? $values['user'] : $values['average'];
-      $form['vote']['#attributes']['class'] .= ' fivestar-smart-stars '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
+      $form['vote']['#attributes']['class'][] = 'fivestar-smart-stars '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
     case 'dual':
       $form['vote']['#title'] = t('Your rating');
       $form['vote']['#default_value'] = $values['user'];
-      $form['vote']['#attributes']['class'] .= ' fivestar-combo-stars';
-      $form['#attributes']['class'] .= ' fivestar-combo-stars';
-      $static_average = theme('fivestar_static', $values['average'], $settings['stars'], $settings['tag']);
+      $form['vote']['#attributes']['class'][] = 'fivestar-combo-stars';
+      $form['#attributes']['class'][] = 'fivestar-combo-stars';
+      $static_average = theme('fivestar_static', array(
+        'rating' => $values['average'],
+        'stars' => $settings['stars'],
+        'tag' => $settings['tag'],
+      ));
       if ($settings['text'] == 'none' && !$settings['labels_enable'] && !$settings['feedback_enable']) {
         $static_description = NULL;
       }
       elseif ($settings['text'] != 'none') {
-        $static_description = theme('fivestar_summary', NULL, $settings['text'] == 'user' ? NULL : (isset($values['average']) ? $values['average'] : 0), isset($values['count']) ? $values['count'] : 0, $settings['stars'], FALSE);
+        $static_description = theme('fivestar_summary', array(
+          'averrage_rating' => $settings['text'] == 'user' ? NULL : (isset($values['average']) ? $values['average'] : 0),
+          'votes' => isset($values['count']) ? $values['count'] : 0,
+          'stars' => $settings['stars'],
+          'feedback_enable' => FALSE
+        ));
       }
       else {
         $static_description = '&nbsp;';
       }
       $form['average'] = array(
         '#type' => 'markup',
-        '#value' => theme('fivestar_static_element', $static_average, $settings['title'] !== FALSE ? t('Average') : NULL, $static_description),
+        '#value' => theme('fivestar_static_element', array(
+          'star_display' => $static_average,
+          'title' => $settings['title'] !== FALSE ? t('Average') : NULL,
+          'description' => $static_description,
+        )),
         '#weight' => -1,
       );
       break;
@@ -974,7 +1022,7 @@ function fivestar_form_submit($form, &$form_state) {
  *
  * Defines 'fivestar' form element type
  */
-function fivestar_elements() {
+function fivestar_element_info() {
   $type['fivestar'] = array(
     '#input' => TRUE,
     '#stars' => 5,
@@ -992,7 +1040,8 @@ function fivestar_elements() {
 /**
  * Theme the fivestar form element by adding necessary css and javascript.
  */
-function theme_fivestar($element) {
+function theme_fivestar($variables) {
+  $element = $variables['element'];
   if (empty($element['#description'])) {
     if ($element['#feedback_enable']) {
       $element['#description'] = '<div class="fivestar-summary fivestar-feedback-enabled">&nbsp;</div>';
@@ -1002,14 +1051,15 @@ function theme_fivestar($element) {
     }
   }
 
-  return theme('form_element', $element, $element['#children']);
+  return theme('form_element', array('element' => $element));
 }
 
 /**
  * Theme the straight HTML version of the fivestar select list. This is used
  * to remove the wrapping 'form-item' div from the select list.
  */
-function theme_fivestar_select($element) {
+function theme_fivestar_select($variables) {
+  $element = $variables['element'];
   $select = '';
   $size = $element['#size'] ? ' size="'. $element['#size'] .'"' : '';
   _form_set_class($element, array('form-select'));
@@ -1021,7 +1071,8 @@ function theme_fivestar_select($element) {
  * Theme an entire fivestar widget, including the submit button and the normal
  * fivestar widget themed in the theme_fivestar() function.
  */
-function theme_fivestar_widget($form) {
+function theme_fivestar_widget($variables) {
+  $form = $variables['form'];
   // Only print out the summary if text is being displayed or using rollover text.
   if (empty($form['vote']['#description']) && strpos($form['vote']['#prefix'], 'fivestar-labels-hover') === FALSE) {
     unset($form['vote']['#description']);
@@ -1033,7 +1084,7 @@ function theme_fivestar_widget($form) {
 
   $output  = '';
   $output .= '<div class="'. $class .' clear-block">';
-  $output .= drupal_render($form);
+  $output .= drupal_render_children($form);
   $output .= '</div>';
   return $output;
 }
@@ -1050,7 +1101,10 @@ function theme_fivestar_widget($form) {
  * @return
  *   A themed HTML string representing the star widget.
  */
-function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
+function theme_fivestar_static($variables) {
+  $rating  = $variables['rating'];
+  $stars = $variables['stars'];
+  $tag = $variables['tag'];
   $output = '';
   $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $tag .' fivestar-widget-static-'. $stars .' clear-block">';
   if (empty($stars)) {
@@ -1104,7 +1158,8 @@ function theme_fivestar_static($rating, $stars = 5, $tag = 'vote') {
  * @return
  *   A themed HTML string representing the star widget.
  */
-function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 5, $feedback = TRUE) {
+function theme_fivestar_summary($variables) {
+  extract($variables, EXTR_SKIP);
   $output = '';
   $div_class = '';
   if (isset($user_rating)) {
@@ -1136,23 +1191,24 @@ function theme_fivestar_summary($user_rating, $average_rating, $votes, $stars = 
     $output = '<span class="empty">'. t('No votes yet') .'</span>';
   }
 
-  $output = '<div class="fivestar-summary fivestar-summary-'. $div_class . ($feedback ? ' fivestar-feedback-enabled' : '') .'">'. $output .'</div>';
+  $output = '<div class="fivestar-summary fivestar-summary-'. $div_class . ($feedback_enable ? ' fivestar-feedback-enabled' : '') .'">'. $output .'</div>';
   return $output;
 }
 
 /**
  * Display a static fivestar value as stars with a title and description.
  */
-function theme_fivestar_static_element($value, $title = NULL, $description = NULL) {
+function theme_fivestar_static_element($variables) {
   $output = '';
   $output .= '<div class="fivestar-static-form-item">';
   $element = array(
     '#type' => 'item',
-    '#title' => $title,
-    '#description' => $description,
+    '#title' => $variables['title'],
+    '#description' => $variables['description'],
+    '#children' => $variables['value'],
   );
 
-  $output .= theme('form_element', $element, $value);
+  $output .= theme('form_element', array('element' => $element));
   $output .= '</div>';
   return $output;
 }
@@ -1199,7 +1255,7 @@ function fivestar_add_js() {
 
 
 /**
- * Add Inline CSS to the page, only used on admin/settings/fivestar page.
+ * Add Inline CSS to the page, only used on admin/config/content/fivestar page.
  */
 function fivestar_add_inline_css($widget_key = NULL, $css = NULL, $reset = FALSE) {
   static $inline_css;
@@ -1299,10 +1355,13 @@ function fivestar_expand($element) {
     $element['vote']['#default_value'] = $next_value;
   }
 
-  // Set a class for the display of label text on hover.
-  $label_class = $element['#labels_enable'] ? ' fivestar-labels-hover' : '';
-
-  $element['#prefix'] = '<div class="fivestar-form-item '. (isset($element['#attributes']['class']) ? $element['#attributes']['class'] : '') . $label_class .'">';
+  $class = isset($element['#attributes']['class']) ? $element['#attributes']['class'] : array();
+  $class[] = 'fivestar-form-item';
+  if ($element['#labels_enable']) {
+    // Set a class for the display of label text on hover.
+    $class[] = 'fivestar-labels-hover';
+  }
+  $element['#prefix'] = '<div ' . drupal_attributes(array('class' => $class)) . '>';
   $element['#suffix'] = '</div>';
 
   // Add validation function that considers a 0 value as empty.
@@ -1361,7 +1420,11 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
     $tag = 'vote';
   }
 
-  return theme('fivestar_static', $value, $stars, $tag);
+  return theme('fivestar_static', array(
+    'rating' => $value,
+    'stars' => $stars,
+    'tag' => $tag,
+  ));
 }
 
 /**
@@ -1369,7 +1432,7 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
  */
 function fivestar_views_value_text_handler($value, $field, $columns) {
   // Get the number of stars for this node type.
-  $node_type = isset($columns->node_type) ? $columns->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
+  $node_type = isset($columns->node_type) ? $columns->node_type : db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid)->fetchField();
   $stars = variable_get('fivestar_stars_'. $node_type, 5);
 
   // If displaying a user's vote, always display a whole value.
@@ -1465,7 +1528,10 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
     return drupal_get_form('fivestar_custom_widget', $values, $settings);
   }
   else {
-    return theme('fivestar_static', $value, 5);
+    return theme('fivestar_static', array(
+      'rating' => $value,
+      'stars' => 5,
+    ));
   }
 }
 
@@ -1492,7 +1558,7 @@ function fivestar_get_tags() {
 }
 
 /**
- * Gets the variable suffix for node/tag-specific variables. 
+ * Gets the variable suffix for node/tag-specific variables.
  *
  * Note that for backwards compatibility, the tag suffix is omitted for the tag
  * "vote". So instead of "story_vote", this just returns "story".
@@ -1537,10 +1603,10 @@ function fivestar_get_settings($node_type, $tag) {
  * Implementation of hook_votingapi_metadata_alter().
  */
 function fivestar_votingapi_metadata_alter(&$data) {
-  static $tags;  
+  static $tags;
   if (!isset($tags)) {
     $tags = array();
-    
+
     module_load_install('content');
     module_load_include('inc', 'content', 'includes/content.admin');
     module_load_include('inc', 'content', 'includes/content.crud');

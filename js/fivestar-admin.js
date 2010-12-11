@@ -4,7 +4,8 @@
  * Fivestar admin interface enhancments.
  */
 
-if (Drupal.jsEnabled) {
+// if (Drupal.jsEnabled) {
+(function($) {
   $(document).ready(function() {
     var nodePreview = new fivestarPreview($('#fivestar-direct-preview .fivestar-preview')[0]);
 
@@ -99,7 +100,7 @@ if (Drupal.jsEnabled) {
       });
     }
   });
-}
+//}
 
 /**
  * Constructor for fivestarPreview.
@@ -218,7 +219,7 @@ fivestarPreview.prototype.update = function() {
     }
 
     $.ajax({
-      dateType: 'json',
+      dataType: 'json',
       type: 'POST',
       url: Drupal.settings.fivestar.preview_url,
       data: data,
@@ -238,3 +239,5 @@ fivestarPreview.prototype.displayTextfields = function() {
     }
   }
 };
+})(jQuery);
+

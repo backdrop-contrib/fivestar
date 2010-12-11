@@ -14,10 +14,10 @@
 /**
  * Create a degradeable star rating interface out of a simple form structure.
  * Returns a modified jQuery object containing the new interface.
- *   
+ *
  * @example jQuery('form.rating').fivestar();
  * @cat plugin
- * @type jQuery 
+ * @type jQuery
  *
  */
 (function($){ // Create local scope.
@@ -274,7 +274,7 @@
           summaryText = returnObj.result.summary[returnObj.display.text];
           if ($(returnObj.result.summary.average).is('.fivestar-feedback-enabled')) {
             // Inform user that his/her vote has been processed.
-            if (returnObj.vote.value != 0) { // check if vote has been saved or deleted 
+            if (returnObj.vote.value != 0) { // check if vote has been saved or deleted
               setFeedbackText(Drupal.settings.fivestar.feedbackVoteSaved);
             }
             else {
@@ -293,14 +293,14 @@
         event.reset();
         return $widget;
     };
-    
+
     /**
      * Accepts jQuery object containing a single fivestar widget.
      * Returns the proper div structure for the star interface.
-     * 
+     *
      * @return jQuery
      * @param {Object} $widget
-     * 
+     *
      */
     var buildInterface = function($widget){
         var $container = $('<div class="fivestar-widget clear-block"></div>');
@@ -386,9 +386,10 @@
     } catch(err) {}
   }
 
-  Drupal.behaviors.fivestar = function(context) {
-    $('div.fivestar-form-item:not(.fivestar-processed)', context).addClass('fivestar-processed').fivestar();
-    $('input.fivestar-submit', context).css('display', 'none');
+  Drupal.behaviors.fivestar = {
+    attach: function(context) {
+        $('div.fivestar-form-item:not(.fivestar-processed)', context).addClass('fivestar-processed').fivestar();
+        $('input.fivestar-submit', context).css('display', 'none');
+    }
   }
-
 })(jQuery);

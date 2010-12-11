@@ -62,10 +62,14 @@ function fivestar_color_form() {
     '#description' => t('A custom color widget must be selected to choose colors. Only the selected widget will be previewed.'),
   );
 
+  // TODO: port this if you can.
+  $disabled = FALSE;
+  /*
   $disabled = variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC) == FILE_DOWNLOADS_PRIVATE;
   if ($disabled) {
     $form['#description'] = t('Custom colors are only supported when the <a href="!url">download method</a> is set to public.', array('!url' => url('admin/settings/file-system')));
   }
+  */
 
   // Create the list of available schemes.
   $options = array(
@@ -141,7 +145,8 @@ function fivestar_color_form() {
 /**
  * Theme color form.
  */
-function theme_fivestar_color_form($form) {
+function theme_fivestar_color_form($variables) {
+  $form = $variables['form'];
   if (isset($form['#access']) && $form['#access'] == FALSE) {
     return '';
   }
@@ -177,18 +182,19 @@ function theme_fivestar_color_form($form) {
       $title = $form['fivestar_colors'][$name]['#title'];
       unset($form['fivestar_colors'][$name]['#title']);
       $element = array(
-        '#type' => 'element',
+        '#type' => 'item',
         '#title' => $title,
+        '#title_display' => 'before',
         '#children' => drupal_render($form['fivestar_colors'][$name]) . drupal_render($form['fivestar_colors'][$name2]),
       );
-      $output .= theme('form_element', $element, $element['#children']);
+      $output .= theme('form_element', array('element' => $element));
     }
     $output .= drupal_render($form['fivestar_colors'][$name]);
   }
   $output .= '</div>';
 
   // Render the form.
-  $output .= drupal_render($form);
+  $output .= drupal_render_children($form);
   // Close wrapper.
   $output .= '</div>';
 

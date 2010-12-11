@@ -2,6 +2,7 @@
 name = Fivestar Comments
 description = Rate nodes by leaving comments.
 package = Voting
-core = 6.x
+core = 7.x
 dependencies[] = votingapi
 dependencies[] = fivestar
+files[] = fivestar_comment.module

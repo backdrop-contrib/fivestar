@@ -2,5 +2,9 @@
 name = Fivestar
 description = A simple five-star voting widget for nodes.
 package = Voting
-core = 6.x
+core = 7.x
 dependencies[] = votingapi
+files[] = includes/fivestar.admin.inc
+files[] = includes/fivestar.color.inc
+files[] = includes/fivestar.field.inc
+files[] = fivestar.module

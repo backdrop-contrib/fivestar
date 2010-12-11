@@ -255,6 +255,6 @@ function fivestar_comment_create_vote($cid, $nid, $vote_id) {
 /**
  * Theme fivestar comment view.
  */
-function theme_fivestar_comment_view($comment, $fivestar) {
-  return $fivestar . $comment;
+function theme_fivestar_comment_view($variables) {
+  return $variables['fivestar'] . $variables['comment'];
 }
