@@ -1061,7 +1061,7 @@ function theme_fivestar($variables) {
 function theme_fivestar_select($variables) {
   $element = $variables['element'];
   $select = '';
-  $size = $element['#size'] ? ' size="'. $element['#size'] .'"' : '';
+  $size = isset($element['#size']) ? ' size="'. $element['#size'] .'"' : '';
   _form_set_class($element, array('form-select'));
   $multiple = isset($element['#multiple']) && $element['#multiple'];
   return '<select name="'. $element['#name'] .''. ($multiple ? '[]' : '') .'"'. ($multiple ? ' multiple="multiple" ' : '') . drupal_attributes($element['#attributes']) .' id="'. $element['#id'] .'" '. $size .'>'. form_select_options($element) .'</select>';
