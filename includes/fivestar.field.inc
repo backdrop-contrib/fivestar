@@ -21,9 +21,12 @@ function fivestar_field_info() {
 }
 
 function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
-  // Multiple is not supported with Fivestar.
-  $form['field']['cardinality']['#access'] = FALSE;
-  $form['field']['cardinality']['#value'] = 1;
+  $field = $form['#field'];
+  if ($field['type'] == 'fivestar') {
+    // Multiple values is not supported with Fivestar.
+    $form['field']['cardinality']['#access'] = FALSE;
+    $form['field']['cardinality']['#value'] = 1;
+  }
 }
 
 /**
