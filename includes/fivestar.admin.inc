@@ -77,13 +77,7 @@ function fivestar_settings($form, $form_state) {
   $form['#submit'][] = 'fivestar_color_form_submit';
   $form['#submit'][] ='fivestar_settings_submit';
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-    '#weight' => 45,
-  );
-
-  return $form;
+  return system_settings_form($form);
 }
 
 function fivestar_settings_submit($form, &$form_state) {
