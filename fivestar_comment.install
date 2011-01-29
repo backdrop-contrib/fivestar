@@ -22,12 +22,7 @@ function fivestar_comment_schema() {
   return $schema;
 }
 
-function fivestar_comment_install() {
-  drupal_install_schema('fivestar_comment');
-}
-
 function fivestar_comment_uninstall() {
-  drupal_uninstall_schema('fivestar_comment');
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_comment_%'");
 }
 
