@@ -149,9 +149,8 @@ function theme_fivestar_color_form($variables) {
   }
 
   // Add Farbtastic color picker.
-  drupal_add_css('misc/farbtastic/farbtastic.css', 'module', 'all', FALSE);
   drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-color.js');
-  drupal_add_js('misc/farbtastic/farbtastic.js');
+  drupal_add_library('system', 'farbtastic');
 
   // Add custom CSS/JS.
   $default_colors = array();
