@@ -201,7 +201,7 @@ function theme_fivestar_color_form($variables) {
  * Validate handler for color form.
  */
 function fivestar_color_form_validate($form, &$form_state) {
-  if ($form_state['values']['fivestar_color_type'] == 'default' || $_POST['fivestar_color_type'] == '') {
+  if ($form_state['values']['fivestar_color_type'] == 'default' || !isset($_POST['fivestar_color_type'])) {
     $form_state['values']['fivestar_color_type'] = 'default';
     return;
   }
