@@ -40,10 +40,10 @@ function fivestar_preview_color() {
 
   // Generate the requested image and exit.
   $image = _fivestar_color_render($source_directory . str_replace('.png', '-template.png', $filename), $color_scheme, $type);
-  drupal_set_header('Content-type: image/png');
-  drupal_set_header("Expires: ". gmdate("D, d M Y H:i:s", time() + 300) ." GMT");
-  drupal_set_header("Last-Modified: ". gmdate("D, d M Y H:i:s") ." GMT");
-  drupal_set_header("Cache-Control: max-age=300");
+  drupal_add_http_header('Content-type', 'image/png');
+  drupal_add_http_header('Expires', gmdate("D, d M Y H:i:s", time() + 300) ." GMT");
+  drupal_add_http_header('Last-Modified', gmdate("D, d M Y H:i:s") ." GMT");
+  drupal_add_http_header('Cache-Control', 'max-age=300');
   imagepng($image);
   exit();
 }
