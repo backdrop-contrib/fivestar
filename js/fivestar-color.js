@@ -1,6 +1,6 @@
 // $Id$
 
-if (Drupal.jsEnabled) {
+(function ($) {
   $(document).ready(function () {
     var form = $('#fivestar_color_scheme_form .color-form');
     var inputs = [];
@@ -299,4 +299,4 @@ if (Drupal.jsEnabled) {
     // Hide secondary color fields and preview (called in changeType).
     changeType();
   });
-}
+})(jQuery);
