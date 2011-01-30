@@ -77,7 +77,13 @@ function fivestar_settings($form, $form_state) {
   $form['#submit'][] = 'fivestar_color_form_submit';
   $form['#submit'][] ='fivestar_settings_submit';
 
-  return system_settings_form($form);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#weight' => 45,
+  );
+
+  return $form;
 }
 
 function fivestar_settings_submit($form, &$form_state) {
@@ -155,11 +161,16 @@ function theme_fivestar_preview_widget($variables) {
     '#programmed' => FALSE,
     '#tree' => FALSE,
     '#parents' => array(),
+    '#array_parents' => array(),
     '#required' => FALSE,
     '#attributes' => array(),
     '#title_display' => 'before',
   );
   $form_state = form_state_defaults();
+  $form_state['values'] = array();
+  $form_state['process_input'] = array();
+  $form_state['complete form'] = array();
+
   $form['vote'] = array(
     '#type' => 'fivestar',
     '#stars' => 5,
