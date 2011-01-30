@@ -62,18 +62,15 @@ function fivestar_color_form() {
     '#description' => t('A custom color widget must be selected to choose colors. Only the selected widget will be previewed.'),
   );
 
-  // TODO: port this if you can.
   $disabled = FALSE;
-  /*
-  $disabled = variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC) == FILE_DOWNLOADS_PRIVATE;
-  if ($disabled) {
-    $form['#description'] = t('Custom colors are only supported when the <a href="!url">download method</a> is set to public.', array('!url' => url('admin/settings/file-system')));
+  if(variable_get('file_default_scheme','public') != 'public' || !is_dir(variable_get('file_public_path'))) {
+    $disabled = TRUE;
+    $form['#description'] = t('Custom colors are only supported when the <a href="!url">download method</a> is set to public and the "Public file system path" propery is filled.', array('!url' => url('admin/config/media/file-system')));
   }
-  */
 
   // Create the list of available schemes.
   $options = array(
-    '#fff633,#f5d000,#d2e7f9,#027AC6,#cccccc,#dfdfdf' => t('Blue Lagoon (default)'),
+    '#fff633,#f5d000,#d2e7f9,#027ac6,#cccccc,#dfdfdf' => t('Blue Lagoon (default)'),
     '#ffeb38,#fff385,#ffd60a,#ffe561,#8f8f8f,#e6e6e6' => t('Yellow'),
     '#ad0002,#ff5f61,#ff1a1f,#f3b3b4,#8f8f8f,#e6e6e6' => t('Red'),
     '#001efa,#bbc3fb,#1022c1,#2e41ee,#8f8f8f,#e6e6e6' => t('Blue'),
@@ -234,7 +231,7 @@ function fivestar_color_form_submit($form, &$form_state) {
   $widget = str_replace('.css', '', basename($form_state['values']['fivestar_widget']));
   $widget_css = $form_state['values']['fivestar_widget'];
   $widget_rtl_css = str_replace('.css', '-rtl.css', $widget_css);
-  $upload_directory = file_directory_path() .'/fivestar';
+  $upload_directory = variable_get('file_public_path') .'/fivestar';
   $widget_directory = $upload_directory .'/'. $widget;
   $current_widget = variable_get('fivestar_widget', 'default');
 
@@ -246,8 +243,8 @@ function fivestar_color_form_submit($form, &$form_state) {
   }
 
   // Check the destination directory.
-  file_check_directory($upload_directory, FILE_CREATE_DIRECTORY);
-  file_check_directory($widget_directory, FILE_CREATE_DIRECTORY);
+  file_prepare_directory($upload_directory, FILE_CREATE_DIRECTORY);
+  file_prepare_directory($widget_directory, FILE_CREATE_DIRECTORY);
 
   // Create the new stars.
   $star = _fivestar_color_render(str_replace($widget .'.css', 'star-template.png', $form_state['values']['fivestar_widget']), $form_state['values']['fivestar_colors'], $form_state['values']['fivestar_color_type']);
@@ -256,11 +253,11 @@ function fivestar_color_form_submit($form, &$form_state) {
   imagepng($cancel, $widget_directory .'/cancel.png');
 
   // Copy over the stylesheet.
-  file_copy($widget_css, $widget_directory .'/'. $widget .'.css', FILE_EXISTS_REPLACE);
+  file_unmanaged_copy($widget_css, $widget_directory .'/'. $widget .'.css', FILE_EXISTS_REPLACE);
 
   // Copy over RTL stylesheet.
   if (file_exists($widget_rtl_css)) {
-    file_copy($widget_rtl_css, $widget_directory .'/'. $widget .'-rtl.css', FILE_EXISTS_REPLACE);
+    file_unmanaged_copy($widget_rtl_css, $widget_directory .'/'. $widget .'-rtl.css', FILE_EXISTS_REPLACE);
   }
 
   $form_state['values']['fivestar_widget'] = $widget_css;
