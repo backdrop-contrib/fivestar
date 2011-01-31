@@ -554,31 +554,21 @@ function fivestar_node_view($node, $view_mode) {
         }
         
         break;
+      case 'link':
+        $node->content['links']['fivestar_widget'] = array(
+          '#links' => array(
+            'fivestar-rate' => array(
+              'title' => t('Rate'),
+              'href' => 'node/'. $node->nid,
+              'fragment' => 'fivestar-form-node-'. $node->nid,
+              'attributes' => array('title' => t('Rate this @type', array('@type' => _node_types_build()->types[$node->type]->name))),
+            ),
+          ),
+        );
+        break;
     }
   }
 }
-
-
-/**
- * Implementation of hook_link().
- *
- * Add a "rate" link to node teaser.
- */
-function fivestar_link($type, $node = NULL, $teaser = FALSE) {
-  $links = array();
-  if ($type == "node" && $teaser) {
-    if (variable_get('fivestar_position_teaser_'. $node->type, 'above') == "link") {
-      $links['rate'] = array(
-        'title' => t('Rate'),
-        'href' => 'node/'. $node->nid,
-        'fragment' => 'fivestar-form-node-'. $node->nid,
-        'attributes' => array('title' => t('Rate this @type', array('@type' => node_get_types('name', $node->type)))),
-      );
-    }
-  }
-  return $links;
-}
-
 
 function fivestar_block_info() {
   $blocks[0]['info'] = t('Fivestar: Rate this node');
