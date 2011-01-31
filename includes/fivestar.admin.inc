@@ -500,7 +500,7 @@ $_POST = array (
     'labels_enable' => $labels_enable,
     'labels' => $labels,
   ));
-  drupal_add_http_header('Content-Type: text/javascript; charset=utf-8');
+  drupal_add_http_header('Content-Type', 'text/javascript; charset=utf-8');
   print drupal_json_encode(array('status' => TRUE, 'data' => $output));
 }
 

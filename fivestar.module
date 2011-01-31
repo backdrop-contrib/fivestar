@@ -643,8 +643,8 @@ function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
   }
 
   $suffix = fivestar_get_suffix($node->type, $tag);
-  $star_display = variable_get('fivestar_style' . $suffix, 'average');
-  $text_display = variable_get('fivestar_text' . $suffix, 'dual');
+  $star_display = variable_get('fivestar_style_' . $suffix, 'average');
+  $text_display = variable_get('fivestar_text_' . $suffix, 'dual');
 
   if ($star_display == 'average' && ($text_display == 'average' || $text_display == 'none')) {
     // Save a query and don't retrieve the user vote unnecessarily.
@@ -957,7 +957,7 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
       }
       $form['average'] = array(
         '#type' => 'markup',
-        '#value' => theme('fivestar_static_element', array(
+        '#markup' => theme('fivestar_static_element', array(
           'star_display' => $static_average,
           'title' => $settings['title'] !== FALSE ? t('Average') : NULL,
           'description' => $static_description,
