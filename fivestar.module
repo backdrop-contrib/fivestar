@@ -268,8 +268,8 @@ function fivestar_vote($type, $cid, $tag, $value) {
 
   $suffix = fivestar_get_suffix((!isset($node) ? 'default' : $node->type), $tag);
 
-  $stars = variable_get('fivestar_stars' . $suffix, 5);
-  $feedback_enable = variable_get('fivestar_feedback' . $suffix, 1);
+  $stars = variable_get('fivestar_stars_' . $suffix, 5);
+  $feedback_enable = variable_get('fivestar_feedback_' . $suffix, 1);
 
   $output .= '<xml><result>';
 
@@ -661,18 +661,18 @@ function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
   );
 
   $settings = array(
-    'stars' => variable_get('fivestar_stars' . $suffix, 5),
-    'allow_clear' => variable_get('fivestar_unvote' . $suffix, FALSE),
+    'stars' => variable_get('fivestar_stars_' . $suffix, 5),
+    'allow_clear' => variable_get('fivestar_unvote_' . $suffix, FALSE),
     'style' => $star_display,
     'text' => $text_display,
     'content_type' => $content_type,
     'content_id' => $content_id,
     'tag' => 'vote',
     'autosubmit' => TRUE,
-    'title' => variable_get('fivestar_title' . $suffix, 1) ? NULL : FALSE,
-    'feedback_enable' => variable_get('fivestar_feedback' . $suffix, 1),
-    'labels_enable' => variable_get('fivestar_labels_enable' . $suffix, 1),
-    'labels' => variable_get('fivestar_labels' . $suffix, array()),
+    'title' => variable_get('fivestar_title_' . $suffix, 1) ? NULL : FALSE,
+    'feedback_enable' => variable_get('fivestar_feedback_' . $suffix, 1),
+    'labels_enable' => variable_get('fivestar_labels_enable_' . $suffix, 1),
+    'labels' => variable_get('fivestar_labels_' . $suffix, array()),
     'tag' => $tag,
   );
 
