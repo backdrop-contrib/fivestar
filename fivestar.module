@@ -548,10 +548,11 @@ function fivestar_node_view($node, $view_mode) {
         }
         if ($content) {
           $node->content['fivestar_widget'] = array(
-            '#value' => $content,
+            '#markup' => $content,
             '#weight' => strpos($position, 'above') === 0 ? -10 : 50,
           );
         }
+        
         break;
     }
   }
@@ -784,8 +785,7 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
     'stars'=> $stars,
     'feedback_enable' =>FALSE,
   ));
-
-  return theme('fivestar_static_element', $star_display, $title, $text_display);
+  return theme('fivestar_static_element', array('star_display' => $star_display, 'title' => $title, 'description' => $text_display));
 }
 
 /**
@@ -1205,7 +1205,7 @@ function theme_fivestar_static_element($variables) {
     '#type' => 'item',
     '#title' => $variables['title'],
     '#description' => $variables['description'],
-    '#children' => $variables['value'],
+    '#children' => $variables['star_display'],
   );
 
   $output .= theme('form_element', array('element' => $element));
