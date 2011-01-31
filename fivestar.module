@@ -531,8 +531,8 @@ function fivestar_node_view($node, $view_mode) {
           $content = '';
           foreach (fivestar_get_tags() as $tag) {
             if (fivestar_validate_target('node', $node->nid, $tag)) {
-              $node->content['fivestar_widget'][$tag]['form'] = fivestar_widget_form($node, $tag);
-              $node->content['fivestar_widget'][$tag]['#weight'] = $position == 'above' ? -10 : 50;
+              $node->content['fivestar_widget_' . $tag]['form'] = fivestar_widget_form($node, $tag);
+              $node->content['fivestar_widget_' . $tag]['#weight'] = ($position == 'above') ? -10 : 50;
             }
           }
           break;
