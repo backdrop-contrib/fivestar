@@ -1386,12 +1386,16 @@ function fivestar_votingapi_views_formatters($details = array()) {
 function fivestar_views_value_display_handler($value, $field, $columns) {
   // Determine number of stars to display
   // TODO need to get the tag here to support >1 tag
+  // For now we're only going to support one tag ("vote").
+  // We'll add the multiple tag once the module is somewhat stable.
+  $tag = 'vote';
+
   if ($field->view->base_table == 'node') {
     if (isset($columns->node_type)) {
       $stars = variable_get('fivestar_stars_'. $columns->node_type, 5);
     }
     else {
-      $node_type = db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
+      $node_type = db_query("SELECT type FROM {node} WHERE nid = :nid", array(':nid' => $columns->nid))->fetchField();
       $stars = variable_get('fivestar_stars_'. (!isset($node_type) ? 'default' : $node_type), 5);
     }
 
@@ -1419,7 +1423,7 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
  */
 function fivestar_views_value_text_handler($value, $field, $columns) {
   // Get the number of stars for this node type.
-  $node_type = isset($columns->node_type) ? $columns->node_type : db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid)->fetchField();
+  $node_type = isset($columns->node_type) ? $columns->node_type : db_query("SELECT type FROM {node} WHERE nid = :nid", array(':nid' => $columns->nid))->fetchField();
   $stars = variable_get('fivestar_stars_'. $node_type, 5);
 
   // If displaying a user's vote, always display a whole value.
@@ -1452,7 +1456,8 @@ function fivestar_views_widget_normal_handler($value, $field, $columns) {
  * Generic VotingAPI Views formatter for displaying rating widget.
  */
 function fivestar_views_widget_handler($value, $field, $columns, $summary) {
-
+  // For now we're only supporting one tag.
+  $tag = 'vote';
   // If the user can't rate, use the display handler.
   if (!user_access('rate content')) {
     return fivestar_views_value_display_handler($value, $field, $columns);
@@ -1469,8 +1474,7 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
 
     $content_type = 'node';
     $content_id = $columns->nid;
-    $node_type = isset($columns->node_type) ? $columns->node_type : db_result(db_query("SELECT type FROM {node} WHERE nid = %d", $columns->nid));
-
+    $node_type = isset($columns->node_type) ? $columns->node_type : db_query("SELECT type FROM {node} WHERE nid = :nid", array(":nid" => $columns->nid))->fetchField();
     $values = array(
       'user' => 0,
       'average' => 0,
@@ -1590,28 +1594,25 @@ function fivestar_get_settings($node_type, $tag) {
  * Implementation of hook_votingapi_metadata_alter().
  */
 function fivestar_votingapi_metadata_alter(&$data) {
-  static $tags;
-  if (!isset($tags)) {
-    $tags = array();
-
-    module_load_install('content');
-    module_load_include('inc', 'content', 'includes/content.admin');
-    module_load_include('inc', 'content', 'includes/content.crud');
-
-    // Grab the list of fields to update.
-    foreach (content_types_install() as $type_name => $fields) {
-      foreach ($fields as $field) {
-        if ($field['type'] == 'fivestar') {
-          if (!empty($field['axis'])) {
-            $data['tags'][$field['axis']] = array(
-              'name' => drupal_ucfirst($field['axis']),
-              'description' => t('Used by %field in the %type content type.', array('%type' => $type_name, '%field' => $field['field_name'])),
-              'module' => 'fivestar', // This is optional; we can add it for our own purposes.
-            );
-          }
-        }
-      }
-    }
-  }
-  return $tags;
+  // TODO: This needs porting 
+  // static $tags;
+  // if (!isset($tags)) {
+  //   $tags = array();
+  // 
+    // // Grab the list of fields to update.
+    // foreach (content_types_install() as $type_name => $fields) {
+    //   foreach ($fields as $field) {
+    //     if ($field['type'] == 'fivestar') {
+    //       if (!empty($field['axis'])) {
+    //         $data['tags'][$field['axis']] = array(
+    //           'name' => drupal_ucfirst($field['axis']),
+    //           'description' => t('Used by %field in the %type content type.', array('%type' => $type_name, '%field' => $field['field_name'])),
+    //           'module' => 'fivestar', // This is optional; we can add it for our own purposes.
+    //         );
+    //       }
+    //     }
+    //   }
+    // }
+  // }
+  // return $tags;
 }
