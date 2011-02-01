@@ -717,15 +717,15 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
     switch ($settings['star_display']) {
       case 'average':
       case 'dual':
-        $star_value = $votes['average']['value'];
+        $star_value = (isset($votes['average']['value'])) ? $votes['average']['value']: '';
         $title = $settings['title_display'] ? t('Average') : NULL;
         break;
       case 'user':
-        $star_value = $votes['user']['value'];
+        $star_value = (isset($votes['user']['value'])) ? $votes['user']['value'] : '';
         $title = $settings['title_display'] ? t('Your rating') : NULL;
         break;
       case 'smart':
-        $star_value = $votes['user']['value'] ? $votes['user']['value'] : $votes['average']['value'];
+        $star_value = (isset($votes['user']['value'])) ? $votes['user']['value'] : $votes['average']['value'];
         $title = $settings['title_display'] ? $votes['user']['value'] ? t('Your rating') : t('Average') : NULL;
         break;
     }
@@ -735,9 +735,9 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
     }
 
     // Set all text values, then unset the unnecessary ones.
-    $user_value = $votes['user']['value'];
-    $average_value = $votes['average']['value'];
-    $count_value = $votes['count']['value'];
+    $user_value = (isset($votes['user']['value'])) ? $votes['user']['value'] : NULL;
+    $average_value = (isset($votes['average']['value'])) ? $votes['user']['value'] : NULL;
+    $count_value = (isset($votes['count']['value'])) ? $votes['user']['value'] : NULL;
     switch ($settings['text_display']) {
       case 'average':
         $user_value = NULL;
