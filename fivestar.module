@@ -1050,13 +1050,10 @@ function theme_fivestar($variables) {
  */
 function theme_fivestar_select($variables) {
   $element = $variables['element'];
-  $select = '';
-  $size = isset($element['#size']) ? ' size="'. $element['#size'] .'"' : '';
+  element_set_attributes($element, array('id', 'name', 'size'));
   _form_set_class($element, array('form-select'));
-  $multiple = isset($element['#multiple']) && $element['#multiple'];
-  return '<select name="'. $element['#name'] .''. ($multiple ? '[]' : '') .'"'. ($multiple ? ' multiple="multiple" ' : '') . drupal_attributes($element['#attributes']) .' id="'. $element['#id'] .'" '. $size .'>'. form_select_options($element) .'</select>';
+  return '<select' . drupal_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
 }
-
 /**
  * Theme an entire fivestar widget, including the submit button and the normal
  * fivestar widget themed in the theme_fivestar() function.
