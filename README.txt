@@ -1,4 +1,3 @@
-// $Id$
 
 The Fivestar voting module adds a clean, attractive voting widget to nodes and
 comments in Drupal. It features:

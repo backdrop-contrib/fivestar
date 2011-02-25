@@ -1,4 +1,3 @@
-# $Id: it.po,v 1.1.2.1 2009/03/14 01:03:02 quicksketch Exp $
 # Italian translation of Drupal (general)
 # Copyright 2009 Ludovico Fischer <livrerieATgmail.com>
 # Generated from files:

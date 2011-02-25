@@ -1,4 +1,3 @@
-# $Id: es.po,v 1.1.2.1 2008/08/23 05:37:50 quicksketch Exp $
 #
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>

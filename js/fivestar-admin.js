@@ -1,4 +1,3 @@
-// $Id$
 
 /**
  * Fivestar admin interface enhancments.

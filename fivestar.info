@@ -1,4 +1,3 @@
-; $Id$
 name = Fivestar
 description = A simple five-star voting widget for nodes.
 package = Voting

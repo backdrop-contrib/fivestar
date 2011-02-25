@@ -1,4 +1,3 @@
-# $Id: ja.po,v 1.1.2.1 2009/02/23 03:08:23 pineray Exp $
 #
 # Japanese translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
