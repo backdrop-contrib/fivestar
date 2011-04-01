@@ -46,13 +46,18 @@ function fivestar_comment_form_alter(&$form, &$form_state, $form_id) {
     $form['comment']['fivestar_comment_preview'] = array(
       '#type' => 'item',
       '#title' => t('Comment widget preview'),
-      '#value' => theme('fivestar_preview', 'compact', 'none', $form['fivestar_stars']['#default_value'], $form['comment']['fivestar_comment']['#default_value'] == 1 ? 1 : 0),
+      '#value' => theme('fivestar_preview', array(
+        'style' => 'compact',
+        'text' => 'none',
+        'stars' => $form['fivestar_stars']['#default_value'],
+        'unvote' => $form['direct']['fivestar_unvote']['#default_value'],
+      )),
     );
     if (!$form['fivestar']['#default_value'] || !$form['comment']['fivestar_comment']['#default_value']) {
-      $form['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', '', 'comment');
+      $form['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', array('content' => '', 'type' => 'comment'));
     }
     else {
-      $form['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', $form['comment']['fivestar_comment_preview']['#value'], 'comment');
+      $form['comment']['fivestar_comment_preview']['#value'] = theme('fivestar_preview_wrapper', array('content' => $form['comment']['fivestar_comment_preview']['#value'], 'type' => 'comment'));
     }
   }
 
