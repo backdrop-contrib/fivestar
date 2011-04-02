@@ -162,14 +162,14 @@ function theme_fivestar_color_form($variables) {
   $output = '';
 
   // Wrapper.
-  $output .= '<div class="color-form clear-block">';
+  $output .= '<div class="color-form clearfix">';
 
   // Color schemes.
   $output .= drupal_render($form['fivestar_color_type']);
   $output .= drupal_render($form['scheme']);
 
   // Palette.
-  $output .= '<div id="fivestar-palette" class="clear-block">';
+  $output .= '<div id="fivestar-palette" class="clearfix">';
   foreach (element_children($form['fivestar_colors']) as $key => $name) {
     // Render pairs on a single line inside a new form element.
     if (strpos($name, '1')) {

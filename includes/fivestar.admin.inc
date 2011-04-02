@@ -119,8 +119,8 @@ function theme_fivestar_settings($variables) {
   // Add the new styles to the page.
   drupal_add_css(fivestar_get_inline_css(), array('type' => 'inline'));
 
-  $form['widget']['fivestar_widget']['#attributes']['class'][] = ' clear-block';
-  $form['widget']['fivestar_color_widget']['#attributes']['class'][] = ' fivestar-color-widgets clear-block';
+  $form['widget']['fivestar_widget']['#attributes']['class'][] = ' clearfix';
+  $form['widget']['fivestar_color_widget']['#attributes']['class'][] = ' fivestar-color-widgets clearfix';
 
   return drupal_render_children($form);
 }
