@@ -1070,7 +1070,7 @@ function theme_fivestar_widget($variables) {
   $class .= '-'. (isset($form['content_id']['#value']) ? $form['content_id']['#value'] : 0);
 
   $output  = '';
-  $output .= '<div class="'. $class .' clear-block">';
+  $output .= '<div class="'. $class .' clearfix">';
   $output .= drupal_render_children($form);
   $output .= '</div>';
   return $output;
@@ -1093,7 +1093,7 @@ function theme_fivestar_static($variables) {
   $stars = $variables['stars'];
   $tag = $variables['tag'];
   $output = '';
-  $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $tag .' fivestar-widget-static-'. $stars .' clear-block">';
+  $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $tag .' fivestar-widget-static-'. $stars .' clearfix">';
   if (empty($stars)) {
     $stars = 5;
   }

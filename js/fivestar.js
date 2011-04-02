@@ -303,7 +303,7 @@
      *
      */
     var buildInterface = function($widget){
-        var $container = $('<div class="fivestar-widget clear-block"></div>');
+        var $container = $('<div class="fivestar-widget clearfix"></div>');
         var $options = $("select option", $widget);
         var size = $('option', $widget).size() - 1;
         var cancel = 1;
