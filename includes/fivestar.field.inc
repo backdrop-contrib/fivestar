@@ -186,7 +186,7 @@ function fivestar_field_target($node, $field, $item) {
  * Implementation of hook_field_is_empty().
  */
 function fivestar_field_is_empty($item, $field) {
-  return empty($item['rating']);
+  return empty($item['rating']) || $item['rating'] == '-';
 }
 
 /**
