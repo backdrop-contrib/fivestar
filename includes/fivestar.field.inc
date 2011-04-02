@@ -280,5 +280,10 @@ function fivestar_field_formatter_info() {
 }
 
 function fivestar_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
-  return array('#markup ' => $items[0]['rating']);
+  if (isset($items[0]) && isset($isset[0]['rating'])) {
+    return array('#markup ' => $items[0]['rating']);
+  }
+  else {
+    return 0;
+  }
 }
