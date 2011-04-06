@@ -297,7 +297,7 @@ function fivestar_vote($type, $cid, $tag, $value) {
   );
   $output .= '<summary>';
   foreach ($skip_map as $tag => $skip) {
-    $output .= "<$tag>![CDATA[". theme('fivestar_summary', array_diff_key($arguments, array_flip($skip))) . "]]></$tag>";
+    $output .= "<$tag><![CDATA[". theme('fivestar_summary', array_diff_key($arguments, array_flip($skip))) . "]]></$tag>";
   }
   $output .= '</summary>';
   $output .= '</result>';
