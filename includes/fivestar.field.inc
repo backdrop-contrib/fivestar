@@ -264,26 +264,73 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
  */
 function fivestar_field_formatter_info() {
   return array(
-    'default' => array(
+    'fivestar_formatter_default' => array(
       'label' => t('As Stars'),
       'field types' => array('fivestar'),
     ),
-    'rating' => array(
+    'fivestar_formatter_rating' => array(
       'label' => t('Rating (i.e. 4.2/5)'),
       'field types' => array('fivestar'),
     ),
-    'percentage' => array(
+    'fivestar_formatter_percentage' => array(
       'label' => t('Percentage (i.e. 92)'),
       'field types' => array('fivestar'),
     ),
   );
 }
 
-function fivestar_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
-  if (isset($items[0]) && isset($isset[0]['rating'])) {
-    return array('#markup ' => $items[0]['rating']);
+function fivestar_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  
+  $element[0] = array(
+    '#theme' => $display['type'],
+    '#item' => $items,
+  );
+
+  return $element;
+}
+
+
+/**
+ * Theme function for 'default' fivestar field formatter.
+ */
+function theme_fivestar_formatter_default($variables) {
+  $element = $variables['element'];
+  if (!isset($element['#item'][0]['rating'])) {
+    $element['#item'][0]['rating'] = 0;
   }
-  else {
-    return 0;
+  if (empty($element['#item'][0]['stars'])) {
+    $element['#item'][0]['stars'] = 5;
   }
+  
+   return theme('fivestar_static', array('rating' => $element['#item'][0]['rating'], 'stars' => $element['#item'][0]['stars']));
+}
+
+/**
+ * Theme function for 'rating' fivestar field formatter.
+ */
+function theme_fivestar_formatter_rating($variables) {
+  $element = $variables['element'];
+  
+  if (!isset($element['#item'][0]['rating'])) {
+    $element['#item'][0]['rating'] = 0;
+  }
+
+  return $element['#item'][0]['rating'];
+}
+
+/**
+ * Theme function for 'percentage' fivestar field formatter.
+ */
+function theme_fivestar_formatter_percentage($variables) {
+  $element = $variables['element'];
+  
+  if (empty($element['#item'][0]['rating'])) {
+    $element['#item'][0]['rating'] = 0;
+  }
+  if (empty($element['#item'][0]['stars'])) {
+    $element['#item'][0]['stars'] = 5;
+  }
+
+  return round(100/$element['#item'][0]['rating'], 1)/$element['#item'][0]['stars'];
 }
