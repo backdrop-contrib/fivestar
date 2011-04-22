@@ -40,14 +40,11 @@ function fivestar_field_settings_form($field, $instance) {
   );
 
   $dynamic_options = array();
-  if (module_exists('nodecomment')) {
-    $dynamic_options['comment_target_nid'] = t('Node Comment Parent');
-  }
-  if (module_exists('nodereference')) {
-    $fields = content_fields();
+  if (module_exists('node_reference')) {
+    $fields = field_info_fields();
     foreach ($fields as $field_name => $content_field) {
       // Make sure that this field exists for this type.
-      if ($content_field['type'] == 'nodereference' && $content_field = content_fields($field_name, $field['type_name'])) {
+      if ($content_field['type'] == 'node_reference' && in_array($field['bundles']['node'][0], $content_field['bundles']['node'])) {
         $dynamic_options[$content_field['field_name']] = t('Node reference: @field', array('@field' => $content_field['field_name']));
       }
     }
@@ -57,13 +54,13 @@ function fivestar_field_settings_form($field, $instance) {
     drupal_set_message(t('No potential target fields are available for the %type bundle. Create a node reference field in this bundle to make it easier to assign a vote to a node.', array('%type' => $instance['bundle'])), 'warning');
   }
 
-  $dynamic_options = array('' => '<'. t('none') .'>') + $dynamic_options;
+  $dynamic_options = array('' => '<'. t('none') . '>') + $dynamic_options;
   $form['dynamic_target'] = array(
     '#title' => t('Voting target'),
     '#type' => 'select',
     '#default_value' => isset($field['settings']['dynamic_target']) ? $field['settings']['dynamic_target'] : '',
     '#options' => $dynamic_options,
-    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields (part of CCK core) or <a href="http://drupal.org/project/nodecomment">Node Comments</a> module to create advanced reviews. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.')
+    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
   );
 
   if (user_access('use PHP for fivestar target')) {
@@ -73,16 +70,15 @@ function fivestar_field_settings_form($field, $instance) {
       '#collapsible' => TRUE,
       '#collapsed' => empty($field['php_target']),
     );
-
     $form['php_target']['php_target'] = array(
       '#title' => t('Code'),
       '#type' => 'textarea',
-      '#default_value' => isset($field['php_target']) ? $field['settings']['php_target'] : '',
+      '#default_value' => isset($field['settings']['php_target']) ? $field['settings']['php_target'] : '',
       '#description' => t('Advanced usage only: PHP code that returns a target node ID. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Note that executing incorrect PHP-code can break your Drupal site.'),
     );
   }
   else {
-    $form['php_target'] = array(
+    $form['php_target']['php_target'] = array(
       '#type' => 'value',
       '#value' => isset($field['settings']['php_target']) ? $field['settings']['php_target'] : '',
     );
@@ -122,8 +118,8 @@ function fivestar_field_presave($obj_type, $object, $field, $instance, $langcode
 /**
  * Implementation of hook_field_insert().
  */
-function fivestar_field_insert($obj_type, $object, $field, $instance, $langcode, &$items) {
-  _fivestar_field_helper($obj_type, $object, $field, $items);
+function fivestar_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  _fivestar_field_helper($entity_type, $entity, $field, $items);
 }
 
 /**
@@ -140,18 +136,17 @@ function fivestar_field_delete($obj_type, $object, $field, $instance, $langcode,
   _fivestar_field_helper($obj_type, $object, $field, $items, 'delete');
 }
 
-function _fivestar_field_helper($obj_type, $object, $field, $items, $op = '') {
+function _fivestar_field_helper($entity_type, $entity, $field, $items, $op = '') {
   foreach ($items as $delta => $item) {
-    if ((isset($object->status) && !$object->status) || $op == 'delete') {
+    if ((isset($entity->status) && !$entity->status) || $op == 'delete') {
       $rating = 0;
     }
     else {
-      $rating = $items[$delta]['rating'];
+      $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
     }
-    $items[$delta]['target'] = fivestar_field_target($object, $field, $item);
-
+    $items[$delta]['target'] = _fivestar_field_target($entity, $field, $item);
     if (is_numeric($items[$delta]['target'])) {
-      _fivestar_cast_vote('node', $items[$delta]['target'], $rating, $field['axis'], $node->uid, FALSE, TRUE);
+      _fivestar_cast_vote('node', $items[$delta]['target'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
       votingapi_recalculate_results('node', $items[$delta]['target']);
     }
   }
@@ -160,19 +155,18 @@ function _fivestar_field_helper($obj_type, $object, $field, $items, $op = '') {
 /**
  * Helper function to find the nid that should be rated when a field is changed.
  */
-function fivestar_field_target($node, $field, $item) {
+function _fivestar_field_target($entity, $field, $item) {
   $target = FALSE;
-
-  if (!empty($field['php_target'])) {
+  if (isset($field['settings']['php_target']) && !empty($field['settings']['php_target']['php_target'])) {
     // Use eval rather than drupal_eval to allow access to local variables.
-    $target = eval($field['php_target']);
+    $target = eval($field['settings']['php_target']['php_target']);
   }
-  elseif (!empty($field['settings']['dynamic_target']) && !empty($node->$field['dynamic_target'])) {
-    if (is_array($node->$field['dynamic_target']) && is_numeric($node->{$field['dynamic_target']}[0]['nid'])) {
-      $target = $node->{$field['dynamic_target']}[0]['nid'];
+  elseif (!empty($field['settings']['dynamic_target']) && !empty($entity->$field['settings']['dynamic_target'])) {
+    if (is_array($entity->$field['settings']['dynamic_target']) && is_numeric($entity->{$field['settings']['dynamic_target']}[LANGUAGE_NONE][0]['nid'])) {
+      $target = $entity->{$field['settings']['dynamic_target']}[LANGUAGE_NONE][0]['nid'];
     }
-    elseif (is_numeric($node->$field['dynamic_target'])) {
-      $target = $node->$field['dynamic_target'];
+    elseif (is_numeric($entity->$field['settings']['dynamic_target'])) {
+      $target = $entity->$field['dynamic_target'];
     }
   }
   elseif (isset($item['target'][0]['nid'])) {
