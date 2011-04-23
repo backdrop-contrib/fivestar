@@ -44,10 +44,13 @@ function fivestar_field_settings_form($field, $instance) {
     $fields = field_info_fields();
     foreach ($fields as $field_name => $content_field) {
       // Make sure that this field exists for this type.
-      if ($content_field['type'] == 'node_reference' && in_array($field['bundles']['node'][0], $content_field['bundles']['node'])) {
+      if ($content_field['type'] == 'node_reference' && in_array($field['bundles'][$instance['entity_type']][0], $content_field['bundles']['node'])) {
         $dynamic_options[$content_field['field_name']] = t('Node reference: @field', array('@field' => $content_field['field_name']));
       }
     }
+  }
+  if ($instance['entity_type'] == 'comment') {
+    $dynamic_options['parent_node'] = t('Parent Node');
   }
 
   if (empty($dynamic_options)) {
@@ -60,7 +63,7 @@ function fivestar_field_settings_form($field, $instance) {
     '#type' => 'select',
     '#default_value' => isset($field['settings']['dynamic_target']) ? $field['settings']['dynamic_target'] : '',
     '#options' => $dynamic_options,
-    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
+    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
   );
 
   if (user_access('use PHP for fivestar target')) {
@@ -73,7 +76,7 @@ function fivestar_field_settings_form($field, $instance) {
     $form['php_target']['php_target'] = array(
       '#title' => t('Code'),
       '#type' => 'textarea',
-      '#default_value' => isset($field['settings']['php_target']) ? $field['settings']['php_target'] : '',
+      '#default_value' => isset($field['settings']['php_target']['php_target']) ? $field['settings']['php_target']['php_target'] : '',
       '#description' => t('Advanced usage only: PHP code that returns a target node ID. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Note that executing incorrect PHP-code can break your Drupal site.'),
     );
   }
@@ -119,24 +122,24 @@ function fivestar_field_presave($obj_type, $object, $field, $instance, $langcode
  * Implementation of hook_field_insert().
  */
 function fivestar_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  _fivestar_field_helper($entity_type, $entity, $field, $items);
+  _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implementation of hook_field_update().
  */
-function fivestar_field_update($obj_type, $object, $field, $instance, $langcode, &$items) {
-  _fivestar_field_helper($obj_type, $object, $field, $items);
+function fivestar_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
  * Implementation of hook_field_delete().
  */
 function fivestar_field_delete($obj_type, $object, $field, $instance, $langcode, &$items) {
-  _fivestar_field_helper($obj_type, $object, $field, $items, 'delete');
+  _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, 'delete');
 }
 
-function _fivestar_field_helper($entity_type, $entity, $field, $items, $op = '') {
+function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, $op = '') {
   foreach ($items as $delta => $item) {
     if ((isset($entity->status) && !$entity->status) || $op == 'delete') {
       $rating = 0;
@@ -144,7 +147,7 @@ function _fivestar_field_helper($entity_type, $entity, $field, $items, $op = '')
     else {
       $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
     }
-    $items[$delta]['target'] = _fivestar_field_target($entity, $field, $item);
+    $items[$delta]['target'] = _fivestar_field_target($entity, $field, $item, $langcode);
     if (is_numeric($items[$delta]['target'])) {
       _fivestar_cast_vote('node', $items[$delta]['target'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
       votingapi_recalculate_results('node', $items[$delta]['target']);
@@ -155,15 +158,19 @@ function _fivestar_field_helper($entity_type, $entity, $field, $items, $op = '')
 /**
  * Helper function to find the nid that should be rated when a field is changed.
  */
-function _fivestar_field_target($entity, $field, $item) {
+function _fivestar_field_target($entity, $field, $item, $langcode) {
   $target = FALSE;
   if (isset($field['settings']['php_target']) && !empty($field['settings']['php_target']['php_target'])) {
     // Use eval rather than drupal_eval to allow access to local variables.
     $target = eval($field['settings']['php_target']['php_target']);
   }
+  elseif (!empty($field['settings']['dynamic_target']) && $field['settings']['dynamic_target'] == 'parent_node') {
+    // Allow comments to be voted against the parent node.
+    $target = $entity->nid;
+  }
   elseif (!empty($field['settings']['dynamic_target']) && !empty($entity->$field['settings']['dynamic_target'])) {
-    if (is_array($entity->$field['settings']['dynamic_target']) && is_numeric($entity->{$field['settings']['dynamic_target']}[LANGUAGE_NONE][0]['nid'])) {
-      $target = $entity->{$field['settings']['dynamic_target']}[LANGUAGE_NONE][0]['nid'];
+    if (is_array($entity->$field['settings']['dynamic_target']) && is_numeric($entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'])) {
+      $target = $entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'];
     }
     elseif (is_numeric($entity->$field['settings']['dynamic_target'])) {
       $target = $entity->$field['dynamic_target'];
@@ -211,11 +218,8 @@ function fivestar_widget_settings_form($field, $instance) {
     '#title' => t('Allow user to clear value'),
     '#default_value' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 1,
   );
+
   return $form;
-/*
-    case 'save':
-      return array('allow_clear');
-*/
 }
 
 /**
