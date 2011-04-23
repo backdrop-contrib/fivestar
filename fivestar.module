@@ -1387,12 +1387,6 @@ function fivestar_votingapi_views_formatters($details = array()) {
  * VotingAPI Views formatter for displaying static stars.
  */
 function fivestar_views_value_display_handler($value, $field, $columns) {
-  // Determine number of stars to display
-  // TODO need to get the tag here to support >1 tag
-  // For now we're only going to support one tag ("vote").
-  // We'll add the multiple tag once the module is somewhat stable.
-  $tag = 'vote';
-
   if ($field->view->base_table == 'node') {
     if (isset($columns->node_type)) {
       $stars = variable_get('fivestar_stars_'. $columns->node_type, 5);
@@ -1459,8 +1453,6 @@ function fivestar_views_widget_normal_handler($value, $field, $columns) {
  * Generic VotingAPI Views formatter for displaying rating widget.
  */
 function fivestar_views_widget_handler($value, $field, $columns, $summary) {
-  // For now we're only supporting one tag.
-  $tag = 'vote';
   // If the user can't rate, use the display handler.
   if (!user_access('rate content')) {
     return fivestar_views_value_display_handler($value, $field, $columns);
@@ -1519,7 +1511,8 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
       'labels' => $summary ? variable_get('fivestar_labels_'. $node_type, array()) : array(),
     );
 
-    return drupal_get_form('fivestar_custom_widget', $values, $settings);
+    $form = drupal_get_form('fivestar_custom_widget', $values, $settings);
+    return drupal_render($form);
   }
   else {
     return theme('fivestar_static', array(
@@ -1597,25 +1590,24 @@ function fivestar_get_settings($node_type, $tag) {
  * Implementation of hook_votingapi_metadata_alter().
  */
 function fivestar_votingapi_metadata_alter(&$data) {
-  // TODO: This needs porting 
-  // static $tags;
-  // if (!isset($tags)) {
-  //   $tags = array();
-  // 
-    // // Grab the list of fields to update.
-    // foreach (content_types_install() as $type_name => $fields) {
-    //   foreach ($fields as $field) {
-    //     if ($field['type'] == 'fivestar') {
-    //       if (!empty($field['axis'])) {
-    //         $data['tags'][$field['axis']] = array(
-    //           'name' => drupal_ucfirst($field['axis']),
-    //           'description' => t('Used by %field in the %type content type.', array('%type' => $type_name, '%field' => $field['field_name'])),
-    //           'module' => 'fivestar', // This is optional; we can add it for our own purposes.
-    //         );
-    //       }
-    //     }
-    //   }
-    // }
-  // }
-  // return $tags;
+  static $tags;
+  if (!isset($tags)) {
+    $tags = array();
+  
+    // Grab the list of fields to update.
+    $fields = field_info_fields();
+    foreach ($fields as $field) {
+      if ($field['type'] == 'fivestar') {
+        if (!empty($field['settings']['axis'])) {
+          $data['tags'][$field['settings']['axis']] = array(
+            'name' => drupal_ucfirst($field['settings']['axis']),
+            'description' => t('Used by %field in the %type content type.', array('%type' => $type_name, '%field' => $field['field_name'])),
+            'module' => 'fivestar', // This is optional; we can add it for our own purposes.
+          );
+        }
+      }
+    }
+  }
+
+  return $tags;
 }
