@@ -14,7 +14,10 @@ function fivestar_field_info() {
       'label' => t('Fivestar Rating'),
       'description' => t('Store a rating for this piece of content.'),
       'default_widget' => 'stars',
-      'default_formatter' => 'default',
+      'default_formatter' => 'fivestar_formatter_default',
+      'instance_settings' => array(
+        'axis' => 'vote',
+      ), 
     ),
   );
 }
@@ -169,7 +172,7 @@ function _fivestar_field_target($entity, $field, $item, $langcode) {
     $target = $entity->nid;
   }
   elseif (!empty($field['settings']['dynamic_target']) && !empty($entity->$field['settings']['dynamic_target'])) {
-    if (is_array($entity->$field['settings']['dynamic_target']) && is_numeric($entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'])) {
+    if (isset($entity->{$field['settings']['dynamic_target']}[$langcode][0]) && is_numeric($entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'])) {
       $target = $entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'];
     }
     elseif (is_numeric($entity->$field['settings']['dynamic_target'])) {
