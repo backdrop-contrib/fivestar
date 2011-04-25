@@ -138,7 +138,7 @@ function fivestar_field_update($entity_type, $entity, $field, $instance, $langco
 /**
  * Implementation of hook_field_delete().
  */
-function fivestar_field_delete($obj_type, $object, $field, $instance, $langcode, &$items) {
+function fivestar_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, 'delete');
 }
 
