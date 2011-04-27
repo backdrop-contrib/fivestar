@@ -740,8 +740,8 @@ function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = '
 
     // Set all text values, then unset the unnecessary ones.
     $user_value = (isset($votes['user']['value'])) ? $votes['user']['value'] : NULL;
-    $average_value = (isset($votes['average']['value'])) ? $votes['user']['value'] : NULL;
-    $count_value = (isset($votes['count']['value'])) ? $votes['user']['value'] : NULL;
+    $average_value = (isset($votes['average']['value'])) ? $votes['average']['value'] : NULL;
+    $count_value = (isset($votes['count']['value'])) ? $votes['count']['value'] : NULL;
     switch ($settings['text_display']) {
       case 'average':
         $user_value = NULL;
