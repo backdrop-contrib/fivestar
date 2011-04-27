@@ -507,67 +507,69 @@ function fivestar_fivestar_widgets() {
 }
 
 /**
- * Implementation of hook_node_view().
+ * Implementation of hook_entity_view().
  *
- * Adds the fievestar widget to the node view.
+ * Adds the fivestar widget to the entity.
  */
-function fivestar_node_view($node, $view_mode) {
+function fivestar_entity_view($entity, $type, $view_mode, $langcode) {
   $exclude_modes = array(
     'preview',
     'search_index',
     'search_result',
     'rss',
   );
-  if (!in_array($view_mode, $exclude_modes) && !isset($node->modr8_form_teaser) && variable_get('fivestar_'. $node->type, 0)) {
-    if ($view_mode == 'teaser') {
-      $position = variable_get('fivestar_position_teaser_'. $node->type, 'above');
-    }
-    else {
-      $position = variable_get('fivestar_position_'. $node->type, 'above');
-    }
+  if ($type == 'node') {
+    if (!in_array($view_mode, $exclude_modes) && !isset($entity->modr8_form_teaser) && variable_get('fivestar_'. $entity->type, 0)) {
+      if ($view_mode == 'teaser') {
+        $position = variable_get('fivestar_position_teaser_'. $entity->type, 'above');
+      }
+      else {
+        $position = variable_get('fivestar_position_'. $entity->type, 'above');
+      }
 
-    switch ($position) {
-      case 'above':
-      case 'below':
-        if (user_access('rate content')) {
+      switch ($position) {
+        case 'above':
+        case 'below':
+          if (user_access('rate content')) {
+            $content = '';
+            foreach (fivestar_get_tags() as $tag) {
+              if (fivestar_validate_target('node', $entity->nid, $tag)) {
+                $entity->content['fivestar_widget_' . $tag]['form'] = fivestar_widget_form($entity, $tag);
+                $entity->content['fivestar_widget_' . $tag]['#weight'] = ($position == 'above') ? -10 : 50;
+              }
+            }
+            break;
+          } // Fall through to static if not allowed to rate.
+          $position .= '_static';
+        case 'above_static':
+        case 'below_static':
           $content = '';
           foreach (fivestar_get_tags() as $tag) {
-            if (fivestar_validate_target('node', $node->nid, $tag)) {
-              $node->content['fivestar_widget_' . $tag]['form'] = fivestar_widget_form($node, $tag);
-              $node->content['fivestar_widget_' . $tag]['#weight'] = ($position == 'above') ? -10 : 50;
+            if (fivestar_validate_target('node', $entity->nid, $tag)) {
+              $content .= fivestar_static('node', $entity->nid, $entity->type, $tag);
             }
           }
-          break;
-        } // Fall through to static if not allowed to rate.
-        $position .= '_static';
-      case 'above_static':
-      case 'below_static':
-        $content = '';
-        foreach (fivestar_get_tags() as $tag) {
-          if (fivestar_validate_target('node', $node->nid, $tag)) {
-            $content .= fivestar_static('node', $node->nid, $node->type, $tag);
+          if ($content) {
+            $entity->content['fivestar_widget'] = array(
+              '#markup' => $content,
+              '#weight' => strpos($position, 'above') === 0 ? -10 : 50,
+            );
           }
-        }
-        if ($content) {
-          $node->content['fivestar_widget'] = array(
-            '#markup' => $content,
-            '#weight' => strpos($position, 'above') === 0 ? -10 : 50,
-          );
-        }
-        
-        break;
-      case 'link':
-        $node->content['links']['fivestar_widget'] = array(
-          '#links' => array(
-            'fivestar-rate' => array(
-              'title' => t('Rate'),
-              'href' => 'node/'. $node->nid,
-              'fragment' => 'fivestar-form-node-'. $node->nid,
-              'attributes' => array('title' => t('Rate this @type', array('@type' => _node_types_build()->types[$node->type]->name))),
+
+          break;
+        case 'link':
+          $entity->content['links']['fivestar_widget'] = array(
+            '#links' => array(
+              'fivestar-rate' => array(
+                'title' => t('Rate'),
+                'href' => 'node/'. $entity->nid,
+                'fragment' => 'fivestar-form-node-'. $entity->nid,
+                'attributes' => array('title' => t('Rate this @type', array('@type' => _node_types_build()->types[$entity->type]->name))),
+              ),
             ),
-          ),
-        );
-        break;
+          );
+          break;
+      }
     }
   }
 }
