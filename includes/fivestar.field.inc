@@ -159,7 +159,7 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
 }
 
 /**
- * Helper function to find the nid that should be rated when a field is changed.
+ * Helper function to find the id that should be rated when a field is changed.
  */
 function _fivestar_field_target($entity, $field, $item, $langcode) {
   $target = FALSE;
@@ -277,16 +277,101 @@ function fivestar_field_formatter_info() {
       'label' => t('Percentage (i.e. 92)'),
       'field types' => array('fivestar'),
     ),
+    'fivestar_formatter_exposed_stars' => array(
+      'label' => t('Exposed Stars'),
+      'field types' => array('fivestar'),
+      'settings' =>  array(
+        'stars' => 5,
+        'allow_clear' => FALSE,
+        'style' => 'average',
+        'feedback_enable' => FALSE,
+      ),
+    ),
   );
+}
+
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  
+  if ($display['type'] != 'fivestar_formatter_exposed_stars') {
+    return;
+  }
+
+  $element['stars'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of stars'),
+    '#options' => drupal_map_assoc(range(1, 10)),
+    '#default_value' => $settings['stars'],
+  );
+  $element['feedback_enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable feedback during vote saving and deletion'),
+    '#default_value' => $settings['feedback_enable'],
+    '#return_value' => 1
+  );
+
+  $element['allow_clear'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow users to undo their votes'),
+    '#default_value' => $settings['allow_clear'],
+    '#return_value' => 1,
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function fivestar_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  if ($display['type'] != 'fivestar_formatter_exposed_stars') {
+    return;
+  }
+
+  $summary = t("Stars: @stars, Allows Clear: @clear, Feedback: @feedback", array('@stars' => $settings['stars'], '@clear' => $settings['allow_clear'], '@feedback' => $settings['feedback_enable']));
+
+  return $summary;
 }
 
 function fivestar_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-  
-  $element[0] = array(
-    '#theme' => $display['type'],
-    '#item' => $items,
-  );
+  $settings = $display['settings'];
+  if ($display['type'] == 'fivestar_formatter_exposed_stars') {
+    $tag = 'vote';
+
+    // Only pull in all the votes if we need to display the summary text.
+    $votes = fivestar_get_votes($entity_type, $entity->nid, $tag);
+    $settings = array(
+      'stars' => $settings['stars'],
+      'allow_clear' => $settings['allow_clear'],
+      'style' => $settings['style'],
+      'text' => 'none',
+      'content_type' => $entity_type,
+      'content_id' => $entity->nid,
+      'tag' => 'vote',
+      'autosubmit' => TRUE,
+      'title' => FALSE,
+      'feedback_enable' => $settings['feedback_enable'],
+      'labels_enable' => FALSE,
+      'labels' => array(),
+    );
+
+    $element = drupal_get_form('fivestar_custom_widget', $votes, $settings);
+  }
+  else {
+    $element[0] = array(
+      '#theme' => $display['type'],
+      '#item' => $items,
+    );    
+  }
 
   return $element;
 }
