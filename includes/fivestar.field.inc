@@ -366,7 +366,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'labels' => array(),
     );
 
-    $element = drupal_get_form('fivestar_custom_widget', $values, $settings);
+    $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
   }
   else {
     $element[0] = array(
