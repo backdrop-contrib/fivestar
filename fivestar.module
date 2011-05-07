@@ -631,12 +631,12 @@ function fivestar_forms($form_id, $args) {
  * Note that this is not an implementation of hook_form(). We should probably
  * change the function to reflect that.
  */
-function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
+function fivestar_form($form, &$form_state, $entity_type, $id, $tag) {
   global $user;
 
-  if ($content_type == 'node') {
-    if (is_numeric($content_id)) {
-      $node = node_load($content_id);
+  if ($entity_type == 'node') {
+    if (is_numeric($id)) {
+      $node = node_load($id);
     }
     else {
       return array();
@@ -649,10 +649,10 @@ function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
 
   if ($star_display == 'average' && ($text_display == 'average' || $text_display == 'none')) {
     // Save a query and don't retrieve the user vote unnecessarily.
-    $votes = fivestar_get_votes($content_type, $content_id, $tag, 0);
+    $votes = fivestar_get_votes($entity_type, $id, $tag, 0);
   }
   else {
-    $votes = fivestar_get_votes($content_type, $content_id, $tag);
+    $votes = fivestar_get_votes($entity_type, $id, $tag);
   }
 
   $values = array(
@@ -666,8 +666,8 @@ function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
     'allow_clear' => variable_get('fivestar_unvote_' . $suffix, FALSE),
     'style' => $star_display,
     'text' => $text_display,
-    'content_type' => $content_type,
-    'content_id' => $content_id,
+    'content_type' => $entity_type,
+    'content_id' => $id,
     'tag' => 'vote',
     'autosubmit' => TRUE,
     'title' => variable_get('fivestar_title_' . $suffix, 1) ? NULL : FALSE,
@@ -694,22 +694,22 @@ function fivestar_form($form, &$form_state, $content_type, $content_id, $tag) {
  *   Optional. The voting tag that will be retreived. Defaults to "vote" if none
  *   is specified.
  */
-function fivestar_static($content_type, $content_id, $node_type = NULL, $tag = 'vote') {
+function fivestar_static($entity_type, $id, $node_type = NULL, $tag = 'vote') {
   global $user;
 
   $criteria = array(
-    'content_type' => $content_type,
-    'content_id' => $content_id,
+    'content_type' => $entity_type,
+    'content_id' => $id,
     'value_type' => 'percent',
     'tag' => 'vote',
   );
 
-  $votes = fivestar_get_votes($content_type, $content_id, $tag);
+  $votes = fivestar_get_votes($entity_type, $id, $tag);
 
-  if ($content_type == 'node') {
+  if ($entity_type == 'node') {
     // Content type should always be passed to avoid this node load.
     if (!isset($node_type)) {
-      $node = node_load($content_id);
+      $node = node_load($id);
       $node_type = $node->type;
     }
 
