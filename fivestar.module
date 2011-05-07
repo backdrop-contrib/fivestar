@@ -681,17 +681,17 @@ function fivestar_form($form, &$form_state, $entity_type, $id, $tag) {
 }
 
 /**
- * Retreive and print out a static display of stars for a piece of content.
+ * Retrieve and print out a static display of stars for a piece of content.
  *
- * @param $content_type
- *   The type of content that will have its vote retreived. i.e. "node".
- * @param $content_id
- *   The ID of the content that will have its vote retreived.
+ * @param $entity_type
+ *   The type of entity that will have its vote retrieved. i.e. "node".
+ * @param $id
+ *   The ID of the content that will have its vote retrieved.
  * @param $node_type
- *   Optional. If retreiving a node's rating, passing in the node type will
+ *   Optional. If retrieving a node's rating, passing in the node type will
  *   prevent Fivestar from doing an additional query to find it.
  * @param $tag
- *   Optional. The voting tag that will be retreived. Defaults to "vote" if none
+ *   Optional. The voting tag that will be retrieved. Defaults to "vote" if none
  *   is specified.
  */
 function fivestar_static($entity_type, $id, $node_type = NULL, $tag = 'vote') {
