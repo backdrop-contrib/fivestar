@@ -344,11 +344,13 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
 function fivestar_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   $settings = $display['settings'];
-  if ($display['type'] == 'fivestar_formatter_exposed_stars') {
-    $tag = 'vote';
-
-    // Only pull in all the votes if we need to display the summary text.
+  if ($display['type'] == 'fivestar_formatter_exposed_stars' && user_access('rate content')) {
+    $tag = (isset($instance['settings']['axis'])) ? $instance['settings']['axis'] : 'vote';
     $votes = fivestar_get_votes($entity_type, $entity->nid, $tag);
+    $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
+    $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
+    $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
+    
     $settings = array(
       'stars' => $settings['stars'],
       'allow_clear' => $settings['allow_clear'],
@@ -364,7 +366,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'labels' => array(),
     );
 
-    $element = drupal_get_form('fivestar_custom_widget', $votes, $settings);
+    $element = drupal_get_form('fivestar_custom_widget', $values, $settings);
   }
   else {
     $element[0] = array(
