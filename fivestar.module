@@ -320,22 +320,22 @@ function fivestar_vote($type, $cid, $tag, $value) {
  * voting, etc...
  */
 
-function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $result = FALSE, $skip_validation = FALSE) {
+function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $result = FALSE, $skip_validation = FALSE) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
   $uid = empty($uid) ? $user->uid : $uid;
   // Bail out if the user's trying to vote on an invalid object.
-  if (!$skip_validation && !fivestar_validate_target($type, $cid, $tag, $uid)) {
+  if (!$skip_validation && !fivestar_validate_target($entity_type, $id, $tag, $uid)) {
     return array();
   }
   // Sanity-check the incoming values.
-  if (is_numeric($cid) && is_numeric($value)) {
+  if (is_numeric($id) && is_numeric($value)) {
     if ($value > 100) {
       $value = 100;
     }
 
     // Get the user's current vote.
-    $criteria = array('entity_type' => $type, 'entity_id' => $cid, 'tag' => $tag, 'uid' => $uid);
+    $criteria = array('entity_type' => $entity_type, 'entity_id' => $id, 'tag' => $tag, 'uid' => $uid);
     // Get the unique identifier for the user (IP Address if anonymous).
     $user_criteria = votingapi_current_user_identifier();
     $user_votes = votingapi_select_votes($criteria + $user_criteria);
@@ -347,7 +347,7 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
       $votes = $criteria += array('value' => $value);
       votingapi_set_votes($votes, $user_votes);
     }
-    return fivestar_get_votes($type, $cid, $tag, $uid);
+    return fivestar_get_votes($entity_type, $id, $tag, $uid);
   }
 }
 
