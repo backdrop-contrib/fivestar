@@ -352,27 +352,27 @@ function _fivestar_cast_vote($type, $cid, $value, $tag = NULL, $uid = NULL, $res
 }
 
 /**
- * Utility function to retreive VotingAPI votes.
+ * Utility function to retrieve VotingAPI votes.
  *
- * Note that this should not be used for general vote retreival, instead the
+ * Note that this should not be used for general vote retrieval, instead the
  * VotingAPI function votingapi_select_results() should be used, which is more
  * efficient when retrieving multiple votes.
  *
- * @param $type
- *   The content type for which to retreive votes.
- * @param $cid
- *   The content ID for which to retreive votes.
+ * @param $entity_type
+ *   The Entity type for which to retrieve votes.
+ * @param $id
+ *   The ID for which to retrieve votes.
  * @param $tag
- *   The VotingAPI tag for which to retreive votes.
+ *   The VotingAPI tag for which to retrieve votes.
  * @param $uid
- *   Optional. A user ID for which to retreive votes.
+ *   Optional. A user ID for which to retrieve votes.
  * @return
  *   An array of the following keys:
  *   - average: An array of VotingAPI results, including the average 'value'.
  *   - count: An array of VotingAPI results, including the count 'value'.
  *   - user: An array of VotingAPI results, including the user's vote 'value'.
  */
-function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
+function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
   global $user;
 
   if (!isset($uid)) {
@@ -380,8 +380,8 @@ function fivestar_get_votes($type, $cid, $tag = 'vote', $uid = NULL) {
   }
 
   $criteria = array(
-    'entity_type' => $type,
-    'entity_id' => $cid,
+    'entity_type' => $entity_type,
+    'entity_id' => $id,
     'value_type' => 'percent',
     'tag' => $tag,
   );
