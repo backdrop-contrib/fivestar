@@ -11,12 +11,6 @@
     // Hide extra mouseover textfields
     nodePreview.displayTextfields();
 
-    // Enable comments if available.
-    $comment = $('input[name=fivestar_comment]');
-    if ($comment.size()) {
-      var commentPreview = new fivestarPreview($('#fivestar-comment-preview .fivestar-preview')[0]);
-    }
-
     // Setup dynamic form elements.
     $enable = $('#edit-fivestar');
     $unvote = $('#edit-fivestar-unvote');
@@ -43,27 +37,10 @@
         // Enable the node preview.
         nodePreview.enable($unvote.attr('checked') ? 1 : 0, $style.val(), $text.val(), $title.attr('checked') ? 1 : 0, $feedback.attr('checked') ? 1 : 0);
         nodePreview.update()
-
-        // Enable the comment preview if available.
-        if (commentPreview) {
-          var commentSetting = 0;
-          $comment.each(function() {
-            if ($(this).attr('checked')) {
-              commentSetting = this.value;
-            }
-          });
-          if (commentSetting != 0) {
-            commentPreview.enable(commentSetting == 1 ? 1 : 0, 'user', 'none', 0, 0);
-            commentPreview.update();
-          }
-        }
         $options.attr('disabled', false);
       }
       else {
         nodePreview.disable();
-        if (commentPreview) {
-          commentPreview.disable();
-        }
         $options.attr('disabled', 'disabled');
       }
     });
@@ -74,32 +51,7 @@
     $title.change(function() { nodePreview.setValue('title', $(this).attr('checked') ? 1 : 0); });
     $unvote.change(function() { nodePreview.setValue('unvote', $(this).attr('checked') ? 1 : 0); });
     $feedback.change(function() { nodePreview.setValue('feedback', $(this).attr('checked') ? 1 : 0); });
-
-    if (commentPreview) {
-      // Enable the comment preview.
-      if ($enable.attr('checked')) {
-        commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0, 0);
-      }
-      else {
-        commentPreview.disable();
-      }
-
-      // Setup comment preview handlers.
-      $comment.change(function() {
-        if ($(this).attr('checked') && $enable.attr('checked')) {
-          if (this.value != 0) {
-            commentPreview.setValue('unvote', this.value == 1 ? 1 : 0);
-            commentPreview.enable(this.value == 1 ? 1 : 0, 'user', 'none', 0, 0);
-            commentPreview.update();
-          }
-          else {
-            commentPreview.disable();
-          }
-        }
-      });
-    }
   });
-//}
 
 /**
  * Constructor for fivestarPreview.

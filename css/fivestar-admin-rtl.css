@@ -2,11 +2,9 @@ div.fivestar-widgets div.form-item {
   float: right;
 }
 
-#fivestar-comment-form,
 #fivestar-direct-form {
   float: right;
 }
-#fivestar-comment-preview,
 #fivestar-direct-preview {
   float: right;
   margin-right: 40px;

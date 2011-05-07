@@ -9,11 +9,9 @@ div.fivestar-widgets div.form-item {
 }
 
 /* Fivestar Node Type Preview */
-#fivestar-comment-form,
 #fivestar-direct-form {
   float: left; /* RTL */
 }
-#fivestar-comment-preview,
 #fivestar-direct-preview {
   float: left; /* RTL */
   margin-left: 40px; /* RTL */

@@ -428,20 +428,6 @@ function theme_fivestar_node_type_tag_form($variables) {
   $form['direct']['#children'] = $direct;
   $output .= drupal_render($form['direct']);
 
-  // Comment settings form.
-  if (module_exists('fivestar_comment')) {
-    $comment = '';
-    $comment .= '<div id="fivestar-comment-form">';
-    $comment .= drupal_render($form['comment']['fivestar_comment']);
-    $comment .= '</div>';
-    $comment .= '<div id="fivestar-comment-preview">';
-    $comment .= drupal_render($form['comment']['fivestar_comment_preview']);
-    $comment .= '</div>';
-
-    $form['comment']['#children'] = $comment;
-    $output .= drupal_render($form['comment']);
-  }
-
   // Any remaining cruft (should be empty).
   $output .= drupal_render_children($form);
   return $output;
