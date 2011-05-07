@@ -236,9 +236,9 @@ function _fivestar_variables() {
 /**
  * Callback function for fivestar/vote.
  *
- * @param type
- *   A content-type to log the vote to. 'node' is the most common.
- * @param cid
+ * @param entity_type
+ *   An entity_type to log the vote to. 'node' is the most common.
+ * @param id
  *   A content id to log the vote to. This would be a node ID, a comment ID, etc.
  * @param tag
  *   Multi-axis tag to allow multiple votes per node. 'vote' is the most common.
@@ -248,7 +248,7 @@ function _fivestar_variables() {
  *  An XML chunk containing the results of the vote, for use by the client-side
  *  javascript code.
  */
-function fivestar_vote($type, $cid, $tag, $value) {
+function fivestar_vote($entity_type, $id, $tag, $value) {
   drupal_add_http_header("Content-Type", "text/xml");
   $output = '';
   $output .= '<?xml version="1.0" encoding="UTF-8"?>';
@@ -260,10 +260,10 @@ function fivestar_vote($type, $cid, $tag, $value) {
     echo $output;
     drupal_exit();
   }
-  $result = _fivestar_cast_vote($type, $cid, $value, $tag, NULL, TRUE);
-  votingapi_recalculate_results($type, $cid);
-  if ($type == 'node') {
-    $node = node_load($cid);
+  $result = _fivestar_cast_vote($entity_type, $id, $value, $tag, NULL, TRUE);
+  votingapi_recalculate_results($entity_type, $id);
+  if ($entity_type == 'node') {
+    $node = node_load($id);
   }
 
   $suffix = fivestar_get_suffix((!isset($node) ? 'default' : $node->type), $tag);
@@ -305,8 +305,8 @@ function fivestar_vote($type, $cid, $tag, $value) {
 
   $output .= '<vote>';
   $output .= '<value>'. $value .'</value>';
-  $output .= '<type>'. $type .'</type>';
-  $output .= '<id>'. $cid .'</id>';
+  $output .= '<type>'. $entity_type .'</type>';
+  $output .= '<id>'. $id .'</id>';
   $output .= '<tag>'. $tag .'</tag>';
   $output .= '</vote></xml>';
 
