@@ -421,7 +421,7 @@ function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
 /**
  * Check that an item being voted upon is a valid vote.
  *
- * @param $type
+ * @param $entity_type
  *   Type of target (currently only node is supported).
  * @param $id
  *   Identifier within the type (in this case nid).
@@ -432,12 +432,12 @@ function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
  *
  * @return boolean
  */
-function fivestar_validate_target($type, $id, $tag, $uid = NULL) {
+function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
   if (!isset($uid)) {
     $uid = $GLOBALS['user']->uid;
   }
 
-  $access = module_invoke_all('fivestar_access', $type, $id, $tag, $uid);
+  $access = module_invoke_all('fivestar_access', $entity_type, $id, $tag, $uid);
   foreach ($access as $result) {
     if ($result == TRUE) {
       return TRUE;
@@ -455,7 +455,7 @@ function fivestar_validate_target($type, $id, $tag, $uid = NULL) {
  * modules to allow voting on any type of content, such as nodes, users, or
  * comments, even though only nodes are supported by Fivestar directly.
  *
- * @param $type
+ * @param $entity_type
  *   Type of target (currently only node is supported).
  * @param $id
  *   Identifier within the type (in this case nid).
@@ -471,8 +471,8 @@ function fivestar_validate_target($type, $id, $tag, $uid = NULL) {
  *   of permissions defined in other modules, return FALSE. Note if all
  *   modules return NULL, stating no preference, then access will be denied.
  */
-function fivestar_fivestar_access($type, $id, $tag, $uid) {
-  if ($type == 'node' && $node = node_load($id)) {
+function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
+  if ($entity_type == 'node' && $node = node_load($id)) {
     if (variable_get('fivestar_'. fivestar_get_suffix($node->type, $tag), 0)) {
       return TRUE;
     }
