@@ -341,10 +341,17 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
   return $summary;
 }
 
+/**
+ * Implements hook_field_formatter_view().
+ */
 function fivestar_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   $settings = $display['settings'];
+
+  // We are going to built a custom fivestar rating widget if the exposed stars formatter is 
+  // selected and the user has the rate content permission. 
   if ($display['type'] == 'fivestar_formatter_exposed_stars' && user_access('rate content')) {
+    // The axis/tag is selected from the field instance.
     $tag = (isset($instance['settings']['axis'])) ? $instance['settings']['axis'] : 'vote';
     $votes = fivestar_get_votes($entity_type, $entity->nid, $tag);
     $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
@@ -358,7 +365,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'text' => 'none',
       'content_type' => $entity_type,
       'content_id' => $entity->nid,
-      'tag' => 'vote',
+      'tag' => $tag,
       'autosubmit' => TRUE,
       'title' => FALSE,
       'feedback_enable' => $settings['feedback_enable'],
