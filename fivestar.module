@@ -712,7 +712,8 @@ function fivestar_static($entity_type, $id, $bundle = NULL, $tag = 'vote') {
   $votes = fivestar_get_votes($entity_type, $id, $tag);
 
   if ($entity_type == 'node') {
-    // Content type should always be passed to avoid this node load.
+    // The bundle should always be passed to avoid this node load.
+    // !TODO: Remove the node_load, a direct query would be better.
     if (!isset($bundle)) {
       $node = node_load($id);
       $bundle = $node->type;
