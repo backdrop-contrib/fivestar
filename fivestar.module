@@ -422,9 +422,9 @@ function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
  * Check that an item being voted upon is a valid vote.
  *
  * @param $entity_type
- *   Type of target (currently only node is supported).
+ *   Type of target.
  * @param $id
- *   Identifier within the type (in this case nid).
+ *   Identifier within the type.
  * @param $tag
  *   The VotingAPI tag string.
  * @param $uid
@@ -452,13 +452,13 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
  * Implementation of hook_fivestar_access().
  *
  * This hook is called before every vote is cast through Fivestar. It allows
- * modules to allow voting on any type of content, such as nodes, users, or
- * comments, even though only nodes are supported by Fivestar directly.
+ * modules to allow voting on any type of entity, such as nodes, users, or
+ * comments.
  *
  * @param $entity_type
  *   Type of target (currently only node is supported).
  * @param $id
- *   Identifier within the type (in this case nid).
+ *   Identifier within the type.
  * @param $tag
  *   The VotingAPI tag string.
  * @param $uid
@@ -472,10 +472,15 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
  *   modules return NULL, stating no preference, then access will be denied.
  */
 function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
+  //!TODO: remove the node_load that is a bit too much just to get the node type.
   if ($entity_type == 'node' && $node = node_load($id)) {
     if (variable_get('fivestar_'. fivestar_get_suffix($node->type, $tag), 0)) {
       return TRUE;
     }
+  }
+  else {
+    // We need to check if the entity being loaded has a fivestar exposed star formatter. 
+    // If it does then it should be allowed to vote. 
   }
 }
 
