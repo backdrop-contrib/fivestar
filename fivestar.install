@@ -10,37 +10,25 @@ function fivestar_schema() {
 }
 
 function fivestar_install() {
-  drupal_install_schema('fivestar');
-  if (module_exists('content')) {
-    content_notify('install', 'fivestar');
-  }
+
 }
 
 function fivestar_uninstall() {
-  drupal_uninstall_schema('fivestar');
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
-  if (module_exists('content')) {
-    content_notify('uninstall', 'fivestar');
-  }
 }
 
 /**
  * Implementation of hook_enable().
  */
 function fivestar_enable() {
-  if (module_exists('content')) {
-    module_load_include('inc', 'fivestar', 'fivestar_field');
-    content_notify('enable', 'fivestar');
-  }
+
 }
 
 /**
  * Implementation of hook_disable().
  */
 function fivestar_disable() {
-  if (module_exists('content')) {
-    content_notify('disable', 'fivestar');
-  }
+
 }
 
 /**
