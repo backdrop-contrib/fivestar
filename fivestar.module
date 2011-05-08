@@ -692,14 +692,14 @@ function fivestar_form($form, &$form_state, $entity_type, $id, $tag) {
  *   The type of entity that will have its vote retrieved. i.e. "node".
  * @param $id
  *   The ID of the content that will have its vote retrieved.
- * @param $node_type
- *   Optional. If retrieving a node's rating, passing in the node type will
+ * @param $bundle
+ *   Optional. If retrieving a node's rating, passing in the bundle will
  *   prevent Fivestar from doing an additional query to find it.
  * @param $tag
  *   Optional. The voting tag that will be retrieved. Defaults to "vote" if none
  *   is specified.
  */
-function fivestar_static($entity_type, $id, $node_type = NULL, $tag = 'vote') {
+function fivestar_static($entity_type, $id, $bundle = NULL, $tag = 'vote') {
   global $user;
 
   $criteria = array(
@@ -713,12 +713,12 @@ function fivestar_static($entity_type, $id, $node_type = NULL, $tag = 'vote') {
 
   if ($entity_type == 'node') {
     // Content type should always be passed to avoid this node load.
-    if (!isset($node_type)) {
+    if (!isset($bundle)) {
       $node = node_load($id);
-      $node_type = $node->type;
+      $bundle = $node->type;
     }
 
-    $settings = fivestar_get_settings($node_type, $tag);
+    $settings = fivestar_get_settings($bundle, $tag);
     $stars = $settings['stars'];
     switch ($settings['star_display']) {
       case 'average':
