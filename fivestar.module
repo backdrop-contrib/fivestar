@@ -261,7 +261,6 @@ function fivestar_vote($entity_type, $id, $tag, $value) {
     drupal_exit();
   }
   $result = _fivestar_cast_vote($entity_type, $id, $value, $tag, NULL, TRUE);
-  votingapi_recalculate_results($entity_type, $id);
   if ($entity_type == 'node') {
     $node = node_load($id);
   }
@@ -272,7 +271,6 @@ function fivestar_vote($entity_type, $id, $tag, $value) {
   $feedback_enable = variable_get('fivestar_feedback_' . $suffix, 1);
 
   $output .= '<xml><result>';
-
   if (count($result)) {
     foreach ($result as $data) {
       if (isset($data['tag']) && $data['tag'] == $tag) {
@@ -283,8 +281,8 @@ function fivestar_vote($entity_type, $id, $tag, $value) {
   }
   $arguments = array(
     'user_rating' => $value,
-    'average_rating' => $summary[$tag]['average'],
-    'votes' => $summary[$tag]['count'],
+    'average_rating' => (isset($summary[$tag]['average'])) ? $summary[$tag]['average'] : 0,
+    'votes' => (isset($summary[$tag]['count'])) ? $summary[$tag]['count'] : 0,
     'stars' => $stars,
     'feedback_enable' => $feedback_enable,
   );
@@ -347,6 +345,9 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
       $votes = $criteria += array('value' => $value);
       votingapi_set_votes($votes);
     }
+
+    // Moving the calculationg after saving/deleting the vote but before getting the votes.
+    votingapi_recalculate_results($entity_type, $id);    
     return fivestar_get_votes($entity_type, $id, $tag, $uid);
   }
 }
