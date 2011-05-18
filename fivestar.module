@@ -1591,29 +1591,16 @@ function fivestar_get_settings($node_type, $tag) {
   return $settings;
 }
 
-
 /**
  * Implementation of hook_votingapi_metadata_alter().
  */
 function fivestar_votingapi_metadata_alter(&$data) {
-  static $tags;
-  if (!isset($tags)) {
-    $tags = array();
-  
-    // Grab the list of fields to update.
-    $fields = field_info_fields();
-    foreach ($fields as $field) {
-      if ($field['type'] == 'fivestar') {
-        if (!empty($field['settings']['axis'])) {
-          $data['tags'][$field['settings']['axis']] = array(
-            'name' => drupal_ucfirst($field['settings']['axis']),
-            'description' => t('Used by %field in the %type content type.', array('%type' => $type_name, '%field' => $field['field_name'])),
-            'module' => 'fivestar', // This is optional; we can add it for our own purposes.
-          );
-        }
-      }
-    }
+  foreach (fivestar_get_tags() as $tag) {
+    // Add several custom tags that are being used by fivestar.
+    $data['tags'][$tag] = array(
+      'name' => t($tag),
+      'description' => t('@tag used by fivestar.', array('@tag' => $tag)),
+      'module' => 'fivestar',
+    );  
   }
-
-  return $tags;
 }
