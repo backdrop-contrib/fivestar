@@ -92,8 +92,8 @@ function fivestar_field_settings_form($field, $instance) {
 
   $form['axis'] = array(
     '#type' => 'textfield',
-    '#title' => 'Voting Axis',
-    '#description' => t('The axis this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc. If no axis is entered, the default axis <em>vote</em> will be used. Warning: changing this value will not update existing votes to the new axis.'),
+    '#title' => 'Voting Tag',
+    '#description' => t('The tag this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc. If no tag is entered, the default tag <em>vote</em> will be used. Warning: changing this value will not update existing votes to the new tag.'),
     '#default_value' => isset($field['settings']['axis']) ? $field['settings']['axis'] : '',
   );
 
