@@ -100,11 +100,6 @@ function fivestar_field_settings_form($field, $instance) {
   return $form;
 }
 
-/*
-case 'save':
-  return array('stars', 'dynamic_target', 'php_target', 'axis');
-*/
-
 function fivestar_field_schema() {
   return array(
     'columns' => array(
@@ -289,7 +284,6 @@ function fivestar_field_formatter_info() {
     ),
   );
 }
-
 
 /**
  * Implements hook_field_formatter_settings_form().
