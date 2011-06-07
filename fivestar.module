@@ -583,14 +583,27 @@ function fivestar_block_info() {
 }
 
 function fivestar_block_view($delta = 0) {
-  if (user_access('access content') && user_access('rate content') && (arg(2) == '' || arg(2) == 'view') && ($node = menu_get_object())) {
-    $block = array('subject' => t('Rate This'));
-    foreach (fivestar_get_tags() as $tag) {
-      if (fivestar_validate_target('node', $node->nid, $tag)) {
-        $block['content'][$tag] = fivestar_widget_form($node, $tag);
+  if (user_access('access content') && (arg(2) == '' || arg(2) == 'view') && ($node = menu_get_object())) {
+    if (user_access('rate content')) {
+      $block = array('subject' => t('Rate This'));
+      foreach (fivestar_get_tags() as $tag) {
+        if (fivestar_validate_target('node', $node->nid, $tag)) {
+          $block['content'][$tag] = fivestar_widget_form($node, $tag);
+        }
       }
+      return $block;      
     }
-    return $block;
+    else {
+      $block = array('subject' => t('Fivestars'));
+      foreach (fivestar_get_tags() as $tag) {
+        if (fivestar_validate_target('node', $node->nid, $tag)) {
+          $block['content'][$tag] = array(
+            '#markup' => fivestar_static('node', $node->nid, $node->type, $tag),
+          );
+        }
+      }
+      return $block;
+    }
   }
 }
 
