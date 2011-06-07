@@ -357,7 +357,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
     $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
     $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
-    
+
     $settings = array(
       'stars' => $settings['stars'],
       'allow_clear' => $settings['allow_clear'],
@@ -374,15 +374,23 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     );
 
     $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
+
+    return $element;
   }
-  else {
-    $element[0] = array(
-      '#theme' => $display['type'],
-      '#item' => $items,
-      '#field_settings' => $field['settings'],
-      '#display_settings' => $settings,
-    );    
+
+  // If the display type happends to be fivestar_formatter_exposed_stars and the user does not
+  // have access to rate content as check above then we'll going to default back to
+  // fivestar_formatter_default. !TODO: This should be configurable.
+  if ($display['type'] == 'fivestar_formatter_exposed_stars') {
+    $display['type'] = 'fivestar_formatter_default';
   }
+
+  $element[0] = array(
+    '#theme' => $display['type'],
+    '#item' => $items,
+    '#field_settings' => $field['settings'],
+    '#display_settings' => $settings,
+  );
 
   return $element;
 }
