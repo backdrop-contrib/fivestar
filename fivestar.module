@@ -68,9 +68,6 @@ function fivestar_menu() {
   );
 
   // Add a "fivestar" tab to each content type.
-  // We can't yet add it to the "operations" column in content types, due to a TODO in CCK
-  // (content.admin.inc line 32)
-
   $items['admin/structure/types/manage/%node_type/fivestar'] = array(
     'title' => 'Fivestar voting',
     'page callback' => 'drupal_get_form',
@@ -101,8 +98,6 @@ function fivestar_menu() {
  * These includes do not need to be loaded for cached pages.
  */
 function fivestar_init() {
-  module_load_include('inc', 'fivestar', 'includes/fivestar.field');
-
   // Add necessary CSS and JS.
   // TODO: These shouldn't be loaded on every page, but block caching omits
   // CSS and JS files that would be otherwise added.
