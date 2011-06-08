@@ -474,8 +474,16 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
     }
   }
   else {
-    // We need to check if the entity being loaded has a fivestar exposed star formatter. 
-    // If it does then it should be allowed to vote. 
+    $bundles = field_info_instances($entity_type);
+    foreach ($bundles as $bundle => $fields) {
+      foreach ($fields as $field_name => $field) {
+        // If the fivestar field is being used on this entity_type then and the correct
+        // tag is being voted on, then lets alow the vote to go through.
+        if ($field['widget']['module'] == 'fivestar' && $field['settings']['axis'] == $tag){
+          return TRUE;
+        }
+      }
+    }
   }
 }
 
