@@ -120,11 +120,9 @@ function fivestar_permission() {
   return array(
     'rate content' => array(
       'title' => t('rate content'),
-      'description' => 'TODO: write description for rate content',
     ),
     'use PHP for fivestar target' => array(
       'title' => t('use PHP for fivestar target'),
-      'description' => 'TODO: write description for use PHP for fivestar target',
     ),
   );
 }
