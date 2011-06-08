@@ -381,7 +381,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   if ($display['type'] == 'fivestar_formatter_exposed_stars' && user_access('rate content')) {
     // The axis/tag is selected from the field instance.
     $tag = (isset($instance['settings']['axis'])) ? $instance['settings']['axis'] : 'vote';
-    $votes = fivestar_get_votes($entity_type, $entity->nid, $tag);
+    list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+    $votes = fivestar_get_votes($entity_type, $id, $tag);
     $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
     $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
     $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
@@ -392,7 +393,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'style' => $settings['style'],
       'text' => 'none',
       'content_type' => $entity_type,
-      'content_id' => $entity->nid,
+      'content_id' => $id,
       'tag' => $tag,
       'autosubmit' => TRUE,
       'title' => FALSE,
