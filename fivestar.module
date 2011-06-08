@@ -1367,7 +1367,9 @@ function fivestar_expand($element) {
   }
 
   $class = isset($element['#attributes']['class']) ? $element['#attributes']['class'] : array();
-  $class[] = 'fivestar-form-item';
+  if ($element['#widget'] == 'stars') {
+    $class[] = 'fivestar-form-item';    
+  }
   if ($element['#labels_enable']) {
     // Set a class for the display of label text on hover.
     $class[] = 'fivestar-labels-hover';

@@ -200,7 +200,7 @@ function fivestar_field_widget_info() {
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
     ),
-    'radios' => array(
+    'select' => array(
       'label' => t('Select list'),
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
@@ -226,33 +226,65 @@ function fivestar_widget_settings_form($field, $instance) {
  * Implementation of hook_field_widget_form().
  */
 function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $element = array('#tree' => TRUE);
-  $element['rating'] = array(
-    '#type' => 'fivestar',
-    '#title' => $instance['label'],
-    '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
-    '#stars' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
-    // dunno where these two comes from
-    '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
-    '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
-    '#weight' => $instance['widget']['weight'],
-    '#auto_submit' => FALSE,
-    '#widget' => $instance['widget']['type'],
-    '#required' => $instance['required'],
-    '#labels_enable' => FALSE,
-  );
-  $element['target'] = array(
-    '#type' => 'value',
-    // again i have no clue where this comes from.
-    '#value' => isset($field['settings']['target']) ? $field['settings']['target'] : NULL,
-  );
-  $element['axis'] = array(
-    '#type' => 'value',
-    '#value' => $field['settings']['axis'],
-  );
+  if ($instance['widget']['type'] == 'select') {
+    $element = array('#tree' => TRUE);
+    $element['rating'] = array(
+      '#type' => 'fivestar',
+      '#title' => $instance['label'],
+      '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
+      '#stars' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
+      // dunno where these two comes from
+      '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
+      '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
+      '#weight' => $instance['widget']['weight'],
+      '#auto_submit' => FALSE,
+      '#widget' => $instance['widget']['type'],
+      '#required' => $instance['required'],
+      '#labels_enable' => FALSE,
+    );
+    $element['target'] = array(
+      '#type' => 'value',
+      // again i have no clue where this comes from.
+      '#value' => isset($field['settings']['target']) ? $field['settings']['target'] : NULL,
+    );
+    $element['axis'] = array(
+      '#type' => 'value',
+      '#value' => $field['settings']['axis'],
+    );
 
-  // CCK likes to always have a 2D array for form elements.
-  $element = array($element);
+    // CCK likes to always have a 2D array for form elements.
+    $element = array($element);    
+  }
+  
+  if ($instance['widget']['type'] == 'stars') {
+    $element = array('#tree' => TRUE);
+    $element['rating'] = array(
+      '#type' => 'fivestar',
+      '#title' => $instance['label'],
+      '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
+      '#stars' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
+      // dunno where these two comes from
+      '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
+      '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
+      '#weight' => $instance['widget']['weight'],
+      '#auto_submit' => FALSE,
+      '#widget' => $instance['widget']['type'],
+      '#required' => $instance['required'],
+      '#labels_enable' => FALSE,
+    );
+    $element['target'] = array(
+      '#type' => 'value',
+      // again i have no clue where this comes from.
+      '#value' => isset($field['settings']['target']) ? $field['settings']['target'] : NULL,
+    );
+    $element['axis'] = array(
+      '#type' => 'value',
+      '#value' => $field['settings']['axis'],
+    );
+
+    // CCK likes to always have a 2D array for form elements.
+    $element = array($element);
+  }
 
   return $element;
 }
