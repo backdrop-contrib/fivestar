@@ -261,6 +261,7 @@ function fivestar_vote($entity_type, $id, $tag, $value) {
     drupal_exit();
   }
   $result = _fivestar_cast_vote($entity_type, $id, $value, $tag, NULL, TRUE);
+  drupal_alter('fivestar_vote_result', $result);
   if ($entity_type == 'node') {
     $node = node_load($id);
   }
