@@ -314,6 +314,7 @@ function fivestar_field_formatter_info() {
         'allow_clear' => FALSE,
         'style' => 'average',
         'feedback_enable' => FALSE,
+        'text' => 'average',
       ),
     ),
   );
@@ -342,12 +343,34 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
     '#default_value' => $settings['feedback_enable'],
     '#return_value' => 1
   );
-
   $element['allow_clear'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow users to undo their votes'),
     '#default_value' => $settings['allow_clear'],
     '#return_value' => 1,
+  );
+  $element['style'] = array(
+    '#type' => 'select',
+    '#title' => t('Star display style'),
+    '#default_value' => $settings['style'],
+    '#options' => array(
+      'average' => t('Display average vote value'),
+      'user'    => t('Display user vote value'),
+      'smart'   => t('User vote if available, average otherwise'),
+      'dual'    => t('Both user and average vote'),
+    ),
+  );
+  $element['text'] = array(
+    '#type' => 'select',
+    '#title' => t('Text display style'),
+    '#default_value' => $settings['text'],
+    '#options' => array(
+      'none'    => t('Display no text beneath stars'),
+      'average' => t('Current average in text'),
+      'user'    => t('User current vote in text'),
+      'smart'   => t('User vote if available, average otherwise'),
+      'dual'    => t('Both user and average vote'),
+    ),
   );
 
   return $element;
@@ -364,7 +387,12 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
     return;
   }
 
-  $summary = t("Stars: @stars, Allows Clear: @clear, Feedback: @feedback", array('@stars' => $settings['stars'], '@clear' => $settings['allow_clear'], '@feedback' => $settings['feedback_enable']));
+  $summary = t("Stars: @stars, Feedback: @feedback, Undo: @clear, Stars Display: @style, Text Display: @text", array(
+    '@stars' => $settings['stars'], 
+    '@clear' => ($settings['allow_clear']) ? 'Yes' : 'No', 
+    '@feedback' => ($settings['feedback_enable']) ? 'Yes' : 'No',
+    '@style' => $settings['style'],
+    '@text' => $settings['text']));
 
   return $summary;
 }
@@ -391,7 +419,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'stars' => $settings['stars'],
       'allow_clear' => $settings['allow_clear'],
       'style' => $settings['style'],
-      'text' => 'none',
+      'text' => $settings['text'],
       'content_type' => $entity_type,
       'content_id' => $id,
       'tag' => $tag,
