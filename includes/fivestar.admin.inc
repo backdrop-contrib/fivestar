@@ -94,98 +94,6 @@ function fivestar_settings_submit($form, &$form_state) {
   menu_rebuild();
 }
 
-function theme_fivestar_settings($variables) {
-  $form = $variables['form'];
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar-admin.css', 'module', 'all', FALSE);
-  drupal_set_title(t('Fivestar Settings'));
-
-  // Default preview.
-  $form['widget']['fivestar_widget']['default']['#description'] = 'Default '. t('Preview') .':<br />'. theme('fivestar_preview_widget', array('css_file' => 'default'));
-
-  // Preview for each classic widget.
-  foreach (element_children($form['widget']['fivestar_widget']) as $widget_key) {
-    if ($widget_key != 'default') {
-      $form['widget']['fivestar_widget'][$widget_key]['#description'] = $form['widget']['fivestar_widget'][$widget_key]['#title'] .' '. t('Preview') .':<br />'. theme('fivestar_preview_widget', array('css_file' => $widget_key));
-    }
-  }
-
-  // Preview for each color-enabled widget.
-  foreach (element_children($form['widget']['fivestar_color_widget']) as $widget_key) {
-    $form['widget']['fivestar_color_widget'][$widget_key] = $form['widget']['fivestar_widget'][$widget_key];
-    $form['widget']['fivestar_color_widget'][$widget_key]['#description'] = $form['widget']['fivestar_color_widget'][$widget_key]['#title'] .' '. t('Preview') .':<br />'. theme('fivestar_preview_widget', array('css_file' => $widget_key));
-    unset($form['widget']['fivestar_widget'][$widget_key]);
-  }
-
-  // Add the new styles to the page.
-  drupal_add_css(fivestar_get_inline_css(), array('type' => 'inline'));
-
-  $form['widget']['fivestar_widget']['#attributes']['class'][] = ' clearfix';
-  $form['widget']['fivestar_color_widget']['#attributes']['class'][] = ' fivestar-color-widgets clearfix';
-
-  return drupal_render_children($form);
-}
-
-/**
- * Show a preview of a widget using a custom CSS file.
- */
-function theme_fivestar_preview_widget($variables) {
-  static $default_css_added = FALSE;
-
-  $css_file = $variables['css_file'];
-  // Add the default CSS to the page to ensure the defaults take precedence.
-  if (!$default_css_added) {
-    $css = file_get_contents(drupal_get_path('module', 'fivestar') .'/css/fivestar.css');
-    // Prepend the classes with the unique widget div.
-    $css = preg_replace('/((div)?\.fivestar-widget)/', 'div.fivestar-widgets $1', $css);
-    // Update relative URLs with absolute locations.
-    $css = preg_replace('/url\(\.\.\/(.*?)\)/', 'url('. base_path() . drupal_get_path('module', 'fivestar') .'/$1)', $css);
-    fivestar_add_inline_css('default', $css);
-    $default_css_added = TRUE;
-  }
-
-  // Add widget specific CSS to the page.
-  $widget_name = str_replace('.css', '', basename($css_file));
-  $widget_path = dirname($css_file);
-  if ($widget_name != 'default') {
-    $css = file_get_contents($css_file);
-    // Prepend the classes with the unique widget div.
-    $css = preg_replace('/((div)?\.fivestar-widget)/', 'div#fivestar-preview-'. $widget_name .' $1', $css);
-    // Update relative URLs with absolute locations.
-    $css = preg_replace('/url\((.*?)\)/', 'url('. base_path() . $widget_path .'/$1)', $css);
-    fivestar_add_inline_css($widget_name, $css);
-  }
-
-  $form = array(
-    '#post' => array(),
-    '#programmed' => FALSE,
-    '#tree' => FALSE,
-    '#parents' => array(),
-    '#array_parents' => array(),
-    '#required' => FALSE,
-    '#attributes' => array(),
-    '#title_display' => 'before',
-  );
-  $form_state = form_state_defaults();
-  $form_state['values'] = array();
-  $form_state['process_input'] = array();
-  $form_state['complete form'] = array();
-
-  $form['vote'] = array(
-    '#type' => 'fivestar',
-    '#stars' => 5,
-    '#auto_submit' => FALSE,
-    '#allow_clear' => TRUE,
-  );
-
-  $form = form_builder('fivestar_preview', $form, $form_state);
-
-  $output = '<div class="fivestar-star-preview" id="fivestar-preview-'. $widget_name .'">';
-  $output .= drupal_render_children($form);
-  $output .= '</div>';
-
-  return $output;
-}
-
 /**
  * Adds fivestar enaable and position to the node-type configuration form.
  */
@@ -395,45 +303,6 @@ function fivestar_node_type_tag_form_submit($form, &$form_state) {
 }
 
 /**
- * Theme function to add the Fivestar preview to the node type form.
- */
-function theme_fivestar_node_type_tag_form($variables) {
-  $form = $variables['form'];
-  drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-admin.js');
-  drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar-admin.css', 'module', 'all', FALSE);
-
-  $output = '';
-  $output .= drupal_render($form['fivestar']);
-  $output .= drupal_render($form['fivestar_stars']);
-
-  // Star labels.
-  $output .= drupal_render($form['labels']);
-
-  // Direct rating settings form.
-  $direct = '';
-  $direct .= '<div id="fivestar-direct-form">';
-  $direct .= drupal_render($form['direct']['fivestar_style']);
-  $direct .= drupal_render($form['direct']['fivestar_text']);
-  $direct .= drupal_render($form['direct']['fivestar_title']);
-  $direct .= drupal_render($form['direct']['fivestar_unvote']);
-  $direct .= drupal_render($form['direct']['fivestar_feedback']);
-  $direct .= drupal_render($form['direct']['fivestar_position_teaser']);
-  $direct .= drupal_render($form['direct']['fivestar_position']);
-  $direct .= '</div>';
-  $direct .= '<div id="fivestar-direct-preview">';
-  $direct .= drupal_render($form['direct']['fivestar_direct_preview']);
-  $direct .= '</div>';
-
-  $form['direct']['#children'] = $direct;
-  $output .= drupal_render($form['direct']);
-
-  // Any remaining cruft (should be empty).
-  $output .= drupal_render_children($form);
-  return $output;
-}
-
-/**
  * Menu callback function for fivestar/preview/node.
  *
  * Outputs a JSON page containing a Fivestar preview of a node rating widget.
@@ -487,38 +356,4 @@ $_POST = array (
   ));
   drupal_add_http_header('Content-Type', 'text/javascript; charset=utf-8');
   print drupal_json_encode(array('status' => TRUE, 'data' => $output));
-}
-
-function theme_fivestar_preview($variables) {
-  extract($variables, EXTR_SKIP);
-  $values = array(
-    'average' => 50,
-    'user' => 80,
-    'count' => 20,
-  );
-  $settings = array(
-    'stars' => $stars,
-    'allow_clear' => $unvote,
-    'style' => $style,
-    'text' => $text,
-    'title' => $title,
-    'autosubmit' => FALSE,
-    'feedback_enable' => $feedback_enable,
-    'labels_enable' => $labels_enable,
-    'labels' => $labels,
-    'tag' => 'vote',
-  );
-
-  $form = drupal_get_form('fivestar_custom_widget', $values, $settings);
-  $form = drupal_render($form);
-  // This regex is sadly necessary because having duplicate form_tokens or
-  // form_id elements can cause the content type form to choke. Forms inside of
-  // forms is also frowned upon, so this removes the wrapping form tag as well.
-  $form = str_replace(array('<form', '</form>'), array('<div', '</div>'), $form);
-  $form = preg_replace('/( method=".*?")|( action=".*?")|(<input.*?name="(form_token|form_id|destination|form_build_id)".*?\/>)/', '', $form);
-  return $form;
-}
-
-function theme_fivestar_preview_wrapper($variables) {
-  return '<div class="fivestar-preview fivestar-preview-'. $variables['type'] .'">'. $variables['content'] .'</div>';
 }

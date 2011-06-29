@@ -139,64 +139,6 @@ function fivestar_color_form() {
 }
 
 /**
- * Theme color form.
- */
-function theme_fivestar_color_form($variables) {
-  $form = $variables['form'];
-  if (isset($form['#access']) && $form['#access'] == FALSE) {
-    return '';
-  }
-
-  // Add Farbtastic color picker.
-  drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-color.js');
-  drupal_add_library('system', 'farbtastic');
-
-  // Add custom CSS/JS.
-  $default_colors = array();
-  foreach (element_children($form['fivestar_colors']) as $key) {
-    $default_colors[$key] = $form['fivestar_colors'][$key]['#value'];
-  }
-
-  drupal_add_js(array('fivestar' => array('reference' => $default_colors, 'transparent' => t('none'), 'colorPreview' => url('fivestar/preview/color'))), 'setting');
-
-  $output = '';
-
-  // Wrapper.
-  $output .= '<div class="color-form clearfix">';
-
-  // Color schemes.
-  $output .= drupal_render($form['fivestar_color_type']);
-  $output .= drupal_render($form['scheme']);
-
-  // Palette.
-  $output .= '<div id="fivestar-palette" class="clearfix">';
-  foreach (element_children($form['fivestar_colors']) as $key => $name) {
-    // Render pairs on a single line inside a new form element.
-    if (strpos($name, '1')) {
-      $name2 = str_replace('1', '2', $name);
-      $title = $form['fivestar_colors'][$name]['#title'];
-      unset($form['fivestar_colors'][$name]['#title']);
-      $element = array(
-        '#type' => 'item',
-        '#title' => $title,
-        '#title_display' => 'before',
-        '#children' => drupal_render($form['fivestar_colors'][$name]) . drupal_render($form['fivestar_colors'][$name2]),
-      );
-      $output .= theme('form_element', array('element' => $element));
-    }
-    $output .= drupal_render($form['fivestar_colors'][$name]);
-  }
-  $output .= '</div>';
-
-  // Render the form.
-  $output .= drupal_render_children($form);
-  // Close wrapper.
-  $output .= '</div>';
-
-  return $output;
-}
-
-/**
  * Validate handler for color form.
  */
 function fivestar_color_form_validate($form, &$form_state) {
