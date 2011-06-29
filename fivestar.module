@@ -1247,7 +1247,9 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
       $stars = variable_get('fivestar_stars_'. $columns->node_type, 5);
     }
     else {
-      $node_type = db_query("SELECT type FROM {node} WHERE nid = :nid", array(':nid' => $columns->nid))->fetchField();
+      if (isset($columns->nid)) {
+        $node_type = db_query("SELECT type FROM {node} WHERE nid = :nid", array(':nid' => $columns->nid))->fetchField();
+      }
       $stars = variable_get('fivestar_stars_'. (!isset($node_type) ? 'default' : $node_type), 5);
     }
 
