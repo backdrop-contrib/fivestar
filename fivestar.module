@@ -456,7 +456,7 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
  * comments.
  *
  * @param $entity_type
- *   Type of target (currently only node is supported).
+ *   Type entity.
  * @param $id
  *   Identifier within the type.
  * @param $tag
@@ -472,22 +472,26 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
  *   modules return NULL, stating no preference, then access will be denied.
  */
 function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
-  //!TODO: remove the node_load that is a bit too much just to get the node type.
+  // Check to see if there is a field instance on this entity.
+  $fields = field_read_fields(array('module' => 'fivestar'));
+  foreach($fields as $field) {
+    if ($field['settings']['axis'] == $tag) {
+      $params = array(
+        'entity_type' => $entity_type,
+        'field_name' => $field['field_name'],
+      );
+      $instance = field_read_instances($params);
+      if(!empty($instance)) {
+        return TRUE;
+      }
+    }
+  }
+  
+  // Also perform a check to see if fivestar voting has been abled on this
+  // node content type.
   if ($entity_type == 'node' && $node = node_load($id)) {
     if (variable_get('fivestar_'. fivestar_get_suffix($node->type, $tag), 0)) {
       return TRUE;
-    }
-  }
-  else {
-    $bundles = field_info_instances($entity_type);
-    foreach ($bundles as $bundle => $fields) {
-      foreach ($fields as $field_name => $field) {
-        // If the fivestar field is being used on this entity_type then and the correct
-        // tag is being voted on, then lets alow the vote to go through.
-        if ($field['widget']['module'] == 'fivestar' && $field['settings']['axis'] == $tag){
-          return TRUE;
-        }
-      }
     }
   }
 }
@@ -1388,7 +1392,7 @@ function fivestar_get_tags() {
   foreach ($tags_exploded as $tag) {
     $tag_trimmed = trim($tag);
     if ($tag_trimmed) {
-      $tags[] = $tag_trimmed;
+      $tags[$tag_trimmed] = $tag_trimmed;
       if ($tag_trimmed == 'vote') {
         $got_vote = true;
       }
@@ -1396,7 +1400,7 @@ function fivestar_get_tags() {
   }
 
   if (!$got_vote) {
-    $tags[] = 'vote';
+    $tags['vote'] = 'vote';
   }
   return $tags;
 }

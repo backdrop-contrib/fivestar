@@ -203,3 +203,17 @@ function fivestar_update_6105() {
 
   return $ret;
 }
+
+/**
+ * Fixes the axis value stored for fivestar fields
+ */
+function fivestar_update_7001() {
+  $fields = field_read_fields(array('module' => 'fivestar'));
+  $tags_numeric = array_values(fivestar_get_tags());
+  
+  foreach($fields as $field) {
+    if (is_numeric($field['settings']['axis'])) {
+      $field['settings']['axis'] = $tags_numeric[$field['settings']['axis']];
+    }
+  }
+}
