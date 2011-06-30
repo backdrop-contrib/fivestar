@@ -217,3 +217,18 @@ function fivestar_update_7201() {
     }
   }
 }
+
+/**
+ * Moves the field settings to field instance settings
+ */
+function fivestar_update_7002() {
+  $fields = field_read_fields(array('module' => 'fivestar'));
+  
+  foreach($fields as $field) {
+    $instances = field_read_instances(array('field_name' => $field['field_name']));
+    foreach($instances as $instance) {
+      $instance['settings'] = $field['settings'];
+      field_update_instance($instance);
+    }
+  }
+}

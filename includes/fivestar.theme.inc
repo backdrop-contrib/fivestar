@@ -236,11 +236,11 @@ function theme_fivestar_formatter_default($variables) {
   if (!isset($element['#item'][0]['rating'])) {
     $element['#item'][0]['rating'] = 0;
   }
-  if (empty($element['#field_settings']['stars'])) {
-    $element['#field_settings']['stars'] = 5;
+  if (empty($element['#instance_settings']['stars'])) {
+    $element['#instance_settings']['stars'] = 5;
   }
 
-  return theme('fivestar_static', array('rating' => $element['#item'][0]['rating'], 'stars' => $element['#field_settings']['stars']));
+  return theme('fivestar_static', array('rating' => $element['#item'][0]['rating'], 'stars' => $element['#instance_settings']['stars']));
 }
 
 /**
@@ -265,11 +265,11 @@ function theme_fivestar_formatter_percentage($variables) {
   if (empty($element['#item'][0]['rating'])) {
     $element['#item'][0]['rating'] = 0;
   }
-  if (empty($element['#field_settings']['stars'])) {
-    $element['#field_settings']['stars'] = 5;
+  if (empty($element['#instance_settings']['stars'])) {
+    $element['#instance_settings']['stars'] = 5;
   }
 
-  return round(100/$element['#item'][0]['rating'], 1)/$element['#field_settings']['stars'];
+  return round(100/$element['#item'][0]['rating'], 1)/$element['#instance_settings']['stars'];
 }
 
 /**

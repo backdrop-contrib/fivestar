@@ -35,13 +35,30 @@ function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
  * Implementation of hook_field_settings_form().
  */
 function fivestar_field_settings_form($field, $instance) {
+  
+  $form['axis'] = array(
+    '#type' => 'select',
+    '#required' => TRUE,
+    '#title' => 'Voting Tag',
+    '#options' => fivestar_get_tags(),
+    '#description' => t('The tag this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc.'),
+    '#default_value' => isset($field['settings']['axis']) ? $field['settings']['axis'] : '',
+    '#disabled' => field_has_data($field),
+  );
+
+  return $form;
+}
+
+function fivestar_field_instance_settings_form($field, $instance) {
+  $form = array();
+  
   $form['stars'] = array(
     '#type' => 'select',
     '#title' => $instance['widget']['type'] == 'stars' ? t('Number of Stars') : t('Number of Options'),
     '#options' => drupal_map_assoc(range(1, 10)),
-    '#default_value' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
+    '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
-
+  
   $dynamic_options = array();
   if (module_exists('node_reference')) {
     $fields = field_info_fields();
@@ -61,10 +78,10 @@ function fivestar_field_settings_form($field, $instance) {
   }
 
   $dynamic_options = array('' => '<'. t('none') . '>') + $dynamic_options;
-  $form['dynamic_target'] = array(
+  $form['target'] = array(
     '#title' => t('Voting target'),
     '#type' => 'select',
-    '#default_value' => isset($field['settings']['dynamic_target']) ? $field['settings']['dynamic_target'] : '',
+    '#default_value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : '',
     '#options' => $dynamic_options,
     '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
   );
@@ -79,26 +96,17 @@ function fivestar_field_settings_form($field, $instance) {
     $form['php_target']['php_target'] = array(
       '#title' => t('Code'),
       '#type' => 'textarea',
-      '#default_value' => isset($field['settings']['php_target']['php_target']) ? $field['settings']['php_target']['php_target'] : '',
+      '#default_value' => isset($instance['settings']['php_target']['php_target']) ? $instance['settings']['php_target']['php_target'] : '',
       '#description' => t('Advanced usage only: PHP code that returns a target node ID. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Note that executing incorrect PHP-code can break your Drupal site.'),
     );
   }
   else {
     $form['php_target']['php_target'] = array(
       '#type' => 'value',
-      '#value' => isset($field['settings']['php_target']) ? $field['settings']['php_target'] : '',
+      '#value' => isset($instance['settings']['php_target']) ? $instance['settings']['php_target'] : '',
     );
   }
-
-  $form['axis'] = array(
-    '#type' => 'select',
-    '#required' => TRUE,
-    '#title' => 'Voting Tag',
-    '#options' => fivestar_get_tags(),
-    '#description' => t('The tag this rating will affect. Enter a property on which that this rating will affect, such as <em>quality</em>, <em>satisfaction</em>, <em>overall</em>, etc. Warning: changing this value will not update existing votes to the new tag.'),
-    '#default_value' => isset($field['settings']['axis']) ? $field['settings']['axis'] : '',
-  );
-
+  
   return $form;
 }
 
@@ -115,7 +123,7 @@ function fivestar_field_schema() {
  * Implementation of hook_field_presave().
  */
 function fivestar_field_presave($obj_type, $object, $field, $instance, $langcode, &$items) {
-  $items[0]['stars'] = $field['settings']['stars'];
+  $items[0]['stars'] = $instance['settings']['stars'];
 }
 
 /**
@@ -147,7 +155,7 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
     else {
       $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
     }
-    $items[$delta]['target'] = _fivestar_field_target($entity, $field, $item, $langcode);
+    $items[$delta]['target'] = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
     if (is_numeric($items[$delta]['target'])) {
       _fivestar_cast_vote('node', $items[$delta]['target'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
       votingapi_recalculate_results('node', $items[$delta]['target']);
@@ -158,22 +166,22 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
 /**
  * Helper function to find the id that should be rated when a field is changed.
  */
-function _fivestar_field_target($entity, $field, $item, $langcode) {
+function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
   $target = FALSE;
-  if (isset($field['settings']['php_target']) && !empty($field['settings']['php_target']['php_target'])) {
+  if (isset($instance['settings']['php_target']) && !empty($instance['settings']['php_target']['php_target'])) {
     // Use eval rather than drupal_eval to allow access to local variables.
-    $target = eval($field['settings']['php_target']['php_target']);
+    $target = eval($instance['settings']['php_target']['php_target']);
   }
-  elseif (!empty($field['settings']['dynamic_target']) && $field['settings']['dynamic_target'] == 'parent_node') {
+  elseif (!empty($instance['settings']['target']) && $instance['settings']['target'] == 'parent_node') {
     // Allow comments to be voted against the parent node.
     $target = $entity->nid;
   }
-  elseif (!empty($field['settings']['dynamic_target']) && !empty($entity->$field['settings']['dynamic_target'])) {
-    if (isset($entity->{$field['settings']['dynamic_target']}[$langcode][0]) && is_numeric($entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'])) {
-      $target = $entity->{$field['settings']['dynamic_target']}[$langcode][0]['nid'];
+  elseif (!empty($instance['settings']['target']) && !empty($entity->$instance['settings']['target'])) {
+    if (isset($entity->{$instance['settings']['target']}[$langcode][0]) && is_numeric($entity->{$instance['settings']['target']}[$langcode][0]['nid'])) {
+      $target = $entity->{$instance['settings']['target']}[$langcode][0]['nid'];
     }
-    elseif (is_numeric($entity->$field['settings']['dynamic_target'])) {
-      $target = $entity->$field['dynamic_target'];
+    elseif (is_numeric($entity->$instance['settings']['target'])) {
+      $target = $entity->$instance['target'];
     }
   }
   elseif (isset($item['target'][0]['nid'])) {
@@ -232,7 +240,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#type' => 'fivestar',
       '#title' => $instance['label'],
       '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
-      '#stars' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
+      '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       // dunno where these two comes from
       '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
       '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
@@ -245,7 +253,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     $element['target'] = array(
       '#type' => 'value',
       // again i have no clue where this comes from.
-      '#value' => isset($field['settings']['target']) ? $field['settings']['target'] : NULL,
+      '#value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : NULL,
     );
     $element['axis'] = array(
       '#type' => 'value',
@@ -262,7 +270,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#type' => 'fivestar',
       '#title' => $instance['label'],
       '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
-      '#stars' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
+      '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       // dunno where these two comes from
       '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
       '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
@@ -275,7 +283,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     $element['target'] = array(
       '#type' => 'value',
       // again i have no clue where this comes from.
-      '#value' => isset($field['settings']['target']) ? $field['settings']['target'] : NULL,
+      '#value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : NULL,
     );
     $element['axis'] = array(
       '#type' => 'value',
@@ -445,7 +453,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   $element[0] = array(
     '#theme' => $display['type'],
     '#item' => $items,
-    '#field_settings' => $field['settings'],
+    '#instance_settings' => $instance['settings'],
     '#display_settings' => $settings,
   );
 
