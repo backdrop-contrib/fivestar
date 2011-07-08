@@ -451,3 +451,18 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
 
   return $element;
 }
+
+/**
+ * Implements hook_field_prepare_view()
+ */
+function fivestar_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // Fivestar fields need to be visible when the field has been added to an
+  // existing instance of a field but also when that instance has not been edited.
+  // This will force the render system to output a widget regardless.
+  foreach($entities as $key => $entity) {
+    if (empty($items[$key])) {
+      $items[$key] = array('fake');
+    }
+  }
+}
+
