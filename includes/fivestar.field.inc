@@ -39,7 +39,7 @@ function fivestar_field_settings_form($field, $instance) {
     '#type' => 'select',
     '#title' => $instance['widget']['type'] == 'stars' ? t('Number of Stars') : t('Number of Options'),
     '#options' => drupal_map_assoc(range(1, 10)),
-    '#default_value' => isset($instance['stars']) ? $field['stars'] : 5,
+    '#default_value' => isset($field['settings']['stars']) ? $field['settings']['stars'] : 5,
   );
 
   $dynamic_options = array();
