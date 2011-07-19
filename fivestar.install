@@ -207,7 +207,7 @@ function fivestar_update_6105() {
 /**
  * Fixes the axis value stored for fivestar fields
  */
-function fivestar_update_7001() {
+function fivestar_update_7201() {
   $fields = field_read_fields(array('module' => 'fivestar'));
   $tags_numeric = array_values(fivestar_get_tags());
   
