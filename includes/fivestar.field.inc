@@ -461,8 +461,7 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
   // This will force the render system to output a widget regardless.
   foreach($entities as $key => $entity) {
     if (empty($items[$key])) {
-      $items[$key] = array('fake');
+      $items[$key] = array('fivetar');
     }
   }
 }
-
