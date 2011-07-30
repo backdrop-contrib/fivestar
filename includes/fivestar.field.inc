@@ -35,7 +35,7 @@ function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
  * Implementation of hook_field_settings_form().
  */
 function fivestar_field_settings_form($field, $instance) {
-  
+
   $form['axis'] = array(
     '#type' => 'select',
     '#required' => TRUE,
@@ -51,14 +51,14 @@ function fivestar_field_settings_form($field, $instance) {
 
 function fivestar_field_instance_settings_form($field, $instance) {
   $form = array();
-  
+
   $form['stars'] = array(
     '#type' => 'select',
     '#title' => $instance['widget']['type'] == 'stars' ? t('Number of Stars') : t('Number of Options'),
     '#options' => drupal_map_assoc(range(1, 10)),
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
-  
+
   $dynamic_options = array();
   if (module_exists('node_reference')) {
     $fields = field_info_fields();
@@ -106,7 +106,7 @@ function fivestar_field_instance_settings_form($field, $instance) {
       '#value' => isset($instance['settings']['php_target']) ? $instance['settings']['php_target'] : '',
     );
   }
-  
+
   return $form;
 }
 
