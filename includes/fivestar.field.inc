@@ -351,25 +351,25 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   );
   $element['style'] = array(
     '#type' => 'select',
-    '#title' => t('Star display style'),
+    '#title' => t('Value to display as stars'),
     '#default_value' => $settings['style'],
     '#options' => array(
-      'average' => t('Display average vote value'),
-      'user'    => t('Display user vote value'),
-      'smart'   => t('User vote if available, average otherwise'),
-      'dual'    => t('Both user and average vote'),
+      'average' => t('Average vote'),
+      'user'    => t("User's vote"),
+      'smart'   => t("User's vote if available, average otherwise"),
+      'dual'    => t("Both user's and average vote"),
     ),
   );
   $element['text'] = array(
     '#type' => 'select',
-    '#title' => t('Text display style'),
+    '#title' => t('Text to display under the stars'),
     '#default_value' => $settings['text'],
     '#options' => array(
-      'none'    => t('Display no text beneath stars'),
-      'average' => t('Current average in text'),
-      'user'    => t('User current vote in text'),
-      'smart'   => t('User vote if available, average otherwise'),
-      'dual'    => t('Both user and average vote'),
+      'none'    => t('No text'),
+      'average' => t('Average vote'),
+      'user'    => t("User's vote"),
+      'smart'   => t("User's vote if available, average otherwise"),
+      'dual'    => t("Both user's and average vote"),
     ),
   );
 
