@@ -204,6 +204,25 @@ function fivestar_update_6105() {
   return $ret;
 }
 
+
+function fivestar_field_schema() {
+  return array(
+    'columns' => array(
+      'rating' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'sortable' => TRUE
+      ),
+      'target' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE
+      ),
+    ),
+  );
+}
+
 /**
  * Fixes the axis value stored for fivestar fields
  */
