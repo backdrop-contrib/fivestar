@@ -996,7 +996,7 @@ function fivestar_views_widget_handler($value, $field, $columns, $summary) {
     }
 
     $settings = array(
-      'stars' => $field['settings']['stars'],
+      'stars' => $instance['settings']['stars'], 
       'allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
       'style' => $field->table == 'votingapi_vote' ? 'user' : 'average',
       'text' => $summary ? isset($instance['settings']['text']) ? $instance['settings']['text']: 'dual' : 'none',

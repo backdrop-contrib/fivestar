@@ -363,3 +363,39 @@ function fivestar_update_7203() {
   menu_rebuild();
   _field_info_collate_fields(TRUE);
 }
+
+/**
+ * Preserve settings from fivestar_formatter_exposed_stars and convert to
+ * fivestar_formatter_default.
+ */
+function fivestar_update_7204() {
+  $fields = field_read_fields(array('type' => 'fivestar'));
+  foreach($fields as $field) {
+    // Iterate through the instances of the field.
+    $instances = field_read_instances(array('field_name' => $field['field_name']));
+    foreach($instances as $instance) {
+      // The default should be to not allow clearing.
+      $instance['settings']['allow_clear'] = FALSE;
+      // Check each of the displays on the field instance an convert the formatter
+      // from fivestar_formatter_exposed_stars to fivestar_formatter_default.
+      foreach($instance['display'] as $key => $display) {
+        if ($display['type'] == 'fivestar_formatter_exposed_stars') {
+          // Convert the formatter and set the exposed settings.
+          $instance['display'][$key]['type'] == 'fivestar_formatter_default';
+          $instance['display'][$key]['settings']['expose'] = TRUE;
+
+          // The widget type needs to be exposed for the widget to be exposed.
+          $instance['widget']['type'] = 'exposed';
+
+          // If one of the displays allowed clearing change the field settings
+          // to allow clearing.
+          if ($display['settings']['allow_clear'] == TRUE) {
+            $instance['settings']['allow_clear'] = TRUE;
+          }
+        }
+      }
+      // Update the instance
+      field_update_instance($instance);
+    }
+  }
+}

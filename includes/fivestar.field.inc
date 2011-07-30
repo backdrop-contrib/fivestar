@@ -13,7 +13,7 @@ function fivestar_field_info() {
     'fivestar' => array(
       'label' => t('Fivestar Rating'),
       'description' => t('Store a rating for this piece of content.'),
-      'default_widget' => 'stars',
+      'default_widget' => 'exposed',
       'default_formatter' => 'fivestar_formatter_default',
       'instance_settings' => array(
         'axis' => 'vote',
@@ -24,10 +24,30 @@ function fivestar_field_info() {
 
 function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $field = $form['#field'];
+  $instance = $form['#instance'];
   if ($field['type'] == 'fivestar') {
     // Multiple values is not supported with Fivestar.
     $form['field']['cardinality']['#access'] = FALSE;
     $form['field']['cardinality']['#value'] = 1;
+
+   // If the widget type is exposed setting a default value has no purpose.
+   // The fieldset is removed to unclutter the UI.
+   if ($form['instance']['widget']['type']['#value'] == 'exposed' ) {
+     $form['instance']['default_value_widget']['#access'] = FALSE;
+   }
+   elseif ($form['instance']['widget']['type']['#value'] == 'stars') {
+     // Use a select dropdown in the field form to reduce clutter and confusion.
+     $options = array(0 => t('No stars'));
+     for($i = 1; $i <= $instance['settings']['stars']; $i++) {
+       $percentage = ceil($i * 100 / $instance['settings']['stars']);
+       $options[$percentage] = format_plural($i, '1 star', '@count stars');
+     }
+     $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE][0]['rating'] = array(
+       '#type' => 'select',
+       '#options' => $options,
+       '#default_value' => isset($instance['default_value'][0]['rating']) ? $instance['default_value'][0]['rating'] : NULL,
+     );
+   }
   }
 }
 
@@ -54,18 +74,28 @@ function fivestar_field_instance_settings_form($field, $instance) {
 
   $form['stars'] = array(
     '#type' => 'select',
-    '#title' => $instance['widget']['type'] == 'stars' ? t('Number of Stars') : t('Number of Options'),
+    '#title' => $instance['widget']['type'] == 'select' ? t('Number of Options') : t('Number of Stars'),
     '#options' => drupal_map_assoc(range(1, 10)),
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
 
- $form['target'] = array(
-   '#title' => t('Voting target'),
-   '#type' => 'select',
-   '#default_value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : '',
-   '#options' => fivestar_get_targets($field, $instance),
-   '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
- );
+  $form['allow_clear'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow users to undo their votes.'),
+    '#default_value' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
+    '#return_value' => 1,
+  );
+
+  $options = fivestar_get_targets($field, $instance);
+
+  $form['target'] = array(
+    '#title' => t('Voting target'),
+    '#type' => 'select',
+    '#default_value' => (isset($instance['settings']['target']) && $instance['widget']['type'] != 'exposed') ? $instance['settings']['target'] : 'self',
+    '#options' => $options,
+    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
+    '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
+  );
 
   return $form;
 }
@@ -118,6 +148,9 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
  * Helper function to find the id that should be rated when a field is changed.
  */
 function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
+  if ($instance['widget']['type'] == 'exposed') {
+    return null;
+  }
   if (isset($instance['settings']['target'])) {
     $target = fivestar_get_targets($field, $instance, $instance['settings']['target'], $entity, $langcode);
   }
@@ -144,8 +177,13 @@ function fivestar_field_is_empty($item, $field) {
  */
 function fivestar_field_widget_info() {
   return array(
+    'exposed' => array(
+      'label' => t('Stars (rated while viewing)'),
+      'field types' => array('fivestar'),
+      'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
+    ),
     'stars' => array(
-      'label' => t('Stars'),
+      'label' => t('Stars (rated while editing)'),
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
     ),
@@ -168,67 +206,32 @@ function fivestar_widget_settings_form($field, $instance) {
  * Implementation of hook_field_widget_form().
  */
 function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  if ($instance['widget']['type'] == 'select') {
-    $element = array('#tree' => TRUE);
-    $element['rating'] = array(
-      '#type' => 'fivestar',
-      '#title' => $instance['label'],
-      '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
-      '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
-      // dunno where these two comes from
-      '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
-      '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
-      '#weight' => $instance['widget']['weight'],
-      '#auto_submit' => FALSE,
-      '#widget' => $instance['widget']['type'],
-      '#required' => $instance['required'],
-      '#labels_enable' => FALSE,
-    );
-    $element['target'] = array(
-      '#type' => 'value',
-      // again i have no clue where this comes from.
-      '#value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : NULL,
-    );
-    $element['axis'] = array(
-      '#type' => 'value',
-      '#value' => $field['settings']['axis'],
-    );
+  $element['#tree'] = TRUE;
 
-    // CCK likes to always have a 2D array for form elements.
-    $element = array($element);    
+  if ($instance['widget']['type'] == 'select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
+    $options = array(0 => t('No stars'));
+    for($i = 1; $i <= $instance['settings']['stars']; $i++) {
+      $percentage = ceil($i * 100 / $instance['settings']['stars']);
+      $options[$percentage] = format_plural($i, '1 star', '@count stars');
+    }
+    $element['rating'] = array(
+      '#type' => 'select',
+      '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
+      '#options' => $options,
+      '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : NULL,
+    );
   }
-  
-  if ($instance['widget']['type'] == 'stars') {
-    $element = array('#tree' => TRUE);
+  elseif ($instance['widget']['type'] == 'stars') {
     $element['rating'] = array(
-      '#type' => 'fivestar',
-      '#title' => $instance['label'],
-      '#default_value' => isset($items[0]['rating']) ? $items[0]['rating'] : NULL,
+      '#type'=> 'fivestar',
+      '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
       '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
-      // dunno where these two comes from
-      '#allow_clear' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 0,
-      '#description' => isset($instance['widget']['settings']['description']) ? $instance['widget']['settings']['description'] : '',
-      '#weight' => $instance['widget']['weight'],
-      '#auto_submit' => FALSE,
-      '#widget' => $instance['widget']['type'],
-      '#required' => $instance['required'],
-      '#labels_enable' => FALSE,
+      '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
+      '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : 0,
     );
-    $element['target'] = array(
-      '#type' => 'value',
-      // again i have no clue where this comes from.
-      '#value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : NULL,
-    );
-    $element['axis'] = array(
-      '#type' => 'value',
-      '#value' => $field['settings']['axis'],
-    );
-
-    // CCK likes to always have a 2D array for form elements.
-    $element = array($element);
   }
 
-  return $element;
+  return array($element);
 }
 
 /**
@@ -239,6 +242,12 @@ function fivestar_field_formatter_info() {
     'fivestar_formatter_default' => array(
       'label' => t('As Stars'),
       'field types' => array('fivestar'),
+        'settings' =>  array(
+          'style' => 'average',
+          'feedback_enable' => FALSE,
+          'text' => 'average',
+          'expose' => TRUE,
+        ),
     ),
     'fivestar_formatter_rating' => array(
       'label' => t('Rating (i.e. 4.2/5)'),
@@ -247,17 +256,6 @@ function fivestar_field_formatter_info() {
     'fivestar_formatter_percentage' => array(
       'label' => t('Percentage (i.e. 92)'),
       'field types' => array('fivestar'),
-    ),
-    'fivestar_formatter_exposed_stars' => array(
-      'label' => t('Exposed Stars'),
-      'field types' => array('fivestar'),
-      'settings' =>  array(
-        'stars' => 5,
-        'allow_clear' => FALSE,
-        'style' => 'average',
-        'feedback_enable' => FALSE,
-        'text' => 'average',
-      ),
     ),
   );
 }
@@ -269,27 +267,23 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
   
-  if ($display['type'] != 'fivestar_formatter_exposed_stars') {
+  if ($display['type'] != 'fivestar_formatter_default') {
     return;
   }
 
-  $element['stars'] = array(
-    '#type' => 'select',
-    '#title' => t('Number of stars'),
-    '#options' => drupal_map_assoc(range(1, 10)),
-    '#default_value' => $settings['stars'],
-  );
+  if ($instance['widget']['type'] == 'exposed') {
+    $element['expose'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Expose the widget for this display'),
+      '#default_value' => $settings['expose'],
+      '#return_value' => 1
+    );
+  }
   $element['feedback_enable'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable feedback during vote saving and deletion'),
     '#default_value' => $settings['feedback_enable'],
     '#return_value' => 1
-  );
-  $element['allow_clear'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow users to undo their votes'),
-    '#default_value' => $settings['allow_clear'],
-    '#return_value' => 1,
   );
   $element['style'] = array(
     '#type' => 'select',
@@ -325,13 +319,21 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  if ($display['type'] != 'fivestar_formatter_exposed_stars') {
+  if ($display['type'] != 'fivestar_formatter_default') {
     return;
   }
 
-  $summary = t("Stars: @stars, Feedback: @feedback, Undo: @clear, Stars Display: @style, Text Display: @text", array(
-    '@stars' => $settings['stars'], 
-    '@clear' => ($settings['allow_clear']) ? 'Yes' : 'No', 
+  if ($instance['widget']['type'] == 'exposed') {
+    $summary = t("Exposed: @expose, Feedback: @feedback, Stars Display: @style, Text Display: @text", array(
+      '@expose' => ($settings['expose']) ? 'Yes' : 'No',
+      '@feedback' => ($settings['feedback_enable']) ? 'Yes' : 'No',
+      '@style' => $settings['style'],
+      '@text' => $settings['text']));
+  
+    return $summary;
+  }
+  
+  $summary = t("Feedback: @feedback, Stars Display: @style, Text Display: @text", array(
     '@feedback' => ($settings['feedback_enable']) ? 'Yes' : 'No',
     '@style' => $settings['style'],
     '@text' => $settings['text']));
@@ -348,7 +350,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
 
   // We are going to built a custom fivestar rating widget if the exposed stars formatter is 
   // selected and the user has the rate content permission. 
-  if ($display['type'] == 'fivestar_formatter_exposed_stars' && user_access('rate content')) {
+if ($display['type'] == 'fivestar_formatter_default' && user_access('rate content') && $instance['widget']['type'] == 'exposed' && $settings['expose']) {
     // The axis/tag is selected from the field instance.
     $tag = (isset($instance['settings']['axis'])) ? $instance['settings']['axis'] : 'vote';
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -358,8 +360,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
 
     $settings = array(
-      'stars' => $settings['stars'],
-      'allow_clear' => $settings['allow_clear'],
+      'stars' => $instance['settings']['stars'],
+      'allow_clear' => $instance['settings']['allow_clear'],
       'style' => $settings['style'],
       'text' => $settings['text'],
       'content_type' => $entity_type,
@@ -375,13 +377,6 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
 
     return $element;
-  }
-
-  // If the display type happends to be fivestar_formatter_exposed_stars and the user does not
-  // have access to rate content as check above then we'll going to default back to
-  // fivestar_formatter_default. !TODO: This should be configurable.
-  if ($display['type'] == 'fivestar_formatter_exposed_stars') {
-    $display['type'] = 'fivestar_formatter_default';
   }
 
   $element[0] = array(
