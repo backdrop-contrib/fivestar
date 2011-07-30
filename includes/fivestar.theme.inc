@@ -97,45 +97,6 @@ function theme_fivestar_preview_widget($variables) {
   return $output;
 }
 
-/**
- * Theme function to add the Fivestar preview to the node type form.
- */
-function theme_fivestar_node_type_tag_form($variables) {
-  $form = $variables['form'];
-  drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar-admin.js');
-  drupal_add_js(array('fivestar' => array('preview_url' => url('fivestar/preview/node'))), 'setting');
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar-admin.css', 'module', 'all', FALSE);
-
-  $output = '';
-  $output .= drupal_render($form['fivestar']);
-  $output .= drupal_render($form['fivestar_stars']);
-
-  // Star labels.
-  $output .= drupal_render($form['labels']);
-
-  // Direct rating settings form.
-  $direct = '';
-  $direct .= '<div id="fivestar-direct-form">';
-  $direct .= drupal_render($form['direct']['fivestar_style']);
-  $direct .= drupal_render($form['direct']['fivestar_text']);
-  $direct .= drupal_render($form['direct']['fivestar_title']);
-  $direct .= drupal_render($form['direct']['fivestar_unvote']);
-  $direct .= drupal_render($form['direct']['fivestar_feedback']);
-  $direct .= drupal_render($form['direct']['fivestar_position_teaser']);
-  $direct .= drupal_render($form['direct']['fivestar_position']);
-  $direct .= '</div>';
-  $direct .= '<div id="fivestar-direct-preview">';
-  $direct .= drupal_render($form['direct']['fivestar_direct_preview']);
-  $direct .= '</div>';
-
-  $form['direct']['#children'] = $direct;
-  $output .= drupal_render($form['direct']);
-
-  // Any remaining cruft (should be empty).
-  $output .= drupal_render_children($form);
-  return $output;
-}
-
 function theme_fivestar_preview($variables) {
   extract($variables, EXTR_SKIP);
   $values = array(

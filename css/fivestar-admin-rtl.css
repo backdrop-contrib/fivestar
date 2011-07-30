@@ -2,15 +2,6 @@ div.fivestar-widgets div.form-item {
   float: right;
 }
 
-#fivestar-direct-form {
-  float: right;
-}
-#fivestar-direct-preview {
-  float: right;
-  margin-right: 40px;
-  margin-left: 0px;
-}
-
 #placeholder {
   left: 0;
   right: auto;

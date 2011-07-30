@@ -8,23 +8,6 @@ div.fivestar-widgets div.form-item {
   float: left; /* RTL */
 }
 
-/* Fivestar Node Type Preview */
-#fivestar-direct-form {
-  float: left; /* RTL */
-}
-#fivestar-direct-preview {
-  float: left; /* RTL */
-  margin-left: 40px; /* RTL */
-  width: 300px;
-}
-#fivestar-node-type-form fieldset {
-  background: transparent;
-}
-.fivestar-preview {
-  border: 1px solid #CCC;
-  padding: 10px;
-}
-
 /* Farbtastic placement */
 .color-form {
   max-width: 50em;
@@ -74,11 +57,4 @@ div.fivestar-widgets div.form-item {
 }
 #fivestar-palette .item-selected input {
   border: 2px solid black;
-}
-#fivestar-direct-preview div.description {
-  margin-bottom: 0;
-}
-#fivestar-direct-preview div.feedback{
-  font-size: 0.85em;
-  line-height: 150%;
 }

@@ -161,14 +161,7 @@ function fivestar_field_widget_info() {
  * Implementation of hook_widget_settings_form().
  */
 function fivestar_widget_settings_form($field, $instance) {
-  $form = array();
-  $form['allow_clear'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow user to clear value'),
-    '#default_value' => isset($instance['widget']['settings']['allow_clear']) ? $instance['widget']['settings']['allow_clear'] : 1,
-  );
-
-  return $form;
+  // @todo: Add some widget settings here if applicable.
 }
 
 /**

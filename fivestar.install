@@ -251,3 +251,115 @@ function fivestar_update_7202() {
     }
   }
 }
+
+  
+/**
+ * Convert all existing fivestar/node_type settings into fields with exposed fivestar formatters
+ */
+function fivestar_update_7203() {
+  // Gather the node types
+  $query = db_select('node_type', 'n');
+  $query->addField('n', 'type');
+  $result = $query->execute();
+  $types = $result->fetchCol();
+
+  // Gather the tags.  In the case that fivestar_get_tags() is ever removed from
+  // the module, this update still needs to run.
+  $tags_txt = variable_get('fivestar_tags', 'vote');
+  $tags_exploded = explode(',', $tags_txt);
+
+  $tags = array();
+  $got_vote = false;
+  foreach ($tags_exploded as $tag) {
+    $tag_trimmed = trim($tag);
+    if ($tag_trimmed) {
+      $tags[] = $tag_trimmed;
+      if ($tag_trimmed == 'vote') {
+        $got_vote = true;
+      }
+    }
+  }
+
+  if (!$got_vote) {
+    $tags[] = 'vote';
+  }
+  $tags;
+
+  foreach($tags as $tag) {
+    $suffix = '';
+    foreach($types as $type) {
+      $var_suffix = $type . ($tag == 'vote' ? '' : '_' . $tag);
+
+      $settings = array(
+        'stars' => variable_get('fivestar_stars_' . $var_suffix, 6),
+        'allow_clear' => variable_get('fivestar_unvote_' . $var_suffix, 0),
+        'feedback_enable' => variable_get('fivestar_feedback_'. $var_suffix, 1),
+        'style' => variable_get('fivestar_style_' . $var_suffix, 'average'),
+        'text' => variable_get('fivestar_text_' . $var_suffix, 'dual'),
+      );
+
+      if (variable_get('fivestar_' . $var_suffix, FALSE)) {
+        // Check to see if a field for this tag exists and create one if needed
+        $field_name = 'field_' . $tag;
+        $field = field_read_field($field_name . $suffix, array('include_deleted' => TRUE));
+
+        $i = 0;
+        while(!empty($field) && $field['type'] != 'fivestar') {
+          $suffix = '_' . $i;
+          $field = field_read_field($field_name . $suffix, array('include_deleted' => TRUE));
+          $i++;
+        }
+        if (empty($field)) {
+          $field_values = array(
+            'field_name' => $field_name . $suffix,
+            'type' => 'fivestar',
+            'settings' => array(
+              'axis' => $tag,
+            ),
+          );
+          $field = field_create_field($field_values);
+        }
+        
+        // Create an instance of the field in this bundle
+        $instance = field_read_instance('node', $field['field_name'], $type, array('include_deleted' => TRUE));
+        if (empty($instance)) {
+          $settings['allow_clear'] = $settings['unvote_enable'];
+          $settings['style'] = $settings['star_display'];
+          $settings['text'] = $settings['text_display'];
+
+          $instance_info = array(
+            'field_name' => $field['field_name'],
+            'entity_type' => 'node',
+            'bundle' => $type,
+            'widget' => array(
+              'type' => 'stars',
+            ),
+            'display' => array(
+              'default' => array(
+                'type' => 'fivestar_formatter_exposed_stars',
+                'settings' => $settings,
+              ),
+            ),
+            'settings' => array(
+              'stars' => $settings['stars'],
+              'target' => 'self',
+            ),
+          );
+
+          if (variable_get('fivestar_position_teaser_' . $var_suffix, 'hidden') != 'hidden') {
+            $instance_info['display']['teaser'] = array(
+              'type' => 'fivestar_formatter_exposed_stars',
+              'settings' => $settings,
+            );
+          }
+          
+          field_create_instance($instance_info);
+        }
+      }
+    }
+  }
+  
+  // Rebuild the menu to remove the node type tag form paths
+  menu_rebuild();
+  _field_info_collate_fields(TRUE);
+}
