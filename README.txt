@@ -122,8 +122,7 @@ Fivestar Rating with the Stars radio button.
 explain their purpose. The Node ID field is the most important field on the page
 which determines exactly what node will receive the value of the rating. In a
 realy simple case, you could just enter the value 10 to always rate on the same
-node with nid = 10. Usually you'll need to enter PHP code to dynamically select
-what node you want to rate.
+node with nid = 10.
 
 A common scenario is using fivestar with nodecomments to make reviews. If using
 nodecomments a separate checkbox appears the Node ID field to allow you easily

@@ -59,53 +59,13 @@ function fivestar_field_instance_settings_form($field, $instance) {
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
 
-  $dynamic_options = array();
-  if (module_exists('node_reference')) {
-    $fields = field_info_fields();
-    foreach ($fields as $field_name => $content_field) {
-      // Make sure that this field exists for this type.
-      if ($content_field['type'] == 'node_reference' && in_array($field['bundles'][$instance['entity_type']][0], $content_field['bundles']['node'])) {
-        $dynamic_options[$content_field['field_name']] = t('Node reference: @field', array('@field' => $content_field['field_name']));
-      }
-    }
-  }
-  if ($instance['entity_type'] == 'comment') {
-    $dynamic_options['parent_node'] = t('Parent Node');
-  }
-
-  if (empty($dynamic_options)) {
-    drupal_set_message(t('No potential target fields are available for the %type bundle. Create a node reference field in this bundle to make it easier to assign a vote to a node.', array('%type' => $instance['bundle'])), 'warning');
-  }
-
-  $dynamic_options = array('' => '<'. t('none') . '>') + $dynamic_options;
-  $form['target'] = array(
-    '#title' => t('Voting target'),
-    '#type' => 'select',
-    '#default_value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : '',
-    '#options' => $dynamic_options,
-    '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
-  );
-
-  if (user_access('use PHP for fivestar target')) {
-    $form['php_target'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Voting target PHP code'),
-      '#collapsible' => TRUE,
-      '#collapsed' => empty($field['php_target']),
-    );
-    $form['php_target']['php_target'] = array(
-      '#title' => t('Code'),
-      '#type' => 'textarea',
-      '#default_value' => isset($instance['settings']['php_target']['php_target']) ? $instance['settings']['php_target']['php_target'] : '',
-      '#description' => t('Advanced usage only: PHP code that returns a target node ID. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Note that executing incorrect PHP-code can break your Drupal site.'),
-    );
-  }
-  else {
-    $form['php_target']['php_target'] = array(
-      '#type' => 'value',
-      '#value' => isset($instance['settings']['php_target']) ? $instance['settings']['php_target'] : '',
-    );
-  }
+ $form['target'] = array(
+   '#title' => t('Voting target'),
+   '#type' => 'select',
+   '#default_value' => isset($instance['settings']['target']) ? $instance['settings']['target'] : '',
+   '#options' => fivestar_get_targets($field, $instance),
+   '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
+ );
 
   return $form;
 }
@@ -147,9 +107,9 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
       $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
     }
     $items[$delta]['target'] = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
-    if (is_numeric($items[$delta]['target'])) {
-      _fivestar_cast_vote('node', $items[$delta]['target'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
-      votingapi_recalculate_results('node', $items[$delta]['target']);
+    if (!empty($items[$delta]['target'])) {
+     _fivestar_cast_vote($items[$delta]['target']['entity_type'], $items[$delta]['target']['entity_id'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
+     votingapi_recalculate_results($items[$delta]['target']['entity_type'], $items[$delta]['target']['entity_id']);
     }
   }
 }
@@ -158,27 +118,17 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
  * Helper function to find the id that should be rated when a field is changed.
  */
 function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
-  $target = NULL;
-  if (isset($instance['settings']['php_target']) && !empty($instance['settings']['php_target']['php_target'])) {
-    // Use eval rather than drupal_eval to allow access to local variables.
-    $target = eval($instance['settings']['php_target']['php_target']);
+  if (isset($instance['settings']['target'])) {
+    $target = fivestar_get_targets($field, $instance, $instance['settings']['target'], $entity, $langcode);
   }
-  elseif (!empty($instance['settings']['target']) && $instance['settings']['target'] == 'parent_node') {
-    // Allow comments to be voted against the parent node.
-    $target = $entity->nid;
+  else {
+    // If all else fails, default to voting on the instance the field is attached to.
+    list($id, $vid, $bundle) = entity_extract_ids($instance['entity_type'], $entity);
+    $target = array(
+      'entity_id' => $id,
+      'entity_type' => $instance['entity_type'],
+    );
   }
-  elseif (!empty($instance['settings']['target']) && !empty($entity->$instance['settings']['target'])) {
-    if (isset($entity->{$instance['settings']['target']}[$langcode][0]) && is_numeric($entity->{$instance['settings']['target']}[$langcode][0]['nid'])) {
-      $target = $entity->{$instance['settings']['target']}[$langcode][0]['nid'];
-    }
-    elseif (is_numeric($entity->$instance['settings']['target'])) {
-      $target = $entity->$instance['target'];
-    }
-  }
-  elseif (isset($item['target'][0]['nid'])) {
-    $target = $item['target'][0]['nid'];
-  }
-
   return $target;
 }
 

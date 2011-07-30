@@ -108,16 +108,12 @@ function fivestar_init() {
 /**
  * Implementation of hook_permission().
  *
- * Exposes permissions for rating content, viewing aggregate ratings, and using PHP
- * snippets when configuring fivestar CCK fields.
+ * Exposes permissions for rating content.
  */
 function fivestar_permission() {
   return array(
     'rate content' => array(
       'title' => t('rate content'),
-    ),
-    'use PHP for fivestar target' => array(
-      'title' => t('use PHP for fivestar target'),
     ),
   );
 }
@@ -1458,4 +1454,90 @@ function fivestar_votingapi_metadata_alter(&$data) {
       'module' => 'fivestar',
     );  
   }
+}
+
+function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, $langcode = LANGUAGE_NONE) {
+  $options = array();
+  $targets = module_invoke_all('fivestar_target_info', $field, $instance);
+  if ($key == FALSE) {
+    foreach ($targets as $target => $info) {
+      $options[$target] = $info['title'];
+    }
+    return $options;
+  }
+  else {
+    if (isset($targets[$key]) && !empty($targets[$key]['callback']) && function_exists($targets[$key]['callback'])) {
+      return call_user_func($targets[$key]['callback'], $entity, $field, $instance, $langcode);
+    }
+  }
+}
+
+/**
+ * Implements hook_fivestar_target_info().
+ */
+function fivestar_fivestar_target_info($field, $instance) {
+  $options = array(
+    'none' => array(
+      'title' => t('None'),
+    ),
+    'self' => array(
+      'title' => t('Self'),
+      'callback' => '_fivestar_target_self',
+    ),
+  );
+
+  // Add node_referrence support.
+  if (module_exists('node_reference')) {
+    $fields = field_info_fields(array('type' => 'node_reference'));
+    foreach ($fields as $field_name => $content_field) {
+      // Make sure that this field exists for this type.
+      if (in_array($field['bundles'][$instance['entity_type']][0], $content_field['bundles']['node'])) {
+        $options[$content_field['field_name']] = array(
+          'title' => t('Node reference: @field', array('@field' => $content_field['field_name'])),
+          'callback' => '_fivestar_target_node_reference'
+        );
+      }
+    }
+  }
+
+  // Add comment module support.
+  if ($instance['entity_type'] == 'comment') {
+    $options['parent_node'] = array(
+      'title' => t('Parent Node'),
+      'callback' => '_fivestar_target_comment_parent_node'
+    );
+  }
+
+  return $options;
+}
+
+/**
+ *
+ * @return (array) array('entity_type', 'entity_id')
+ */
+function _fivestar_target_node_reference($entity, $field, $instance, $langcode) {
+  $targer = array();
+
+  $node_reference = $instance['settings']['target'];
+  if (isset($entity->{$node_reference}[$langcode][0]) && is_numeric($entity->{$node_reference}[$langcode][0]['nid'])) {
+    $target['entity_id'] = $entity->{$node_reference}[$langcode][0]['nid'];
+    $target['entity_type'] = 'node';
+  }
+
+  return $target;
+}
+
+function _fivestar_target_comment_parent_node($entity, $field, $instance, $langcode) {
+  return array(
+    'entity_id' => $entity->nid,
+    'entity_type' => 'node',
+  );
+}
+
+function _fivestar_target_self($entity, $field, $instance, $langcode) {
+  list($id, $vid, $bundle) = entity_extract_ids($instance['entity_type'], $entity);
+  return array(
+    'entity_id' => $id,
+    'entity_type' => $instance['entity_type'],
+  );
 }
