@@ -110,15 +110,6 @@ function fivestar_field_instance_settings_form($field, $instance) {
   return $form;
 }
 
-function fivestar_field_schema() {
-  return array(
-    'columns' => array(
-      'rating' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'sortable' => TRUE),
-      'target' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE),
-    ),
-  );
-}
-
 /**
  * Implementation of hook_field_presave().
  */
@@ -147,7 +138,7 @@ function fivestar_field_delete($entity_type, $entity, $field, $instance, $langco
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, 'delete');
 }
 
-function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, $op = '') {
+function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, &$items, $op = '') {
   foreach ($items as $delta => $item) {
     if ((isset($entity->status) && !$entity->status) || $op == 'delete') {
       $rating = 0;
@@ -167,7 +158,7 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
  * Helper function to find the id that should be rated when a field is changed.
  */
 function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
-  $target = FALSE;
+  $target = NULL;
   if (isset($instance['settings']['php_target']) && !empty($instance['settings']['php_target']['php_target'])) {
     // Use eval rather than drupal_eval to allow access to local variables.
     $target = eval($instance['settings']['php_target']['php_target']);
