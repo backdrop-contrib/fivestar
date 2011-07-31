@@ -351,8 +351,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   // We are going to built a custom fivestar rating widget if the exposed stars formatter is 
   // selected and the user has the rate content permission. 
 if ($display['type'] == 'fivestar_formatter_default' && user_access('rate content') && $instance['widget']['type'] == 'exposed' && $settings['expose']) {
-    // The axis/tag is selected from the field instance.
-    $tag = (isset($instance['settings']['axis'])) ? $instance['settings']['axis'] : 'vote';
+    // The axis/tag is selected from the field, not the instance.
+    $tag = (isset($field['settings']['axis'])) ? $field['settings']['axis'] : 'vote';
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
     $votes = fivestar_get_votes($entity_type, $id, $tag);
     $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
