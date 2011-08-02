@@ -1075,6 +1075,8 @@ function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, 
  * Implements hook_fivestar_target_info().
  */
 function fivestar_fivestar_target_info($field, $instance) {
+  $entity_type = $instance['entity_type'];
+  $bundle = $instance['bundle'];
   $options = array(
     'none' => array(
       'title' => t('None'),
@@ -1084,15 +1086,14 @@ function fivestar_fivestar_target_info($field, $instance) {
       'callback' => '_fivestar_target_self',
     ),
   );
-
   // Add node_referrence support.
   if (module_exists('node_reference')) {
-    $fields = field_info_fields(array('type' => 'node_reference'));
-    foreach ($fields as $field_name => $content_field) {
-      // Make sure that this field exists for this type.
-      if (in_array($field['bundles'][$instance['entity_type']][0], $content_field['bundles']['node'])) {
-        $options[$content_field['field_name']] = array(
-          'title' => t('Node reference: @field', array('@field' => $content_field['field_name'])),
+    $field_names = array_keys(field_read_fields(array('module' => 'node_reference')));
+    $field_instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle, 'field_name' => $field_names));
+    if (!empty($field_instances)) {
+      foreach ($field_instances as $field_instance) {
+        $options[$field_instance['field_name']] = array(
+          'title' => t('Node reference: @field', array('@field' => $field_instance['field_name'])),
           'callback' => '_fivestar_target_node_reference'
         );
       }

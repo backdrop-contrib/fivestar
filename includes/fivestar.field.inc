@@ -96,7 +96,6 @@ function fivestar_field_instance_settings_form($field, $instance) {
     '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
     '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
   );
-
   return $form;
 }
 
@@ -136,10 +135,10 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
     else {
       $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
     }
-    $items[$delta]['target'] = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
-    if (!empty($items[$delta]['target'])) {
-     _fivestar_cast_vote($items[$delta]['target']['entity_type'], $items[$delta]['target']['entity_id'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
-     votingapi_recalculate_results($items[$delta]['target']['entity_type'], $items[$delta]['target']['entity_id']);
+    $target = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
+    if (!empty($target)) {
+      _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
+      votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
     }
   }
 }
@@ -347,10 +346,9 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
 function fivestar_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   $settings = $display['settings'];
-
   // We are going to built a custom fivestar rating widget if the exposed stars formatter is 
   // selected and the user has the rate content permission. 
-if ($display['type'] == 'fivestar_formatter_default' && user_access('rate content') && $instance['widget']['type'] == 'exposed' && $settings['expose']) {
+  if ($display['type'] == 'fivestar_formatter_default' && user_access('rate content') && $instance['widget']['type'] == 'exposed' && $settings['expose']) {
     // The axis/tag is selected from the field, not the instance.
     $tag = (isset($field['settings']['axis'])) ? $field['settings']['axis'] : 'vote';
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -358,10 +356,9 @@ if ($display['type'] == 'fivestar_formatter_default' && user_access('rate conten
     $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
     $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
     $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
-
     $settings = array(
-      'stars' => $instance['settings']['stars'],
-      'allow_clear' => $instance['settings']['allow_clear'],
+      'stars' => (!empty($instance['settings']['stars'])) ? $instance['settings']['stars'] : 5,
+      'allow_clear' => (!empty($instance['settings']['allow_clear'])) ? $instance['settings']['allow_clear'] : 5,
       'style' => $settings['style'],
       'text' => $settings['text'],
       'content_type' => $entity_type,
