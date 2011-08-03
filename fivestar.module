@@ -1116,7 +1116,7 @@ function fivestar_fivestar_target_info($field, $instance) {
  * @return (array) array('entity_type', 'entity_id')
  */
 function _fivestar_target_node_reference($entity, $field, $instance, $langcode) {
-  $targer = array();
+  $target = array();
 
   $node_reference = $instance['settings']['target'];
   if (isset($entity->{$node_reference}[$langcode][0]) && is_numeric($entity->{$node_reference}[$langcode][0]['nid'])) {
