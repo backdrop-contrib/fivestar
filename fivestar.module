@@ -395,14 +395,6 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
       }
     }
   }
-  
-  // Also perform a check to see if fivestar voting has been abled on this
-  // node content type.
-  if ($entity_type == 'node' && $node = node_load($id)) {
-    if (variable_get('fivestar_'. fivestar_get_suffix($node->type, $tag), 0)) {
-      return TRUE;
-    }
-  }
 }
 
 /**
