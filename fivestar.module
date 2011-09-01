@@ -53,19 +53,6 @@ function fivestar_menu() {
 }
 
 /**
- * Implementation of hook_init().
- *
- * These includes do not need to be loaded for cached pages.
- */
-function fivestar_init() {
-  // Add necessary CSS and JS.
-  // TODO: These shouldn't be loaded on every page, but block caching omits
-  // CSS and JS files that would be otherwise added.
-  fivestar_add_js();
-  fivestar_add_css();
-}
-
-/**
  * Implementation of hook_permission().
  *
  * Exposes permissions for rating content.
@@ -93,7 +80,7 @@ function fivestar_theme() {
       'file' => 'includes/fivestar.theme.inc',
     ),
     'fivestar_static' => array(
-      'variables' => array('rating' => NULL, 'stars' => 5, 'tag' => 'vote'),
+      'variables' => array('rating' => NULL, 'stars' => 5, 'tag' => 'vote', 'widget' => array('name' => 'default', 'css' => '')),
       'file' => 'includes/fivestar.theme.inc',
     ),
     'fivestar_static_element' => array(
@@ -114,7 +101,7 @@ function fivestar_theme() {
       'file' => 'includes/fivestar.theme.inc',
     ),
     'fivestar_preview_widget' => array(
-      'variables' => array('css_file' => NULL),
+      'variables' => array('css' => NULL, 'name' => NULL),
       'file' => 'includes/fivestar.theme.inc',
     ),
     'fivestar_preview_wrapper' => array(
@@ -520,6 +507,7 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
     '#labels_enable' => isset($settings['labels_enable']) ? $settings['labels_enable'] : TRUE,
     '#labels' => isset($settings['labels']) ? $settings['labels'] : NULL,
     '#tag' => isset($settings['tag']) ? $settings['tag'] : 'vote',
+    '#widget' => isset($settings['widget']) ? $settings['widget'] : array('name' => 'default', 'css' => 'default'),
   );
 
   $form['destination'] = array(
@@ -602,13 +590,14 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
         'rating' => $values['average'],
         'stars' => $settings['stars'],
         'tag' => $settings['tag'],
+        'widget' => $settings['widget'],
       ));
       if ($settings['text'] == 'none' && !$settings['labels_enable'] && !$settings['feedback_enable']) {
         $static_description = NULL;
       }
       elseif ($settings['text'] != 'none') {
         $static_description = theme('fivestar_summary', array(
-          'averrage_rating' => $settings['text'] == 'user' ? NULL : (isset($values['average']) ? $values['average'] : 0),
+          'average_rating' => $settings['text'] == 'user' ? NULL : (isset($values['average']) ? $values['average'] : 0),
           'votes' => isset($values['count']) ? $values['count'] : 0,
           'stars' => $settings['stars'],
           'feedback_enable' => FALSE
@@ -677,7 +666,6 @@ function fivestar_form_submit($form, &$form_state) {
 function fivestar_element_info() {
   $type['fivestar'] = array(
     '#input' => TRUE,
-    '#stars' => 5,
     '#widget' => 'stars',
     '#allow_clear' => FALSE,
     '#auto_submit' => FALSE,
@@ -686,80 +674,33 @@ function fivestar_element_info() {
     '#feedback_enable' => TRUE,
     '#process' => array('fivestar_expand'),
     '#theme_wrappers' => array('form_element'),
+    '#widget' => array(
+      'name' => 'default',
+      'css' => 'default',
+    ),
   );
   return $type;
-}
-
-/**
- * Fetch the necessary CSS files to render the fivestar widget.
- */
-function fivestar_add_css($widget_css = NULL) {
-  // Add fivestar CSS.
-  drupal_add_css(drupal_get_path('module', 'fivestar') .'/css/fivestar.css');
-
-  // Add widget specific CSS.
-  if (!isset($widget_css)) {
-    $widget_css = variable_get('fivestar_widget', 'default');
-  }
-
-  if ($widget_css != 'default') {
-    drupal_add_css($widget_css);
-  }
-}
-
-/**
- * Add necessary JS files and settings to render the fivestar widget.
- */
-function fivestar_add_js() {
-  static $js_added = FALSE;
-
-  // Add necessary javascript only once per page.
-  if (!$js_added) {
-    $settings = array(
-      'titleUser' => t('Your rating') .': ',
-      'titleAverage' => t('Average') .': ',
-      'feedbackSavingVote' => t('Saving your vote...'),
-      'feedbackVoteSaved' => t('Your vote has been saved.'),
-      'feedbackDeletingVote' => t('Deleting your vote...'),
-      'feedbackVoteDeleted' => t('Your vote has been deleted.'),
-    );
-
-    drupal_add_js(drupal_get_path('module', 'fivestar') .'/js/fivestar.js');
-    drupal_add_js(array('fivestar' => $settings), 'setting');
-    $js_added = TRUE;
-  }
-}
-
-
-/**
- * Add Inline CSS to the page, only used on admin/config/content/fivestar page.
- */
-function fivestar_add_inline_css($widget_key = NULL, $css = NULL, $reset = FALSE) {
-  static $inline_css;
-
-  if (!isset($inline_css) || $reset) {
-    $inline_css = array();
-  }
-
-  if (isset($widget_key) && isset($inline_css)) {
-    $inline_css[$widget_key] = $css;
-  }
-
-  return $inline_css;
-}
-
-/**
- * Retrieve a list of all inline CSS to be added to the page.
- */
-function fivestar_get_inline_css() {
-  $inline_css = fivestar_add_inline_css();
-  return implode("\n", $inline_css);
 }
 
 /**
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
+  // Add CSS and JS
+  $path = drupal_get_path('module', 'fivestar');
+  $element['#attached']['js'][] = $path . '/js/fivestar.js';
+  $element['#attached']['css'][] = $path . '/css/fivestar.css';
+  // Attach necessary JS settings
+  $settings = array(
+   'titleUser' => t('Your rating') .': ',
+   'titleAverage' => t('Average') .': ',
+   'feedbackSavingVote' => t('Saving your vote...'),
+   'feedbackVoteSaved' => t('Your vote has been saved.'),
+   'feedbackDeletingVote' => t('Deleting your vote...'),
+   'feedbackVoteDeleted' => t('Your vote has been deleted.'),
+  );
+
+  drupal_add_js(array('fivestar' => $settings), 'setting');
 
   if (isset($element['#vote_count'])) {
     $element['vote_count'] =  array(
@@ -833,12 +774,10 @@ function fivestar_expand($element) {
   }
 
   $class = isset($element['#attributes']['class']) ? $element['#attributes']['class'] : array();
-  if ($element['#widget'] == 'stars') {
-    $class[] = 'fivestar-form-item';    
-  }
-  if ($element['#labels_enable']) {
-    // Set a class for the display of label text on hover.
-    $class[] = 'fivestar-labels-hover';
+  $class[] = 'fivestar-form-item';
+  $class[] = 'fivestar-' . $element['#widget']['name'];
+  if ($element['#widget']['name'] != 'default') {
+    $element['#attached']['css'][] = $element['#widget']['css'];
   }
   $element['#prefix'] = '<div ' . drupal_attributes(array('class' => $class)) . '>';
   $element['#suffix'] = '</div>';
@@ -903,6 +842,7 @@ function fivestar_views_value_display_handler($value, $field, $columns) {
     'rating' => $value,
     'stars' => $stars,
     'tag' => $tag,
+    // @todo: Pass on widget selection
   ));
 }
 

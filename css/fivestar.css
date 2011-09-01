@@ -94,3 +94,7 @@ div.fivestar-widget div.hover a, div.rating div a:hover {
 form.fivestar-widget div.description {
   margin-bottom: 0;
 }
+
+html.js .fivestar-submit {
+  display: none;
+}

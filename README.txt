@@ -178,38 +178,6 @@ Creating a Fivestar Set
    because it only changes the background image as necessary. If you're making a larger or smaller
    size for your stars than 16x16 pixels, the "Minimal" and "Outline" sets make for a good example.
 
-Creating a Color Enhanced Fivestar Set
---------------------------------------
-
-If contributing your set of stars back to the community, creating a color enhanced version of your
-widget is an excellent way to make the stars usable by a large audience. By slightly extending a
-basic widget, you can make allow users to customize the colors in your Fivestar set.
-
-1. Similar to a basic star set, create a new image that will be split in thirds vertically. However,
-   color enhanced sets of stars are also split in half horizontally, so you'll actually create 6
-   stars inside of a single image. The default canvas size for a 16x16 star then is 32x48 pixels.
-
-2. Setup guides at 16 and 32 pixels on the y-axis and another grid at 16 pixels on the x-axis.
-
-3. Using the same method as a basic widget, create stars for Off, On, and Hover states on the right
-   side of your image. The stars on the right side of the image will be used as an *overlay*.
-   While it's okay to use color for the overlay, you'll generally only use white and black to add
-   highlights or shadows to the colors the end-user will choose from the Fivestar settings page.
-
-4. Create matching stars on the left side of the image (also for Off, On, and Hover states). The
-   stars on the left side will be used as the *color mask*. The stars should be entirely black
-   (transparency is okay).
-
-5. Save your image as star-template.png, *make sure to format it as a 24-bit PNG*. Even though the
-   template is a 24-bit PNG (which isn't compatible with IE6), the generated images can be either
-   an 8-bit PNG (with a matte) or 24-bit PNG (if no matte is chosen).
-
-6. Repeat steps 1 through 6 for the cancel image, only with a 32x32 pixel image for the Off and
-   Hover states. Save the final images as cancel-template.png and cancel.png.
-
-7. The two template.png files will tell Fivestar that the set is "color enhanced" and allow users to
-   choose new colors for their stars.
-
 Contributing
 ------------
 Have a sweet set of stars you'd like to contribute to the Fivestar module?
