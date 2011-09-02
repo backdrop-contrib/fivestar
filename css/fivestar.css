@@ -98,3 +98,7 @@ form.fivestar-widget div.description {
 html.js .fivestar-submit {
   display: none;
 }
+
+.fivestar-combo-stars .form-type-fivestar .form-item {
+  float: left;
+}

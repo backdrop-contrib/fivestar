@@ -258,8 +258,22 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     $widgets = module_invoke_all('fivestar_widgets');
     $active = isset($instance['widget']['settings']['widget']['fivestar_widget']) ? $instance['widget']['settings']['widget']['fivestar_widget'] : 'default';
     $widget = array(
-      'name' => strtolower($widgets[$active]),
+      'name' => isset($widgets['active']) ? strtolower($widgets[$active]) : 'default',
       'css' => $active,
+    );
+
+    $values = array(
+      'user' => 0,
+      'average' => 0,
+      'count' => 0,
+    );
+
+    $settings = array(
+      'stars' => $instance['settings']['stars'],
+      'allow_clear' => !empty($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
+      'style' => 'user',
+      'text' => 'none',
+      'widget' => $widget,
     );
     
     $element['rating'] = array(
@@ -269,6 +283,8 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : (isset($instance['default_value'][$delta]['rating']) ? $instance['default_value'][$delta]['rating'] : 0),
       '#widget' => $widget,
+      '#settings' => $settings,
+      '#values' => $values,
     );
   }
 
@@ -286,7 +302,6 @@ function fivestar_field_formatter_info() {
       'settings' =>  array(
         'widget' => array('fivestar_widget' => 'default'),
         'style' => 'average',
-        'feedback_enable' => FALSE,
         'text' => 'average',
         'expose' => TRUE,
       ),
@@ -343,12 +358,6 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
     );
   }
 
-  $element['feedback_enable'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable feedback during vote saving and deletion'),
-    '#default_value' => $settings['feedback_enable'],
-    '#return_value' => 1
-  );
   $element['style'] = array(
     '#type' => 'select',
     '#title' => t('Value to display as stars'),
@@ -390,17 +399,15 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
   $widgets = module_invoke_all('fivestar_widgets');
 
   if ($instance['widget']['type'] == 'exposed') {
-    $summary = t("Widget style: @widget, Exposed: @expose, Feedback: @feedback, Stars Display: @style, Text Display: @text", array(
+    $summary = t("Widget style: @widget, Exposed: @expose, Stars Display: @style, Text Display: @text", array(
       '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? $widgets[$settings['widget']['fivestar_widget']] : t('Default'),
       '@expose' => ($settings['expose']) ? 'Yes' : 'No',
-      '@feedback' => ($settings['feedback_enable']) ? 'Yes' : 'No',
       '@style' => $settings['style'],
       '@text' => $settings['text']));
     return $summary;
   }
   
-  $summary = t("Feedback: @feedback, Stars Display: @style, Text Display: @text", array(
-    '@feedback' => ($settings['feedback_enable']) ? 'Yes' : 'No',
+  $summary = t("Stars Display: @style, Text Display: @text", array(
     '@style' => $settings['style'],
     '@text' => $settings['text']));
 
@@ -430,8 +437,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   $widgets = module_invoke_all('fivestar_widgets');
   $values = $items[0];
   $widget = array(
-    'name' => isset($widgets[$settings['widget']['fivestar_widget']]) ? strtolower($widgets[$settings['widget']['fivestar_widget']]) : 'default',
-    'css' => $settings['widget']['fivestar_widget'],
+    'name' => isset($widgets[$display['settings']['widget']['fivestar_widget']]) ? strtolower($widgets[$display['settings']['widget']['fivestar_widget']]) : 'default',
+    'css' => $display['settings']['widget']['fivestar_widget'],
   );
 
   // Determine if any set of stars to be displayed need to be
@@ -515,7 +522,6 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   $text = $display['settings']['text'];
   $summary_options = array(
     'stars' => $instance['settings']['stars'],
-    'feedback_enable' => $settings['feedback_enable'],
     'votes' => NULL,
   );
   // If we're displaying both user and average ratings, add a description to
@@ -580,7 +586,6 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
     'tag' => $tag,
     'autosubmit' => TRUE,
     'title' => FALSE,
-    'feedback_enable' => $settings['feedback_enable'],
     'labels_enable' => FALSE,
     'labels' => array(),
     'widget' => $widget,

@@ -71,9 +71,6 @@ function theme_fivestar_preview($variables) {
     'text' => $text,
     'title' => $title,
     'autosubmit' => FALSE,
-    'feedback_enable' => $feedback_enable,
-    'labels_enable' => $labels_enable,
-    'labels' => $labels,
     'tag' => 'vote',
   );
 
@@ -151,14 +148,6 @@ function theme_fivestar_formatter_percentage($variables) {
  */
 function theme_fivestar($variables) {
   $element = $variables['element'];
-  if (empty($element['#description'])) {
-    if ($element['#feedback_enable']) {
-      $element['#description'] = '<div class="fivestar-summary fivestar-feedback-enabled">&nbsp;</div>';
-    }
-    elseif ($element['#labels_enable']) {
-      $element['#description'] = '<div class="fivestar-summary">&nbsp;</div>';
-    }
-  }
 
   return theme('form_element', array('element' => $element));
 }
@@ -173,28 +162,6 @@ function theme_fivestar_select($variables) {
   _form_set_class($element, array('form-select'));
   return '<select' . drupal_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
 }
-/**
- * Theme an entire fivestar widget, including the submit button and the normal
- * fivestar widget themed in the theme_fivestar() function.
- */
-function theme_fivestar_widget($variables) {
-  $form = $variables['form'];
-  // Only print out the summary if text is being displayed or using rollover text.
-  if (empty($form['vote']['#description']) && strpos($form['vote']['#prefix'], 'fivestar-labels-hover') === FALSE) {
-    unset($form['vote']['#description']);
-  }
-
-  $class = 'fivestar-form';
-  $class .= '-'. (isset($form['vote']['#tag']) ? $form['vote']['#tag'] : 'vote');
-  $class .= '-'. (isset($form['content_id']['#value']) ? $form['content_id']['#value'] : 0);
-
-  $output  = '';
-  $output .= '<div class="'. $class .' clearfix">';
-  $output .= drupal_render_children($form);
-  $output .= '</div>';
-  return $output;
-}
-
 /**
  * Display a plain HTML view-only version of the widget with a specified rating.
  *
@@ -264,8 +231,6 @@ function theme_fivestar_static($variables) {
  *   The total number of votes.
  * @param $stars
  *   The number of stars being displayed.
- * @param $feedback
- *   A toggle that enables AJAX indicator message when a vote is being saved.
  * @return
  *   A themed HTML string representing the star widget.
  */
@@ -302,7 +267,7 @@ function theme_fivestar_summary($variables) {
     $output = '<span class="empty">'. t('No votes yet') .'</span>';
   }
 
-  $output = '<div class="fivestar-summary fivestar-summary-'. $div_class . ($feedback_enable ? ' fivestar-feedback-enabled' : '') .'">'. $output .'</div>';
+  $output = '<div class="fivestar-summary fivestar-summary-'. $div_class . '">'. $output .'</div>';
   return $output;
 }
 
