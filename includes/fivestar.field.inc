@@ -405,17 +405,18 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
   $widgets = module_invoke_all('fivestar_widgets');
 
   if ($instance['widget']['type'] == 'exposed') {
-    $summary = t("Widget style: @widget, Exposed: @expose, Stars Display: @style, Text Display: @text", array(
-      '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? $widgets[$settings['widget']['fivestar_widget']] : t('Default'),
-      '@expose' => ($settings['expose']) ? 'Yes' : 'No',
-      '@style' => $settings['style'],
-      '@text' => $settings['text']));
+    $summary = t("Style: @widget, Exposed: @expose, Stars display: @style, Text display: @text", array(
+      '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? strtolower($widgets[$settings['widget']['fivestar_widget']]) : t('default'),
+      '@expose' => ($settings['expose']) ? 'yes' : 'no',
+      '@style' => strtolower($settings['style']),
+      '@text' => strtolower($settings['text'])));
     return $summary;
   }
   
-  $summary = t("Stars Display: @style, Text Display: @text", array(
-    '@style' => $settings['style'],
-    '@text' => $settings['text']));
+  $summary = t("Style: @widget, Stars display: @style, Text display: @text", array(
+    '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? $widgets[$settings['widget']['fivestar_widget']] : t('default'),
+    '@style' => strtolower($settings['style']),
+    '@text' => strtolower($settings['text'])));
 
   return $summary;
 }
