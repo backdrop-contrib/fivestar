@@ -292,7 +292,12 @@ function fivestar_field_formatter_info() {
       'label' => t('As Stars'),
       'field types' => array('fivestar'),
       'settings' =>  array(
-        'widget' => array('fivestar_widget' => 'default'),
+        // Note: Do not set to widget to 'default' by
+        // default. "Stars (rated while editing)" should
+        // default to whatever was selected as a widget
+        // setting. Let hook_field_formatter_view() handle
+        // defaults for instances that aren't set to anything.
+        'widget' => array('fivestar_widget' => NULL),
         'style' => 'average',
         'text' => 'average',
         'expose' => TRUE,
@@ -434,11 +439,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   $element = array();
   $settings = $display['settings'];
   $widgets = module_invoke_all('fivestar_widgets');
+  $widget = _fivestar_get_widget($widgets, $display, $instance);
   $values = $items[0];
-  $widget = array(
-    'name' => isset($widgets[$display['settings']['widget']['fivestar_widget']]) ? strtolower($widgets[$display['settings']['widget']['fivestar_widget']]) : 'default',
-    'css' => $display['settings']['widget']['fivestar_widget'],
-  );
 
   // Determine if any set of stars to be displayed need to be
   // displayed in a form. (That is, can the user click the stars
@@ -593,6 +595,47 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
   return $settings;
 }
 
+/**
+ * @param $widgets
+ *  Array, $widgets = module_invoke_all('fivestar_widgets');
+ *  $widgets = array('path/to/css' => 'Widget Name', 'path/to/more/css' => 'Widget 2');
+ *
+ * @param $display
+ *  Array. This is the $display parameter passed to fivestar_field_formatter_view().
+ *
+ * @param $instance
+ *  Array. This is the $instance parameter passed to fivestar_field_formatter_view().
+ *
+ * @return $widget
+ *  Array. $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
+ */
+function _fivestar_get_widget($widgets, $display, $instance) {
+  // Stars (rated while viewing) is $type = 'exposed'.
+  // Stars (rated while editing) is $type = 'stars'.
+  $type = $instance['widget']['type'];
+
+  // Determine which widget to display.
+  if (!$fivestar_widget = $display['settings']['widget']['fivestar_widget']) {
+    // No display has been selected and saved by the user.
+    if ($type == 'exposed') {
+      // Stars rated while viewing, that is, $type = 'exposed', fall backs on 'default'
+      // (which is the same as nothing).
+      $fivestar_widget = 'default';
+    }
+    else if ($type == 'stars') {
+      // Stars rated while editing, that is, $type = stars,
+      // falls back on whatever the user selected to be displayed on node/add and node/%/edit
+      $fivestar_widget = $instance['widget']['settings']['widget']['fivestar_widget'];
+    }
+  }
+
+  $widget = array(
+    'name' => isset($widgets[$fivestar_widget]) ? strtolower($widgets[$fivestar_widget]) : 'default',
+    'css' => $fivestar_widget,
+  );
+
+  return $widget;
+}
 
 /**
  * Implements hook_field_prepare_view()
