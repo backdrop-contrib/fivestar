@@ -873,10 +873,6 @@ function fivestar_fivestar_target_info($field, $instance) {
     'none' => array(
       'title' => t('None'),
     ),
-    'self' => array(
-      'title' => t('Self'),
-      'callback' => '_fivestar_target_self',
-    ),
   );
   // Add node_referrence support.
   if (module_exists('node_reference')) {
@@ -928,10 +924,3 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
   );
 }
 
-function _fivestar_target_self($entity, $field, $instance, $langcode) {
-  list($id, $vid, $bundle) = entity_extract_ids($instance['entity_type'], $entity);
-  return array(
-    'entity_id' => $id,
-    'entity_type' => $instance['entity_type'],
-  );
-}
