@@ -70,7 +70,7 @@ function fivestar_field_instance_settings_form($field, $instance) {
 
   $form['stars'] = array(
     '#type' => 'select',
-    '#title' => $instance['widget']['type'] == 'select' ? t('Number of Options') : t('Number of Stars'),
+    '#title' => $instance['widget']['type'] == 'select' ? t('Number of options') : t('Number of stars'),
     '#options' => drupal_map_assoc(range(1, 10)),
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
