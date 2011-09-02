@@ -183,7 +183,7 @@ function fivestar_field_widget_info() {
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
     ),
     'select' => array(
-      'label' => t('Select list'),
+      'label' => t('Select list (rated while editing)'),
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
     ),
