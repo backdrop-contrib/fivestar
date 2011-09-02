@@ -350,9 +350,15 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   );
   
   if ($instance['widget']['type'] == 'exposed') {
+    $entity_info = entity_get_info($instance['entity_type']);
+    // Include "Default" in the list of view modes to match the ones displayed
+    // to the user; see field_ui_menu().
+    $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
+    $bundles = field_info_bundles($instance['entity_type']);
+
     $element['expose'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Expose the widget for this display'),
+      '#title' => t('Expose this Fivestar field for voting in the @display display on the @type type.', array('@display' => $view_modes[$view_mode]['label'], '@type' => $bundles[$instance['bundle']]['label'])),
       '#default_value' => $settings['expose'],
       '#return_value' => 1
     );
