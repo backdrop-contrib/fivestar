@@ -35,6 +35,9 @@ function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
    elseif ($form['instance']['widget']['type']['#value'] == 'stars') {
      // Use a select dropdown in the field form to reduce clutter and confusion.
      $options = array(0 => t('No stars'));
+     if (empty($instance['settings']['stars'])) {
+       $instance['settings']['stars'] = 5;
+     }
      for($i = 1; $i <= $instance['settings']['stars']; $i++) {
        $percentage = ceil($i * 100 / $instance['settings']['stars']);
        $options[$percentage] = format_plural($i, '1 star', '@count stars');
@@ -242,6 +245,9 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
 
   if ($instance['widget']['type'] == 'select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
     $options = array(0 => t('No stars'));
+    if (empty($instance['settings']['stars'])) {
+      $instance['settings']['stars'] = 5;
+    }
     for($i = 1; $i <= $instance['settings']['stars']; $i++) {
       $percentage = ceil($i * 100 / $instance['settings']['stars']);
       $options[$percentage] = format_plural($i, '1 star', '@count stars');
