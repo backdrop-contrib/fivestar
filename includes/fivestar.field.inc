@@ -616,23 +616,30 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
  * Implements hook_field_prepare_view()
  */
 function fivestar_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // TODO: Clean this function up!
   foreach ($entities as $id => $entity) {
     // Populating the $items[$id] array even for items with no value forces
     // the render system to output a widget.
-    if (!empty($items[$id][0]['rating']) && empty($items[$id][0]['target'])) {
-      $values['user'] = $items[$id][0]['rating'];
-      $values['average'] = $items[$id][0]['rating'];
-      $values['count'] = 1;
-      $items[$id] = array($values);
-    }
-    else {
-      // TODO. Get rid of voting categories setting, then change this so
-      // axis = field name.
+    if ($instances[$id]['widget']['type'] == 'exposed') {
+      // If the widget type is exposed then we want to look up the voting api values.
       $tag = $field['settings']['axis'];
       $votes = fivestar_get_votes($entity_type, $id, $tag);
       $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
       $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
       $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
+      $items[$id] = array($values);
+    }
+    else {
+      // If the widget type is not exposed, then the count is always 1 or 0.
+      // The count is pointless to display.
+      if (!empty($items[$id][0]['rating'])) {
+        $values['count'] = 1;
+      }
+      else {
+        $values['count'] = 0;
+      }
+      $values['user'] = $items[$id][0]['rating'];
+      $values['average'] = $items[$id][0]['rating'];
       $items[$id] = array($values);
     }
   }
