@@ -613,16 +613,23 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
  */
 function fivestar_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
   foreach ($entities as $id => $entity) {
-    // TODO. Get rid of voting categories setting, then change this so
-    // axis = field name.
-    $tag = $field['settings']['axis'];
-    $votes = fivestar_get_votes($entity_type, $id, $tag);
-    $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
-    $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
-    $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
-
     // Populating the $items[$id] array even for items with no value forces
     // the render system to output a widget.
-    $items[$id] = array($values);
+    if (!empty($items[$id][0]['rating']) && empty($items[$id][0]['target'])) {
+      $values['user'] = $items[$id][0]['rating'];
+      $values['average'] = $items[$id][0]['rating'];
+      $values['count'] = 1;
+      $items[$id] = array($values);
+    }
+    else {
+      // TODO. Get rid of voting categories setting, then change this so
+      // axis = field name.
+      $tag = $field['settings']['axis'];
+      $votes = fivestar_get_votes($entity_type, $id, $tag);
+      $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
+      $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
+      $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
+      $items[$id] = array($values);
+    }
   }
 }
