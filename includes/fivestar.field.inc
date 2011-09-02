@@ -258,7 +258,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     $widgets = module_invoke_all('fivestar_widgets');
     $active = isset($instance['widget']['settings']['widget']['fivestar_widget']) ? $instance['widget']['settings']['widget']['fivestar_widget'] : 'default';
     $widget = array(
-      'name' => isset($widgets['active']) ? strtolower($widgets[$active]) : 'default',
+      'name' => isset($widgets[$active]) ? strtolower($widgets[$active]) : 'default',
       'css' => $active,
     );
 
