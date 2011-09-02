@@ -257,6 +257,8 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
       '#options' => $options,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : NULL,
+      '#description' => isset($instance['description']) ? $instance['description'] : FALSE,
+      '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
 
@@ -291,6 +293,8 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#widget' => $widget,
       '#settings' => $settings,
       '#values' => $values,
+      '#description' => isset($instance['description']) ? $instance['description'] : FALSE,
+      '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
 
