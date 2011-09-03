@@ -58,6 +58,28 @@ class FivestarTestCase extends AJAXTestCase {
   }
 
   /**
+   * Test that users can rate content with exposed widgets.
+   */
+  public function testViewerRatingAjax() {
+    // Add a viewer-rated fivestar field to the article content type.
+    $this->createFivestarField(array('widget_type' => 'exposed'));
+    // Add an article to rate.
+    $node = $this->drupalCreateNode(array('type' => 'article'));
+    // Rate the article.
+    $this->drupalLogin($this->voter);
+    $edit = array(
+      'vote' => '60',
+    );
+    $commands = $this->drupalPostAJAX('node/' . $node->nid, $edit, "vote",
+      NULL, array(), array(), "fivestar-custom-widget");
+    $expected = array(
+      'command' => 'fivestarUpdate',
+      // TODO: we should text the data being returned.
+    );
+    $this->assertCommand($commands, $expected, "The fivestarUpdate AJAX command was returned.");
+  }
+
+  /**
    * Add a fivestar field to a content type.
    *
    * @param $options
