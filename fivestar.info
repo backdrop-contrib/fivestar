@@ -4,3 +4,4 @@ package = Voting
 core = 7.x
 dependencies[] = votingapi
 configure = admin/config/content/fivestar
+files[] = fivestar.test
