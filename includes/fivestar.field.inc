@@ -659,12 +659,14 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
       // The count is pointless to display.
       if (!empty($items[$id][0]['rating'])) {
         $values['count'] = 1;
+        $values['user'] = $items[$id][0]['rating'];
+        $values['average'] = $items[$id][0]['rating'];
       }
       else {
         $values['count'] = 0;
+        $values['user'] = 0;
+        $values['average'] = 0;
       }
-      $values['user'] = $items[$id][0]['rating'];
-      $values['average'] = $items[$id][0]['rating'];
       $items[$id] = array($values);
     }
   }
