@@ -71,7 +71,7 @@ function fivestar_field_instance_settings_form($field, $instance) {
   $form['target'] = array(
     '#title' => t('Voting target'),
     '#type' => 'select',
-    '#default_value' => (isset($instance['settings']['target']) && $instance['widget']['type'] != 'exposed') ? $instance['settings']['target'] : 'self',
+    '#default_value' => (isset($instance['settings']['target']) && $instance['widget']['type'] != 'exposed') ? $instance['settings']['target'] : 'none',
     '#options' => $options,
     '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
     '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
