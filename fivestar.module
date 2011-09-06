@@ -358,8 +358,9 @@ function fivestar_fivestar_widgets() {
  */
 function fivestar_custom_widget($form, &$form_state, $values, $settings) {
   $form = array(
-    '#attributes' => array('class' => array('fivestar-widget')),
-    '#theme' => 'fivestar_widget',
+    '#attributes' => array(
+      'class' => array('fivestar-widget')
+    ),
   );
   $form['#submit'][] = 'fivestar_form_submit';
 
