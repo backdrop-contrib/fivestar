@@ -119,6 +119,46 @@ class FivestarTestCase extends AJAXTestCase {
   }
 
   /**
+   * Test that we can switch the fivestar widgets around for the exposed
+   * widget type.
+   */
+  public function testExposedWidgetDisplay() {
+    // Lets add an exposed widget but display the static widget.
+    // It's simpler to compare the display type using the static widget.
+    $this->createFivestarField(array(
+      'widget_type' => 'exposed',
+      'display' => array(
+        'default' => array(
+          'type' => 'fivestar_formatter_default',
+          'settings' => array(
+            'style' => 'average',
+            'text' => 'average',
+            'expose' => FALSE,
+          ),
+        ),
+      ),
+    ));
+    $instance = field_read_instance('node', 'fivestar_test', 'article');
+    $this->verbose(strtr('instance Name: <pre>!var</pre>', array('!var' => check_plain(var_export($instance, TRUE)))));
+    // Add an article to test widget against.
+    $node = $this->drupalCreateNode(array('type' => 'article'));
+
+    // Test the Default Widget.
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertTrue($this->xpath("//div[contains(@class, 'fivestar-default')]//div[contains(@class,'star-first')]/span"));
+
+    $widgets = module_invoke_all('fivestar_widgets');
+    $this->verbose(strtr('Widgets: <pre>!var</pre>', array('!var' => check_plain(var_export($widgets, TRUE)))));
+    foreach ($widgets as $path => $name) {
+      $instance['display']['default']['settings']['widget']['fivestar_widget'] = $path;
+      field_update_instance($instance);
+      $widget_class = 'fivestar-' . drupal_strtolower($name);
+      $this->drupalGet('node/' . $node->nid);
+      $this->assertTrue($this->xpath("//div[contains(@class, '" . $widget_class . "')]//div[contains(@class,'star-first')]/span"));
+    }
+  }
+
+  /**
    * Add a fivestar field to a content type.
    *
    * @param $options
