@@ -152,7 +152,8 @@ class FivestarTestCase extends AJAXTestCase {
       field_update_instance($instance);
       $widget_class = 'fivestar-' . drupal_strtolower($name);
       $this->drupalGet('node/' . $node->nid);
-      $this->assertTrue($this->xpath("//div[contains(@class, '" . $widget_class . "')]//div[contains(@class,'star-first')]/span"));
+      $result = $this->xpath("//div[contains(@class, '" . $widget_class . "')]//div[contains(@class,'star-first')]/span");
+      $this->assertEqual($result[0][0], '0', t('The @name fivestar widget is properly display.', array('@name' => $name)));
     }
   }
 
