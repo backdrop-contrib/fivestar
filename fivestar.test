@@ -55,6 +55,45 @@ class FivestarTestCase extends AJAXTestCase {
     );
     $this->drupalPost('node/' . $node->nid, $edit, t('Rate'));
     $this->assertNoRaw(t('No votes yet'), 'Visitors can rate content using the exposed widget.');
+
+    // Now lets change the field to have exposed off and make sure the value is still there.
+    // @see http://drupal.org/node/1242082
+    $instance = field_read_instance('node', 'fivestar_test', 'article');
+    $instance['display']['default']['settings']['expose'] = FALSE;
+    field_update_instance($instance);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertFalse($this->xpath("//form[contains(@class, 'fivestar-widget')]"));
+    // Make sure the three-star rating still shows on the node view.
+    $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//div[contains(@class,'star-first')]/span");
+    $this->assertEqual($result[0][0], '3', 'The static display still shows three stars.');
+  }
+
+  /**
+   * Test that users can not rate content with exposed widgets that has the exposed
+   * display setting set to FALSE.
+   */
+  public function testViewerNonRating() {
+    // Add an exposed field, with the Exposed display settings set to FALSE.
+    $this->createFivestarField(array(
+      'widget_type' => 'exposed',
+      'display' => array(
+        'default' => array(
+          'type' => 'fivestar_formatter_default',
+          'settings' => array(
+            'style' => 'average',
+            'text' => 'average',
+            'expose' => FALSE,
+          ),
+        ),
+      ),
+    ));
+    // Add an article to test static widget.
+    $node = $this->drupalCreateNode(array('type' => 'article'));
+    // Rate the article.
+    $this->drupalLogin($this->voter);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertRaw(t('No votes yet'), 'Fivestar field has no votes.');
+    $this->assertFalse($this->xpath("//form[contains(@class, 'fivestar-widget')]"));
   }
 
   /**
@@ -89,6 +128,7 @@ class FivestarTestCase extends AJAXTestCase {
     $options = $options + array(
       'content_type' => 'article',
       'widget_type' => 'stars',
+      'display' => array(),
     );
     $field = array(
       'field_name' => 'fivestar_test',
@@ -115,8 +155,9 @@ class FivestarTestCase extends AJAXTestCase {
         'axis' => 'vote',
         'stars' => '5',
       ),
+      'display' => $options['display'],
     );
-    $field = field_create_field($field);
-    $instance = field_create_instance($instance);
+    field_create_field($field);
+    field_create_instance($instance);
   }
 }
