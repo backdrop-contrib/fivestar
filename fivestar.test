@@ -56,9 +56,19 @@ class FivestarTestCase extends AJAXTestCase {
     $this->drupalPost('node/' . $node->nid, $edit, t('Rate'));
     $this->assertNoRaw(t('No votes yet'), 'Visitors can rate content using the exposed widget.');
 
+    // Load the instance settings so we can change certain settings.
+    $instance = field_read_instance('node', 'fivestar_test', 'article');
+
+    // Lets test to make sure the cancel option is not available if disabled.
+    // @see http://drupal.org/node/1269276
+    $this->assertNoRaw(t('Cancel rating'), 'User cannot cancel his vote.');
+    $instance['settings']['allow_clear'] = 1;
+    field_update_instance($instance);
+    $this->drupalGet('node/' . $node->nid);
+    $this->assertRaw(t('Cancel rating'), 'User can cancel his vote.');
+
     // Now lets change the field to have exposed off and make sure the value is still there.
     // @see http://drupal.org/node/1242082
-    $instance = field_read_instance('node', 'fivestar_test', 'article');
     $instance['display']['default']['settings']['expose'] = FALSE;
     field_update_instance($instance);
     $this->drupalGet('node/' . $node->nid);
