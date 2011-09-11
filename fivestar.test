@@ -139,7 +139,6 @@ class FivestarTestCase extends AJAXTestCase {
       ),
     ));
     $instance = field_read_instance('node', 'fivestar_test', 'article');
-    $this->verbose(strtr('instance Name: <pre>!var</pre>', array('!var' => check_plain(var_export($instance, TRUE)))));
     // Add an article to test widget against.
     $node = $this->drupalCreateNode(array('type' => 'article'));
 
@@ -148,7 +147,6 @@ class FivestarTestCase extends AJAXTestCase {
     $this->assertTrue($this->xpath("//div[contains(@class, 'fivestar-default')]//div[contains(@class,'star-first')]/span"));
 
     $widgets = module_invoke_all('fivestar_widgets');
-    $this->verbose(strtr('Widgets: <pre>!var</pre>', array('!var' => check_plain(var_export($widgets, TRUE)))));
     foreach ($widgets as $path => $name) {
       $instance['display']['default']['settings']['widget']['fivestar_widget'] = $path;
       field_update_instance($instance);
