@@ -579,7 +579,7 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
   $settings = $display['settings'];
   $settings = array(
     'stars' => (!empty($instance['settings']['stars'])) ? $instance['settings']['stars'] : 5,
-    'allow_clear' => (!empty($instance['settings']['allow_clear'])) ? $instance['settings']['allow_clear'] : 5,
+    'allow_clear' => (!empty($instance['settings']['allow_clear'])) ? $instance['settings']['allow_clear'] : 0,
     'style' => $settings['style'],
     'text' => $settings['text'],
     'content_type' => $entity_type,
