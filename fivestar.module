@@ -663,12 +663,28 @@ function fivestar_validate($element, &$form_state) {
  * Implementation of hook_votingapi_views_formatters().
  */
 function fivestar_votingapi_views_formatters($details = array()) {
-  if ($details->field == 'value') {
-    return array(
-      'fivestar_views_value_display_handler' => t('Fivestar Stars (display only)'),
-      'fivestar_views_value_text_handler' => t('Fivestar Stars (text star count)'),
-      'fivestar_views_widget_compact_handler' => t('Fivestar Stars (clickable, no text)'),
-      'fivestar_views_widget_normal_handler' => t('Fivestar Stars (clickable, with text)'),
+  // Disabaling views support until its beeing fixed.
+  // Please see http://drupal.org/node/1224700 for more details.
+  // if ($details->field == 'value') {
+  //   return array(
+  //     'fivestar_views_value_display_handler' => t('Fivestar Stars (display only)'),
+  //     'fivestar_views_value_text_handler' => t('Fivestar Stars (text star count)'),
+  //     'fivestar_views_widget_compact_handler' => t('Fivestar Stars (clickable, no text)'),
+  //     'fivestar_views_widget_normal_handler' => t('Fivestar Stars (clickable, with text)'),
+  //   );
+  // }
+}
+
+/**
+ * Implementation of hook_votingapi_metadata_alter().
+ */
+function fivestar_votingapi_metadata_alter(&$data) {
+  foreach (fivestar_get_tags() as $tag) {
+    // Add several custom tags that are being used by fivestar.
+    $data['tags'][$tag] = array(
+      'name' => t($tag),
+      'description' => t('@tag used by fivestar.', array('@tag' => $tag)),
+      'module' => 'fivestar',
     );
   }
 }
@@ -832,20 +848,6 @@ function fivestar_get_tags() {
     $tags['vote'] = 'vote';
   }
   return $tags;
-}
-
-/**
- * Implementation of hook_votingapi_metadata_alter().
- */
-function fivestar_votingapi_metadata_alter(&$data) {
-  foreach (fivestar_get_tags() as $tag) {
-    // Add several custom tags that are being used by fivestar.
-    $data['tags'][$tag] = array(
-      'name' => t($tag),
-      'description' => t('@tag used by fivestar.', array('@tag' => $tag)),
-      'module' => 'fivestar',
-    );  
-  }
 }
 
 function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, $langcode = LANGUAGE_NONE) {
