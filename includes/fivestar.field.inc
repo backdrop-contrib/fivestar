@@ -81,13 +81,6 @@ function fivestar_field_instance_settings_form($field, $instance) {
 }
 
 /**
- * Implementation of hook_field_presave().
- */
-function fivestar_field_presave($obj_type, $object, $field, $instance, $langcode, &$items) {
-  $items[0]['stars'] = $instance['settings']['stars'];
-}
-
-/**
  * Implementation of hook_field_insert().
  */
 function fivestar_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
