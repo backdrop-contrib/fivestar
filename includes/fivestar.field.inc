@@ -15,6 +15,12 @@ function fivestar_field_info() {
       'description' => t('Store a rating for this piece of content.'),
       'default_widget' => 'exposed',
       'default_formatter' => 'fivestar_formatter_default',
+      'settings' => array(
+        'axis' => 'vote',
+      ),
+      'instance_settings' => array(
+        'stars' => 5,
+      )
     ),
   );
 }
@@ -159,6 +165,11 @@ function fivestar_field_widget_info() {
       'label' => t('Stars (rated while editing)'),
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
+      'settings' => array(
+        'widget' => array(
+          'fivestar_widget' => 'default',
+        )
+      )
     ),
     'select' => array(
       'label' => t('Select list (rated while editing)'),
