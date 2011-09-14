@@ -328,7 +328,7 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   if ($display['type'] != 'fivestar_formatter_default') {
     return;
   }
-  
+
   $element['widget'] = array(
     '#tree' => TRUE,
     '#type' => 'fieldset',
@@ -349,17 +349,13 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
     '#pre_render' => array('fivestar_previews_expand'),
     '#attached' => array('css' => array(drupal_get_path('module', 'fivestar') . '/css/fivestar-admin.css')),
   );
-  
-  if ($instance['widget']['type'] == 'exposed') {
-    $entity_info = entity_get_info($instance['entity_type']);
-    // Include "Default" in the list of view modes to match the ones displayed
-    // to the user; see field_ui_menu().
-    $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
-    $bundles = field_info_bundles($instance['entity_type']);
 
+  if ($instance['widget']['type'] == 'exposed') {
+    // Removed entity_get_info here and simplified the text. This is not saved
+    // to used here and is honestly not need it. See http://drupal.org/node/1268972
     $element['expose'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Expose this Fivestar field for voting in the @display display on the @type type.', array('@display' => $view_modes[$view_mode]['label'], '@type' => $bundles[$instance['bundle']]['label'])),
+      '#title' => t('Expose this Fivestar field for voting on the @type type.'),
       '#default_value' => $settings['expose'],
       '#return_value' => 1
     );
