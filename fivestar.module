@@ -628,12 +628,16 @@ function _fivestar_get_element_default_value($element) {
     switch ($element['#settings']['style']) {
       case 'average':
         $default_value = $element['#values']['average'];
+        break;
       case 'user':
         $default_value = $element['#values']['user'];
+        break;
       case 'smart':
         $default_value = (!empty($element['#values']['user']) ? $element['#values']['user'] : $element['#values']['average']);
+        break;
       case 'dual':
         $default_value = $element['#values']['user'];
+        break;
     }
   }
 
