@@ -38,6 +38,7 @@ function fivestar_settings($form, $form_state) {
 }
 
 function fivestar_settings_submit($form, &$form_state) {
+  drupal_set_message(t('Your settings have been saved.'));
   // TODO We could delete all variables for removed tags
   variable_set('fivestar_tags', $form_state['values']['tags']);
 }
