@@ -20,7 +20,10 @@ function fivestar_field_info() {
       ),
       'instance_settings' => array(
         'stars' => 5,
-      )
+      ),
+      'property_type' => 'fivestar',
+      'property_callbacks' => array('fivestar_property_info_callback'),
+      'microdata' => TRUE,
     ),
   );
 }
@@ -539,6 +542,24 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     'stars' => $instance['settings']['stars'],
     'votes' => NULL,
   );
+
+  // If microdata module is enabled, attach the microdata attributes the module
+  // adds to the entity object.
+  if (module_exists('microdata')) {
+    $summary_options['microdata'] = $entity->microdata[$field['field_name']];
+  }
+  // If microdata is not enabled, add empty arrays for each property so we
+  // don't have to check later in the theme functions.
+  else {
+    $summary_options['microdata'] = array(
+      '#attributes' => array(),
+    );
+    $entity_info = entity_get_all_property_info($entity_type);
+    foreach ($entity_info[$field['field_name']]['property info'] as $property_name => $property) {
+      $summary_options['microdata'][$property_name]['#attributes'] = array();
+    }
+  }
+
   // If we're displaying both user and average ratings, add a description to
   // both the 'user' and 'average' elements.
   if ($style === 'dual') {
@@ -684,4 +705,57 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
       $items[$id] = array($values);
     }
   }
+}
+
+/**
+ * Implements hook_microdata_value_type_alter().
+ */
+function fivestar_microdata_value_type_alter(&$types) {
+  $types['fivestar'] = 'item';
+}
+
+/**
+ * Callback to alter the property info of address fields.
+ */
+function fivestar_property_info_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $name = $field['field_name'];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+
+  $property['property info'] = array(
+    'average_rating' => array(
+      'label' => t('Average Rating'),
+      'type' => 'text',
+      'microdata' => TRUE,
+    ),
+    'user_rating' => array(
+      'label' => t('User\'s Rating'),
+      'type' => 'text',
+      'microdata' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_microdata_field_defaults.
+ *
+ * Sets default mappings for different vocabularies; for example, schema.org.
+ * This enables fields to provide mappings for different use cases.
+ */
+function fivestar_microdata_field_defaults() {
+  $field_settings = array();
+
+  // Add the vocabulary terms that are used to describe the data. Multiple
+  // schemes can be defined, allowing the user to choose which mapping to use.
+  // The array key is used to choose which mapping to use in the field instance
+  // settings form.
+  $field_settings['default_mappings']['schema.org'] = array(
+    '#itemprop'    => array('aggregateRating'),
+    '#itemtype'    => 'http://schema.org/AggregateRating',
+    'average_rating' => array(
+      '#itemprop' => array('ratingValue'),
+    ),
+  );
+
+  return $field_settings;
+
 }

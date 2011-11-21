@@ -82,7 +82,7 @@ function fivestar_theme() {
       'file' => 'includes/fivestar.theme.inc',
     ),
     'fivestar_summary' => array(
-      'variables' => array('user_rating' => NULL, 'average_rating' => NULL, 'votes' => 0, 'stars' => 5),
+      'variables' => array('user_rating' => NULL, 'average_rating' => NULL, 'votes' => 0, 'stars' => 5, 'microdata' => array()),
       'file' => 'includes/fivestar.theme.inc',
     ),
     // fivestar.admin.inc.
@@ -776,4 +776,3 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
     'entity_type' => 'node',
   );
 }
-
