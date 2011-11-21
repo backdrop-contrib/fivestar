@@ -117,7 +117,7 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
     }
     $target = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
     if (!empty($target)) {
-      _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, FALSE, TRUE);
+      _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE);
       votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
     }
   }

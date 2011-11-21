@@ -130,7 +130,7 @@ function _fivestar_variables() {
  * voting, etc...
  */
 
-function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $result = FALSE, $skip_validation = FALSE) {
+function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
   $uid = isset($uid) ? $uid : $user->uid;
