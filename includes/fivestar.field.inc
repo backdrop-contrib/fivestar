@@ -145,6 +145,14 @@ function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
 }
 
 /**
+ * Helper function to store a rating into the field storage.
+ */
+function _fivestar_update_field_value($entity_type, $entity, $field_name, $langcode, $value) {
+  $entity->{$field_name}[$langcode][0]['rating'] = $value;
+  field_attach_update($entity_type, $entity);
+}
+
+/**
  * Implementation of hook_field_is_empty().
  */
 function fivestar_field_is_empty($item, $field) {
@@ -459,6 +467,12 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     $tag = (isset($field['settings']['axis'])) ? $field['settings']['axis'] : 'vote';
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
     $settings = _fivestar_custom_widget_settings($entity_type, $instance, $display, $id, $tag, $widget);
+    // Store entity and field data for later reuse.
+    $settings += array(
+      'entity' => $entity,
+      'field_name' => $instance['field_name'],
+      'langcode' => $langcode,
+    );
     $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
     // Our work here is done.
     return $element;
