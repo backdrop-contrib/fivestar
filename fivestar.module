@@ -313,9 +313,11 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
  *   file for a fivestar widget. Each value should be the name of the widget.
  */
 function fivestar_fivestar_widgets() {
-  $widgets_directory = drupal_get_path('module', 'fivestar') .'/widgets';
-  $files = file_scan_directory($widgets_directory, '/\.css$/');
-
+  $files = &drupal_static(__FUNCTION__);
+  if (!isset($files)) {
+    $widgets_directory = drupal_get_path('module', 'fivestar') .'/widgets';
+    $files = file_scan_directory($widgets_directory, '/\.css$/');
+  }
   $widgets = array();
   foreach ($files as $file) {
     if (strpos($file->filename, '-rtl.css') === FALSE) {
