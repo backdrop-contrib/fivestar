@@ -543,22 +543,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     'votes' => NULL,
   );
 
-  // If microdata module is enabled, attach the microdata attributes the module
-  // adds to the entity object.
-  if (module_exists('microdata')) {
-    $summary_options['microdata'] = $entity->microdata[$field['field_name']];
-  }
-  // If microdata is not enabled, add empty arrays for each property so we
-  // don't have to check later in the theme functions.
-  else {
-    $summary_options['microdata'] = array(
-      '#attributes' => array(),
-    );
-    $entity_info = entity_get_all_property_info($entity_type);
-    foreach ($entity_info[$field['field_name']]['property info'] as $property_name => $property) {
-      $summary_options['microdata'][$property_name]['#attributes'] = array();
-    }
-  }
+ $summary_options['microdata'] = _fivestar_get_microdata_property_info($entity_type, $entity, $field, $instance);
 
   // If we're displaying both user and average ratings, add a description to
   // both the 'user' and 'average' elements.
@@ -715,7 +700,7 @@ function fivestar_microdata_value_type_alter(&$types) {
 }
 
 /**
- * Callback to alter the property info of address fields.
+ * Callback to alter the property info of fivestar fields.
  */
 function fivestar_property_info_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $name = $field['field_name'];
@@ -734,6 +719,42 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
     ),
   );
 }
+
+/**
+ * Get microdata attributes for Fivestar field.
+ */
+function _fivestar_get_microdata_property_info($entity_type, $entity, $field, $instance) {
+  // If microdata module is enabled, attach the microdata attributes the module
+  // adds to the entity object.
+  if (module_exists('microdata')) {
+    $microdata = $entity->microdata[$field['field_name']];
+  }
+  // If microdata is not enabled, add empty arrays for each property so we
+  // don't have to check later in the theme functions.
+  else {
+    $microdata = array(
+      '#attributes' => array(),
+    );
+    // If Entity API is enabled, we can use that to get the properties.
+    // Otherwise, replicate the Entity API logic for getting the properties.
+    if (module_exists('entity')) {
+      $entity_info = entity_get_all_property_info($entity_type);
+    }
+    else {
+      $info = array();
+      $info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']] = array();
+      fivestar_property_info_callback($info, $entity_type, $field, $instance, 'fivestar');
+      $entity_info = $info[$entity_type]['bundles'][$instance['bundle']]['properties'];
+
+      foreach ($entity_info[$field['field_name']]['property info'] as $property_name => $property) {
+        $microdata[$property_name]['#attributes'] = array();
+      }
+    }
+  }
+
+  return $microdata;
+}
+
 
 /**
  * Implements hook_microdata_field_defaults.
