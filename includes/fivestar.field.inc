@@ -182,7 +182,7 @@ function fivestar_field_widget_info() {
         )
       )
     ),
-    'select' => array(
+    'fivestar_select' => array(
       'label' => t('Select list (rated while editing)'),
       'field types' => array('fivestar'),
       'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
@@ -240,7 +240,7 @@ function fivestar_previews_expand($element) {
 function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $element['#tree'] = TRUE;
 
-  if ($instance['widget']['type'] == 'select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
+  if ($instance['widget']['type'] == 'fivestar_select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
     $options = array(0 => t('No stars'));
     if (empty($instance['settings']['stars'])) {
       $instance['settings']['stars'] = 5;
