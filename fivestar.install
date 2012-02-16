@@ -218,7 +218,7 @@ function fivestar_update_7205() {
     $instances = field_read_instances(array('field_name' => $field['field_name']));
     foreach($instances as $instance) {
       // If the widget type is select, lets change it.
-      if ($instance['widget']['type'] = 'select') {
+      if ($instance['widget']['type'] == 'select') {
         $instance['widget']['type'] = 'fivestar_select';
       }
       // Update the instance
