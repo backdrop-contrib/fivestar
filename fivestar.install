@@ -220,9 +220,9 @@ function fivestar_update_7205() {
       // If the widget type is select, lets change it.
       if ($instance['widget']['type'] == 'select') {
         $instance['widget']['type'] = 'fivestar_select';
+        // Update the instance
+        field_update_instance($instance);
       }
-      // Update the instance
-      field_update_instance($instance);
     }
   }
 }
