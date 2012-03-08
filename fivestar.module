@@ -641,6 +641,8 @@ function _fivestar_get_element_default_value($element) {
       case 'dual':
         $default_value = $element['#values']['user'];
         break;
+      default:
+        $default_value = $element['#values']['average'];
     }
   }
 
