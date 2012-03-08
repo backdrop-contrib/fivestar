@@ -34,6 +34,7 @@ function fivestar_field_schema() {
  * Fixes the axis value stored for fivestar fields
  */
 function fivestar_update_7201() {
+  drupal_load('module', 'fivestar');
   $fields = field_read_fields(array('module' => 'fivestar'));
   $tags_numeric = array_values(fivestar_get_tags());
   
