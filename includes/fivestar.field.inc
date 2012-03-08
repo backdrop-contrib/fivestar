@@ -630,6 +630,12 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
  *  Array. $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
  */
 function _fivestar_get_widget($widgets, $display, $instance) {
+  // If the type doesn't required widgets lets get out of here.
+  // TODO: Implement this WAY better.
+  if (in_array($display['type'], array('fivestar_formatter_rating', 'fivestar_formatter_percentage'))) {
+    return FALSE;
+  }
+
   // Stars (rated while viewing) is $type = 'exposed'.
   // Stars (rated while editing) is $type = 'stars'.
   $type = $instance['widget']['type'];
