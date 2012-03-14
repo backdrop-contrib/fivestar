@@ -40,7 +40,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // Add an test_node_type to rate.
     $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
     $this->drupalGet('node/' . $node->nid);
-		$this->drupalLogin($this->voter_user);
+    $this->drupalLogin($this->voter_user);
 
     // Rate the test_node_type.
     $edit = array(
