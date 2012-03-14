@@ -4,9 +4,7 @@
  * Simpletests for the Fivestar module.
  */
 
-class FivestarTestCase extends AJAXTestCase {
-  protected $admin_user;
-  protected $voter;
+class FivestarTestCase extends FivestarBaseTestCase {
 
   public static function getInfo() {
     return array(
@@ -16,25 +14,19 @@ class FivestarTestCase extends AJAXTestCase {
     );
   }
 
-  public function setUp() {
-    parent::setUp(array('fivestar'));
-    $this->admin_user = $this->drupalCreateUser(array('create article content', 'rate content'));
-    $this->voter = $this->drupalCreateUser(array('rate content'));
- }
-
   /**
    * Test that authors can rate their own content.
    */
   public function testAuthorRating() {
     $this->drupalLogin($this->admin_user);
-    // Add an author-rated fivestar field to the article content type.
+    // Add an author-rated fivestar field to the test_node_type content type.
     $this->createFivestarField(array('widget_type' => 'stars'));
-    // Save an article node with a two-star rating.
+    // Save an test_node_typee node with a two-star rating.
     $edit = array(
       'title' => $this->randomString(),
       'fivestar_test[und][0][rating]' => '40' // Equals a rating of 2 stars.
     );
-    $this->drupalPost('node/add/article', $edit, t('Save'));
+    $this->drupalPost('node/add/test_node_type', $edit, t('Save'));
     // Make sure the two-star rating shows on the node view.
     $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//div[contains(@class,'star-first')]/span");
     $this->assertEqual($result[0][0], '2', 'Content authors can rate their own content using the stars widget.');
@@ -44,12 +36,16 @@ class FivestarTestCase extends AJAXTestCase {
    * Test that users can rate content with exposed widgets.
    */
   public function testViewerRating() {
-    // Add a viewer-rated fivestar field to the article content type.
     $this->createFivestarField(array('widget_type' => 'exposed'));
-    // Add an article to rate.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
-    // Rate the article.
-    $this->drupalLogin($this->voter);
+    // Add an test_node_type to rate.		
+    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));	
+		$this->drupalGet('node/' . $node->nid);
+
+		$this->drupalLogin($this->voter_user);
+
+		$this->drupalGet('node/' . $node->nid);
+
+    // Rate the test_node_type.
     $edit = array(
       'vote' => '60',
     );
@@ -57,7 +53,7 @@ class FivestarTestCase extends AJAXTestCase {
     $this->assertNoRaw(t('No votes yet'), 'Visitors can rate content using the exposed widget.');
 
     // Load the instance settings so we can change certain settings.
-    $instance = field_read_instance('node', 'fivestar_test', 'article');
+    $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
 
     // Lets test to make sure the cancel option is not available if disabled.
     // @see http://drupal.org/node/1269276
@@ -97,10 +93,10 @@ class FivestarTestCase extends AJAXTestCase {
         ),
       ),
     ));
-    // Add an article to test static widget.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
-    // Rate the article.
-    $this->drupalLogin($this->voter);
+    // Add an test_node_type to test static widget.
+    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
+    // Rate the test_node_type.
+    $this->drupalLogin($this->voter_user);
     $this->drupalGet('node/' . $node->nid);
     $this->assertRaw(t('No votes yet'), 'Fivestar field has no votes.');
     $this->assertFalse($this->xpath("//form[contains(@class, 'fivestar-widget')]"));
@@ -110,12 +106,12 @@ class FivestarTestCase extends AJAXTestCase {
    * Test that users can rate content with exposed widgets.
    */
   public function testViewerRatingAjax() {
-    // Add a viewer-rated fivestar field to the article content type.
+    // Add a viewer-rated fivestar field to the test_node_type content type.
     $this->createFivestarField(array('widget_type' => 'exposed'));
-    // Add an article to rate.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
-    // Rate the article.
-    $this->drupalLogin($this->voter);
+    // Add an test_node_type to rate.
+    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
+    // Rate the test_node_type.
+    $this->drupalLogin($this->voter_user);
     $edit = array(
       'vote' => '60',
     );
@@ -148,9 +144,9 @@ class FivestarTestCase extends AJAXTestCase {
         ),
       ),
     ));
-    $instance = field_read_instance('node', 'fivestar_test', 'article');
-    // Add an article to test widget against.
-    $node = $this->drupalCreateNode(array('type' => 'article'));
+    $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
+    // Add an test_node_type to test widget against.
+    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
 
     // Test the Default Widget.
     $this->drupalGet('node/' . $node->nid);
@@ -165,48 +161,5 @@ class FivestarTestCase extends AJAXTestCase {
       $result = $this->xpath("//div[contains(@class, '" . $widget_class . "')]//div[contains(@class,'star-first')]/span");
       $this->assertEqual($result[0][0], '0', t('The @name fivestar widget is properly display.', array('@name' => $name)));
     }
-  }
-
-  /**
-   * Add a fivestar field to a content type.
-   *
-   * @param $options
-   *   An associative array of options for the field and instance.
-   */
-  public function createFivestarField($options = array()) {
-    $options = $options + array(
-      'content_type' => 'article',
-      'widget_type' => 'stars',
-      'display' => array(),
-    );
-    $field = array(
-      'field_name' => 'fivestar_test',
-      'type' => 'fivestar',
-      'cardinality' => 1,
-      'settings' => array(
-        'axis' => 'vote',
-      ),
-    );
-    $instance = array(
-      'entity_type' => 'node',
-      'field_name' => 'fivestar_test',
-      'label' => 'Fivestar test field',
-      'bundle' => $options['content_type'],
-      'widget' => array(
-        'type' => $options['widget_type'],
-        'settings' => array(
-          'widget' => array(
-            'fivestar_widget' => 'default',
-          ),
-        ),
-      ),
-      'settings' => array(
-        'axis' => 'vote',
-        'stars' => '5',
-      ),
-      'display' => $options['display'],
-    );
-    field_create_field($field);
-    field_create_instance($instance);
   }
 }
