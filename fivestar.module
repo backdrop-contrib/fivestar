@@ -417,7 +417,7 @@ function fivestar_ajax_submit($form, $form_state) {
   $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
 
   $form['vote']['#values'] = $values;
-  drupal_process_form($form_state['values']['form_id'], $form, $form_state);
+  drupal_process_form($form['#form_id'], $form, $form_state);
 
   return array(
     '#type' => 'ajax',
