@@ -151,6 +151,15 @@ function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
  * Helper function to store a rating into the field storage.
  */
 function _fivestar_update_field_value($entity_type, $entity, $field_name, $langcode, $value) {
+  // Instead of updating the entire entity, lets only update the one field we need.
+  // Also see @field_attach_update for property required.
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $field_key => $field_data) {
+    if ($field_key != $field_name) {
+      unset($entity->{$field_key});
+    }
+  }
+
   $entity->{$field_name}[$langcode][0]['rating'] = $value;
   field_attach_update($entity_type, $entity);
 }
