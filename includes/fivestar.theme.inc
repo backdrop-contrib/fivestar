@@ -185,6 +185,8 @@ function theme_fivestar_static($variables) {
   $tag = $variables['tag'];
   $widget = $variables['widget'];
   if ($widget['name'] != 'default') {
+    $path = drupal_get_path('module', 'fivestar');
+    drupal_add_css($path . '/css/fivestar.css');
     drupal_add_css($widget['css']);
   }
 
