@@ -761,29 +761,3 @@ function _fivestar_get_microdata_property_info($entity_type, $entity, $field, $i
 
   return $microdata;
 }
-
-
-/**
- * Implements hook_microdata_field_defaults.
- *
- * Sets default mappings for different vocabularies; for example, schema.org.
- * This enables fields to provide mappings for different use cases.
- */
-function fivestar_microdata_field_defaults() {
-  $field_settings = array();
-
-  // Add the vocabulary terms that are used to describe the data. Multiple
-  // schemes can be defined, allowing the user to choose which mapping to use.
-  // The array key is used to choose which mapping to use in the field instance
-  // settings form.
-  $field_settings['default_mappings']['schema.org'] = array(
-    '#itemprop'    => array('aggregateRating'),
-    '#itemtype'    => 'http://schema.org/AggregateRating',
-    'average_rating' => array(
-      '#itemprop' => array('ratingValue'),
-    ),
-  );
-
-  return $field_settings;
-
-}
