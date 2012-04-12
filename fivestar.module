@@ -492,13 +492,11 @@ function fivestar_expand($element) {
     '#required' => $element['#required'],
     '#theme' => 'fivestar_select',
     '#default_value' => _fivestar_get_element_default_value($element),
+    '#weight' => -2,
   );
 
   if (isset($element['#parents'])) {
     $element['vote']['#parents'] = $element['#parents'];
-  }
-  if (isset($element['#weight'])) {
-    $element['vote']['#weight'] = $element['#weight'];
   }
 
   switch ($settings['text']) {

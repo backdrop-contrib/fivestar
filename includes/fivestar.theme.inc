@@ -35,7 +35,7 @@ function theme_fivestar_preview_widget($variables) {
       'css' => isset($variables['css']) && $variables['css'] != 'default' ? $variables['css'] : FALSE,
     ),
   );
-  
+
   // Attach necessary JS settings
   $settings = array(
     'titleUser' => t('Your rating') .': ',
@@ -90,6 +90,11 @@ function theme_fivestar_preview_wrapper($variables) {
 
 /**
  * Theme function for 'default' fivestar field formatter.
+ *
+ * This themes static stars. That is, pairs of stars where neither set
+ * of stars is "exposed". Exposed stars are clickable and displayed in a
+ * form. Theming of exposed stars is handled by the form array (and calls
+ * the same theme functions called at the end of this function).
  */
 function theme_fivestar_formatter_default($variables) {
   $element = $variables['element'];
@@ -108,7 +113,7 @@ function theme_fivestar_formatter_default($variables) {
     'widget' => $element['#widget'],
   );
   $star_display = theme('fivestar_static', $variables);
-  return theme('fivestar_static_element', array('description' => $element['#description'], 'star_display' => $star_display));
+  return theme('fivestar_static_element', array('description' => $element['#description'], 'star_display' => $star_display, 'is_form' => FALSE));
 }
 
 /**
@@ -124,7 +129,7 @@ function theme_fivestar_formatter_rating($variables) {
   $stars = (empty($element['#instance_settings']['stars'])) ? 5 : $element['#instance_settings']['stars'];
   $average = $element['#item']['average'];
   // Rating is X out of Y stars.
-  $rating = round(($average/100) * $stars, 1); 
+  $rating = round(($average/100) * $stars, 1);
   $output = $rating . '/' . $stars;
 
   return $output;
@@ -182,7 +187,7 @@ function theme_fivestar_static($variables) {
   if($widget['name'] != 'default') {
     drupal_add_css($widget['css']);
   }
-  
+
   $output = '<div class="fivestar-' . $widget['name'] . '">';
   $output .= '<div class="fivestar-widget-static fivestar-widget-static-'. $tag .' fivestar-widget-static-'. $stars . ' clearfix">';
   if (empty($stars)) {
@@ -281,7 +286,12 @@ function theme_fivestar_summary($variables) {
  */
 function theme_fivestar_static_element($variables) {
   $output = '';
-  $output .= '<div class="fivestar-static-form-item">';
+  if (isset($variables['is_form']) && !$variables['is_form']) {
+    $output .= '<div class="fivestar-static-item">';
+  }
+  else {
+    $output .= '<div class="fivestar-static-form-item">';
+  }
   $element = array(
     '#type' => 'item',
     '#title' => $variables['title'],

@@ -12,7 +12,13 @@ form.fivestar-widget input {
 .fivestar-combo-stars .fivestar-static-form-item {
   float: left; /* RTL */
   margin-right: 40px; /* RTL */
+  margin-left: 40px; /* RTL */
 }
+.fivestar-combo-stars .fivestar-static-item {
+  float: left; /* RTL */
+  margin-right: 40px; /* RTL */
+}
+
 .fivestar-combo-stars .fivestar-form-item {
   float: left; /* RTL */
 }
