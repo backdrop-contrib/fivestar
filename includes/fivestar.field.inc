@@ -752,10 +752,9 @@ function _fivestar_get_microdata_property_info($entity_type, $entity, $field, $i
       $info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']] = array();
       fivestar_property_info_callback($info, $entity_type, $field, $instance, 'fivestar');
       $entity_info = $info[$entity_type]['bundles'][$instance['bundle']]['properties'];
-
-      foreach ($entity_info[$field['field_name']]['property info'] as $property_name => $property) {
-        $microdata[$property_name]['#attributes'] = array();
-      }
+    }
+    foreach ($entity_info[$field['field_name']]['property info'] as $property_name => $property) {
+      $microdata[$property_name]['#attributes'] = array();
     }
   }
 
