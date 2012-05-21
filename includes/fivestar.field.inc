@@ -705,8 +705,8 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
 /**
  * Implements hook_microdata_value_type_alter().
  */
-function fivestar_microdata_value_type_alter(&$types) {
-  $types['fivestar'] = 'item';
+function fivestar_microdata_value_types_alter(&$types) {
+  $types['fivestar'] = 'item_option';
 }
 
 /**
