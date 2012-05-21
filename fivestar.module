@@ -505,6 +505,7 @@ function fivestar_expand($element) {
         'user_rating' => $values['user'],
         'votes' => $settings['style'] == 'dual' ? NULL : $values['count'],
         'stars' => $settings['stars'],
+        'microdata' => $settings['microdata'],
       ));
       $class[] = 'fivestar-user-text';
       break;
@@ -513,6 +514,7 @@ function fivestar_expand($element) {
         'average_rating' => $values['average'],
         'votes' => $values['count'],
         'stars' => $settings['stars'],
+        'microdata' => $settings['microdata'],
       ));
       $class[] = 'fivestar-average-text';
       break;
@@ -522,6 +524,7 @@ function fivestar_expand($element) {
         'average_rating' => $values['user'] ? NULL : $values['average'],
         'votes' => $settings['style'] == 'dual' ? NULL : $values['count'],
         'stars' => $settings['stars'],
+        'microdata' => $settings['microdata'],
       ));
       $class[] = 'fivestar-smart-text';
       $class[] = $values['user'] ? 'fivestar-user-text' : 'fivestar-average-text';
@@ -532,6 +535,7 @@ function fivestar_expand($element) {
         'average_rating' => $settings['style'] == 'dual' ? NULL : $values['average'],
         'votes' => $settings['style'] == 'dual' ? NULL : $values['count'],
         'stars' => $settings['stars'],
+        'microdata' => $settings['microdata'],
       ));
       $class[] = ' fivestar-combo-text';
       break;

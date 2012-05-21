@@ -477,6 +477,9 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
       'field_name' => $instance['field_name'],
       'langcode' => $langcode,
     );
+    // If microdata module is enabled, attach the microdata attributes.
+    $settings['microdata'] = module_exists('microdata') ? $entity->microdata[$field['field_name']] : array();
+
     $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
     // Our work here is done.
     return $element;
