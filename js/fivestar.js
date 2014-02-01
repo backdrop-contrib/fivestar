@@ -36,7 +36,9 @@ Drupal.behaviors.fivestar = {
         }
       });
 
-      $container.find('.star:lt(' + index + ')').addClass('on');
+      if (index != -1) {
+        $container.find('.star').slice(0, index).addClass('on');
+      }
       $container.addClass('fivestar-widget-' + ($options.length));
       $container.find('a')
         .bind('click', $this, Drupal.behaviors.fivestar.rate)
