@@ -259,7 +259,8 @@ function theme_fivestar_summary($variables) {
     if (!empty($microdata['average_rating']['#attributes'])) {
       $average_rating_microdata = drupal_attributes($microdata['average_rating']['#attributes']);
     }
-    $output .= '<span class="average-rating">'. t('Average: <span !microdata>!stars</span>', array('!stars' => $average_stars, '!microdata' => $average_rating_microdata)) .'</span>';
+    $output .= '<span class="average-rating">' . t('Average: !stars',
+      array('!stars' => "<span $average_rating_microdata>$average_stars</span>")) . '</span>';
   }
   if (isset($user_rating) && isset($average_rating)) {
     $div_class = 'combo';
