@@ -152,6 +152,7 @@ function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
  */
 function _fivestar_update_field_value($entity_type, $entity, $field_name, $langcode, $value) {
   $entity->{$field_name}[$langcode][0]['rating'] = $value;
+  $entity->original = isset($entity->original) ? $entity->original : NULL;
   field_attach_presave($entity_type, $entity);
   field_attach_update($entity_type, $entity);
 }
