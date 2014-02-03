@@ -63,7 +63,7 @@ function hook_fivestar_access($entity_type, $id, $tag, $uid) {
 }
 
 /**
- * Implementation of hook_fivestar_access().
+ * Implementation of hook_fivestar_target_info().
  *
  * @param $field
  *   The field structure for the operation.
