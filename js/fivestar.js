@@ -1,4 +1,10 @@
 /**
+ * @file
+ *
+ * Fivestar JavaScript behaviors integration.
+ */
+
+/**
  * Create a degradeable star rating interface out of a simple form structure.
  *
  * Originally based on the Star Rating jQuery plugin by Wil Stuckey:

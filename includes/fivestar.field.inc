@@ -62,9 +62,10 @@ function fivestar_field_settings_form($field, $instance) {
 function fivestar_field_instance_settings_form($field, $instance) {
   $form = array();
 
+  $widget_title = ($instance['widget']['type'] == 'select') ? t('Number of options') : t('Number of stars');
   $form['stars'] = array(
     '#type' => 'select',
-    '#title' => $instance['widget']['type'] == 'select' ? t('Number of options') : t('Number of stars'),
+    '#title' => check_plain($widget_title),
     '#options' => drupal_map_assoc(range(1, 10)),
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
@@ -131,7 +132,7 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
  */
 function _fivestar_field_target($entity, $field, $instance, $item, $langcode) {
   if ($instance['widget']['type'] == 'exposed') {
-    return null;
+    return NULL;
   }
   if (isset($instance['settings']['target'])) {
     $target = fivestar_get_targets($field, $instance, $instance['settings']['target'], $entity, $langcode);
@@ -247,7 +248,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     if (empty($instance['settings']['stars'])) {
       $instance['settings']['stars'] = 5;
     }
-    for($i = 1; $i <= $instance['settings']['stars']; $i++) {
+    for ($i = 1; $i <= $instance['settings']['stars']; $i++) {
       $percentage = ceil($i * 100 / $instance['settings']['stars']);
       $options[$percentage] = format_plural($i, '1 star', '@count stars');
     }
@@ -284,7 +285,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     );
     
     $element['rating'] = array(
-      '#type'=> 'fivestar',
+      '#type' => 'fivestar',
       '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
       '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
@@ -653,7 +654,7 @@ function _fivestar_get_widget($widgets, $display, $instance) {
       // (which is the same as nothing).
       $fivestar_widget = 'default';
     }
-    else if ($type == 'stars') {
+    elseif ($type == 'stars') {
       // Stars rated while editing, that is, $type = stars,
       // falls back on whatever the user selected to be displayed on node/add and node/%/edit
       $fivestar_widget = $instance['widget']['settings']['widget']['fivestar_widget'];

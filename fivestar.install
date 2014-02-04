@@ -38,7 +38,7 @@ function fivestar_update_7201() {
   $fields = field_read_fields(array('module' => 'fivestar'));
   $tags_numeric = array_values(fivestar_get_tags());
   
-  foreach($fields as $field) {
+  foreach ($fields as $field) {
     if (is_numeric($field['settings']['axis'])) {
       $field['settings']['axis'] = $tags_numeric[$field['settings']['axis']];
     }
@@ -51,9 +51,9 @@ function fivestar_update_7201() {
 function fivestar_update_7202() {
   $fields = field_read_fields(array('module' => 'fivestar'));
 
-  foreach($fields as $field) {
+  foreach ($fields as $field) {
     $instances = field_read_instances(array('field_name' => $field['field_name']));
-    foreach($instances as $instance) {
+    foreach ($instances as $instance) {
       $instance['settings'] = $field['settings'];
       field_update_instance($instance);
     }
@@ -77,13 +77,13 @@ function fivestar_update_7203() {
   $tags_exploded = explode(',', $tags_txt);
 
   $tags = array();
-  $got_vote = false;
+  $got_vote = FALSE;
   foreach ($tags_exploded as $tag) {
     $tag_trimmed = trim($tag);
     if ($tag_trimmed) {
       $tags[] = $tag_trimmed;
       if ($tag_trimmed == 'vote') {
-        $got_vote = true;
+        $got_vote = TRUE;
       }
     }
   }
@@ -93,15 +93,15 @@ function fivestar_update_7203() {
   }
   $tags;
 
-  foreach($tags as $tag) {
+  foreach ($tags as $tag) {
     $suffix = '';
-    foreach($types as $type) {
+    foreach ($types as $type) {
       $var_suffix = $type . ($tag == 'vote' ? '' : '_' . $tag);
 
       $settings = array(
         'stars' => variable_get('fivestar_stars_' . $var_suffix, 6),
         'allow_clear' => variable_get('fivestar_unvote_' . $var_suffix, 0),
-        'feedback_enable' => variable_get('fivestar_feedback_'. $var_suffix, 1),
+        'feedback_enable' => variable_get('fivestar_feedback_' . $var_suffix, 1),
         'style' => variable_get('fivestar_style_' . $var_suffix, 'average'),
         'text' => variable_get('fivestar_text_' . $var_suffix, 'dual'),
       );
@@ -112,7 +112,7 @@ function fivestar_update_7203() {
         $field = field_read_field($field_name . $suffix, array('include_deleted' => TRUE));
 
         $i = 0;
-        while(!empty($field) && $field['type'] != 'fivestar') {
+        while (!empty($field) && $field['type'] != 'fivestar') {
           $suffix = '_' . $i;
           $field = field_read_field($field_name . $suffix, array('include_deleted' => TRUE));
           $i++;
@@ -178,15 +178,15 @@ function fivestar_update_7203() {
  */
 function fivestar_update_7204() {
   $fields = field_read_fields(array('type' => 'fivestar'));
-  foreach($fields as $field) {
+  foreach ($fields as $field) {
     // Iterate through the instances of the field.
     $instances = field_read_instances(array('field_name' => $field['field_name']));
-    foreach($instances as $instance) {
+    foreach ($instances as $instance) {
       // The default should be to not allow clearing.
       $instance['settings']['allow_clear'] = FALSE;
       // Check each of the displays on the field instance an convert the formatter
       // from fivestar_formatter_exposed_stars to fivestar_formatter_default.
-      foreach($instance['display'] as $key => $display) {
+      foreach ($instance['display'] as $key => $display) {
         if ($display['type'] == 'fivestar_formatter_exposed_stars') {
           // Convert the formatter and set the exposed settings.
           $instance['display'][$key]['type'] == 'fivestar_formatter_default';
@@ -214,10 +214,10 @@ function fivestar_update_7204() {
  */
 function fivestar_update_7205() {
   $fields = field_read_fields(array('type' => 'fivestar'));
-  foreach($fields as $field) {
+  foreach ($fields as $field) {
     // Iterate through the instances of the field.
     $instances = field_read_instances(array('field_name' => $field['field_name']));
-    foreach($instances as $instance) {
+    foreach ($instances as $instance) {
       // If the widget type is select, lets change it.
       if ($instance['widget']['type'] == 'select') {
         $instance['widget']['type'] = 'fivestar_select';

@@ -306,14 +306,14 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
 function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
   // Check to see if there is a field instance on this entity.
   $fields = field_read_fields(array('module' => 'fivestar'));
-  foreach($fields as $field) {
+  foreach ($fields as $field) {
     if ($field['settings']['axis'] == $tag) {
       $params = array(
         'entity_type' => $entity_type,
         'field_name' => $field['field_name'],
       );
       $instance = field_read_instances($params);
-      if(!empty($instance)) {
+      if (!empty($instance)) {
         return TRUE;
       }
     }
@@ -334,7 +334,7 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
 function fivestar_fivestar_widgets() {
   $files = &drupal_static(__FUNCTION__);
   if (!isset($files)) {
-    $widgets_directory = drupal_get_path('module', 'fivestar') .'/widgets';
+    $widgets_directory = drupal_get_path('module', 'fivestar') . '/widgets';
     $files = file_scan_directory($widgets_directory, '/\.css$/');
   }
   $widgets = array();
@@ -568,7 +568,7 @@ function fivestar_expand($element) {
       $class[] = 'fivestar-user-stars';
       break;
     case 'smart':
-      $class[] = 'fivestar-smart-stars '. ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
+      $class[] = 'fivestar-smart-stars ' . ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
     case 'dual':
       $class[] = 'fivestar-combo-stars';
@@ -688,7 +688,7 @@ function _fivestar_get_element_default_value($element) {
  */
 function fivestar_validate($element, &$form_state) {
   if ($element['#required'] && (empty($element['#value']) || $element['#value'] == '-')) {
-    form_error($element, t('!name field is required.', array('!name' => $element['#title'])));
+    form_error($element, t('@name field is required.', array('@name' => $element['#title'])));
   }
 }
 
@@ -711,13 +711,13 @@ function fivestar_get_tags() {
   $tags_exploded = explode(',', $tags_txt);
 
   $tags = array();
-  $got_vote = false;
+  $got_vote = FALSE;
   foreach ($tags_exploded as $tag) {
     $tag_trimmed = trim($tag);
     if ($tag_trimmed) {
       $tags[$tag_trimmed] = $tag_trimmed;
       if ($tag_trimmed == 'vote') {
-        $got_vote = true;
+        $got_vote = TRUE;
       }
     }
   }
