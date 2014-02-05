@@ -69,7 +69,7 @@ function fivestar_field_instance_settings_form($field, $instance) {
     '#options' => drupal_map_assoc(range(1, 10)),
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
-  
+
   $form['allow_clear'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow users to cancel their ratings.'),
@@ -86,7 +86,7 @@ function fivestar_field_instance_settings_form($field, $instance) {
     '#description' => t('The voting target will make the value of this field cast a vote on another node. Use node reference fields module to create advanced reviews. Use the Parent Node Target when using fivestar with comments. More information available on the <a href="http://drupal.org/handbook/modules/fivestar">Fivestar handbook page</a>.'),
     '#access' => (count($options) > 1 && $instance['widget']['type'] != 'exposed'),
   );
-  
+
   return $form;
 }
 
@@ -123,6 +123,18 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
     if (!empty($target)) {
       _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE);
       votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
+    }
+    // The original callback is only called for a single updated field, but the Field API
+    // then updates all fields of the entity. For an update, the Field API first deletes
+    // the equivalent row in the database and then adds a new row based on the
+    // information in $items here. If there are multiple Fivestar fields on an entity, the
+    // one being updated is handled ok ('rating' having already been set to the new value),
+    // but other Fivestar fields are set to NULL as 'rating' isn't set - not what an update
+    // would be expected to do. So set 'rating' for all of the Fivestar fields from the
+    // existing user data in $items. This preserves the user vote thru Field API's
+    // delete/re-insert process.
+    if (!isset($items[$delta]['rating'])) {
+      $items[$delta]['rating'] = $items[$delta]['user'];
     }
   }
 }
@@ -225,7 +237,7 @@ function fivestar_field_widget_settings_form($field, $instance) {
 }
 
 function fivestar_previews_expand($element) {
-  
+
   foreach (element_children($element) as $css) {
     $vars = array(
       'css' => $css,
@@ -233,7 +245,7 @@ function fivestar_previews_expand($element) {
     );
     $element[$css]['#description'] = theme('fivestar_preview_widget', $vars);
   }
-  
+
   return $element;
 }
 
@@ -283,7 +295,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       'text' => 'none',
       'widget' => $widget,
     );
-    
+
     $element['rating'] = array(
       '#type' => 'fivestar',
       '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
@@ -338,7 +350,7 @@ function fivestar_field_formatter_info() {
 function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  
+
   if ($display['type'] != 'fivestar_formatter_default') {
     return;
   }
@@ -354,7 +366,7 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   );
 
   $widgets = module_invoke_all('fivestar_widgets');
-  
+
   $element['widget']['fivestar_widget'] = array(
     '#type' => 'radios',
     '#options' => array('default' => t('Default')) + $widgets,
@@ -423,7 +435,7 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
       '@text' => strtolower($settings['text'])));
     return $summary;
   }
-  
+
   $summary = t("Style: @widget, Stars display: @style, Text display: @text", array(
     '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? $widgets[$settings['widget']['fivestar_widget']] : t('default'),
     '@style' => strtolower($settings['style']),
