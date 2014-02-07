@@ -6,3 +6,4 @@ dependencies[] = votingapi
 configure = admin/config/content/fivestar
 files[] = test/fivestar.base.test
 files[] = test/fivestar.field.test
+files[] = fivestar.migrate.inc
