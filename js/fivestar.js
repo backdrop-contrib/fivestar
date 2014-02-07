@@ -14,7 +14,7 @@
 
 Drupal.behaviors.fivestar = {
   attach: function (context) {
-    $('div.fivestar-form-item').once('fivestar', function() {
+    $(context).find('div.fivestar-form-item').once('fivestar', function() {
       var $this = $(this);
       var $container = $('<div class="fivestar-widget clearfix"></div>');
       var $select = $('select', $this);
