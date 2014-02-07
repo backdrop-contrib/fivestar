@@ -178,7 +178,7 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
     }
 
     // Moving the calculationg after saving/deleting the vote but before getting the votes.
-    votingapi_recalculate_results($entity_type, $id);    
+    votingapi_recalculate_results($entity_type, $id);
     return fivestar_get_votes($entity_type, $id, $tag, $uid);
   }
 }
@@ -787,6 +787,22 @@ function fivestar_fivestar_target_info($field, $instance) {
     }
   }
 
+  // Add user reference support.
+  if (module_exists('user_reference')) {
+    $field_names = array_keys(field_read_fields(array('module' => 'user_reference')));
+    if (!empty($field_names)) {
+      $field_instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle, 'field_name' => $field_names));
+      if (!empty($field_instances)) {
+        foreach ($field_instances as $field_instance) {
+          $options[$field_instance['field_name']] = array(
+            'title' => t('User reference: @field', array('@field' => $field_instance['field_name'])),
+            'callback' => '_fivestar_target_user_reference'
+          );
+        }
+      }
+    }
+  }
+
   // Add comment module support.
   if ($instance['entity_type'] == 'comment') {
     $options['parent_node'] = array(
@@ -800,7 +816,8 @@ function fivestar_fivestar_target_info($field, $instance) {
 
 /**
  *
- * @return (array) array('entity_type', 'entity_id')
+ * @return array
+ *   array('entity_type', 'entity_id').
  */
 function _fivestar_target_node_reference($entity, $field, $instance, $langcode) {
   $target = array();
@@ -828,6 +845,23 @@ function _fivestar_target_entityreference($entity, $field, $instance, $langcode)
   if (isset($entity->{$entityreference}[$langcode][0]) && isset($entity->{$entityreference}[$langcode][0]['target_id']) && is_numeric($entity->{$entityreference}[$langcode][0]['target_id'])) {
     $target['entity_id'] = $entity->{$entityreference}[$langcode][0]['target_id'];
     $target['entity_type'] = $field_info['settings']['target_type'];
+  }
+
+  return $target;
+}
+
+/**
+ *
+ * @return array
+ *   array('entity_type', 'entity_id').
+ */
+function _fivestar_target_user_reference($entity, $field, $instance, $langcode) {
+  $target = array();
+
+  $user_reference = $instance['settings']['target'];
+  if (isset($entity->{$user_reference}[$langcode][0]) && is_numeric($entity->{$user_reference}[$langcode][0]['uid'])) {
+    $target['entity_id'] = $entity->{$user_reference}[$langcode][0]['uid'];
+    $target['entity_type'] = 'user';
   }
 
   return $target;
