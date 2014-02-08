@@ -682,36 +682,40 @@ function _fivestar_get_widget($widgets, $display, $instance) {
 }
 
 /**
- * Implements hook_field_prepare_view()
+ * Implements hook_field_prepare_view().
  */
 function fivestar_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
   // TODO: Clean this function up!
   foreach ($entities as $id => $entity) {
-    // Populating the $items[$id] array even for items with no value forces
-    // the render system to output a widget.
-    if ($instances[$id]['widget']['type'] == 'exposed') {
-      // If the widget type is exposed then we want to look up the voting api values.
-      $tag = $field['settings']['axis'];
-      $votes = fivestar_get_votes($entity_type, $id, $tag);
-      $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
-      $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
-      $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
-      $items[$id] = array($values);
-    }
-    else {
-      // If the widget type is not exposed, then the count is always 1 or 0.
-      // The count is pointless to display.
-      if (!empty($items[$id][0]['rating'])) {
-        $values['count'] = 1;
-        $values['user'] = $items[$id][0]['rating'];
-        $values['average'] = $items[$id][0]['rating'];
+    // Ensure the items aren't processed twice.
+    if (!isset($items[$id][0]['count'])) {
+      // Populating the $items[$id] array even for items with no value forces
+      // the render system to output a widget.
+      if ($instances[$id]['widget']['type'] == 'exposed') {
+        // If the widget type is exposed then we want to look up the voting api
+        // values.
+        $tag = $field['settings']['axis'];
+        $votes = fivestar_get_votes($entity_type, $id, $tag);
+        $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
+        $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
+        $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
+        $items[$id] = array($values);
       }
       else {
-        $values['count'] = 0;
-        $values['user'] = 0;
-        $values['average'] = 0;
+        // If the widget type is not exposed, then the count is always 1 or 0.
+        // The count is pointless to display.
+        if (!empty($items[$id][0]['rating'])) {
+          $values['count'] = 1;
+          $values['user'] = $items[$id][0]['rating'];
+          $values['average'] = $items[$id][0]['rating'];
+        }
+        else {
+          $values['count'] = 0;
+          $values['user'] = 0;
+          $values['average'] = 0;
+        }
+        $items[$id] = array($values);
       }
-      $items[$id] = array($values);
     }
   }
 }
