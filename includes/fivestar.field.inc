@@ -377,11 +377,9 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   );
 
   if ($instance['widget']['type'] == 'exposed') {
-    // Removed entity_get_info here and simplified the text. This is not saved
-    // to used here and is honestly not need it. See http://drupal.org/node/1268972
     $element['expose'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Expose this Fivestar field for voting on the @type type.'),
+      '#title' => t('Allow voting on the entity.'),
       '#default_value' => $settings['expose'],
       '#return_value' => 1
     );
