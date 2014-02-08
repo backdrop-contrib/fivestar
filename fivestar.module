@@ -510,6 +510,7 @@ function fivestar_expand($element) {
     '#options' => $options,
     '#required' => $element['#required'],
     '#theme' => 'fivestar_select',
+    '#attributes' => $element['#attributes'],
     '#default_value' => _fivestar_get_element_default_value($element),
     '#weight' => -2,
   );
