@@ -254,7 +254,7 @@ function fivestar_previews_expand($element) {
  */
 function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $element['#tree'] = TRUE;
-
+  $i18n = function_exists('i18n_field_translate_property');
   if ($instance['widget']['type'] == 'fivestar_select' || ($instance['widget']['type'] == 'stars' && isset($form['#title']) && $form['#title'] == 'Default value')) {
     $options = array(0 => t('No stars'));
     if (empty($instance['settings']['stars'])) {
@@ -266,10 +266,10 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     }
     $element['rating'] = array(
       '#type' => 'select',
-      '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
+      '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
       '#options' => $options,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : NULL,
-      '#description' => isset($instance['description']) ? $instance['description'] : FALSE,
+      '#description' => isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE,
       '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
@@ -297,15 +297,15 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     );
 
     $element['rating'] = array(
-      '#type' => 'fivestar',
-      '#title' => isset($instance['label']) ? $instance['label'] : FALSE,
+      '#type'=> 'fivestar',
+      '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
       '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : (isset($instance['default_value'][$delta]['rating']) ? $instance['default_value'][$delta]['rating'] : 0),
       '#widget' => $widget,
       '#settings' => $settings,
       '#values' => $values,
-      '#description' => isset($instance['description']) ? $instance['description'] : FALSE,
+      '#description' => isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE,
       '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
