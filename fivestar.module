@@ -35,13 +35,6 @@ function fivestar_menu() {
     'type'              => MENU_NORMAL_ITEM,
     'file'              => 'includes/fivestar.admin.inc',
   );
-  $items['fivestar/preview/color'] = array(
-    'page callback'     => 'fivestar_preview_color',
-    'access callback'   => 'user_access',
-    'access arguments'  => array('administer site configuration'),
-    'type'              => MENU_CALLBACK,
-    'file'              => 'includes/fivestar.color.inc',
-  );
 
   return $items;
 }
