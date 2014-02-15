@@ -422,6 +422,7 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
     '#widget' => isset($settings['widget']) ? $settings['widget'] : array('name' => 'default', 'css' => 'default'),
     '#values' => $values,
     '#settings' => $settings,
+    '#description' => $settings['description'],
   );
 
   $form['fivestar_submit'] = array(

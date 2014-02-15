@@ -626,6 +626,7 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
     'labels_enable' => FALSE,
     'labels' => array(),
     'widget' => $widget,
+    'description' => $instance['description'],
   );
 
   return $settings;
