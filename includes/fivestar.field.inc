@@ -685,20 +685,12 @@ function _fivestar_get_widget($widgets, $display, $instance) {
  */
 function fivestar_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
   // TODO: Clean this function up!
+  $exposed_widgets = array();
   foreach ($entities as $id => $entity) {
     // Ensure the items aren't processed twice.
     if (!isset($items[$id][0]['count'])) {
-      // Populating the $items[$id] array even for items with no value forces
-      // the render system to output a widget.
       if ($instances[$id]['widget']['type'] == 'exposed') {
-        // If the widget type is exposed then we want to look up the voting api
-        // values.
-        $tag = $field['settings']['axis'];
-        $votes = fivestar_get_votes($entity_type, $id, $tag);
-        $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;
-        $values['average'] = isset($votes['average']['value']) ? $votes['average']['value'] : 0;
-        $values['count'] = isset($votes['count']['value']) ? $votes['count']['value'] : 0;
-        $items[$id] = array($values);
+        $exposed_widgets[] = $id;
       }
       else {
         // If the widget type is not exposed, then the count is always 1 or 0.
@@ -713,6 +705,17 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
           $values['user'] = 0;
           $values['average'] = 0;
         }
+        $items[$id] = array($values);
+      }
+    }
+    if(!empty($exposed_widgets)) {
+      $votes = fivestar_get_votes_multiple($entity_type, $exposed_widgets, $field['settings']['axis']);
+      foreach($votes[$entity_type] as $id => $vote) {
+        // Populating the $items[$id] array even for items with no value forces
+        // the render system to output a widget.
+        $values['user'] = isset($vote['user']['value']) ? $vote['user']['value'] : 0;
+        $values['average'] = isset($vote['average']['value']) ? $vote['average']['value'] : 0;
+        $values['count'] = isset($vote['count']['value']) ? $vote['count']['value'] : 0;
         $items[$id] = array($values);
       }
     }

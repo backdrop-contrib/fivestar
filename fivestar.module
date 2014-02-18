@@ -197,7 +197,7 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
  *   - count: An array of VotingAPI results, including the count 'value'.
  *   - user: An array of VotingAPI results, including the user's vote 'value'.
  */
-function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
+function fivestar_get_votes_multiple($entity_type, $ids, $tag = 'vote', $uid = NULL) {
   global $user;
 
   if (!isset($uid)) {
@@ -206,41 +206,57 @@ function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
 
   $criteria = array(
     'entity_type' => $entity_type,
-    'entity_id' => $id,
+    'entity_id' => $ids,
     'value_type' => 'percent',
     'tag' => $tag,
   );
 
-  $votes = array(
-    'average' => array(),
-    'count' => array(),
-    'user' => array(),
-  );
+  $votes = array();
+
+  // Initialize defaults.
+  foreach($ids as $id) {
+    $votes[$entity_type][$id] = array(
+      'average' => array(),
+      'count' => array(),
+      'user' => array(),
+    );
+  }
 
   $results = votingapi_select_results($criteria);
+  $user_votes = array();
+  if(!empty($results)) {
+    foreach(votingapi_select_votes($criteria += array('uid' => $uid)) as $uv) {
+      $user_votes[$uv['entity_type']][$uv['entity_id']] = $uv;
+    }
+  }
+
   foreach ($results as $result) {
     if ($result['function'] == 'average') {
-      $votes['average'] = $result;
+      $votes[$result['entity_type']][$result['entity_id']]['average'] = $result;
     }
     if ($result['function'] == 'count') {
-      $votes['count'] = $result;
+      $votes[$result['entity_type']][$result['entity_id']]['count'] = $result;
     }
-  }
-  if ($uid) {
-    $user_vote = votingapi_select_votes($criteria += array('uid' => $uid));
-    if ($user_vote) {
-      $votes['user'] = $user_vote[0];
-      $votes['user']['function'] = 'user';
-    }
-  }
-  else {
-    // If the user is anonymous, we never bother loading their existing votes.
-    // Not only would it be hit-or-miss, it would break page caching. Safer to always
-    // show the 'fresh' version to anon users.
-    $votes['user'] = array('value' => 0);
+	  if ($uid) {
+	    if (!empty($user_votes[$result['entity_type']][$result['entity_id']])) {
+        $votes[$result['entity_type']][$result['entity_id']]['user'] = $user_votes[$result['entity_type']][$result['entity_id']];
+        $votes[$result['entity_type']][$result['entity_id']]['user']['function'] = 'user';
+	    }
+	  }
+	  else {
+	    // If the user is anonymous, we never bother loading their existing votes.
+	    // Not only would it be hit-or-miss, it would break page caching. Safer to always
+	    // show the 'fresh' version to anon users.
+      $votes[$result['entity_type']][$result['entity_id']]['user'] = array('value' => 0);
+	  }
   }
 
   return $votes;
+}
+
+function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
+  $multiple = fivestar_get_votes_multiple($entity_type, array($id), $tag, $uid);
+  return $multiple[$entity_type][$id];
 }
 
 /**
