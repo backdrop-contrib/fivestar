@@ -464,10 +464,11 @@ function fivestar_form_submit($form, &$form_state) {
  */
 function fivestar_ajax_submit($form, $form_state) {
   if (!empty($form_state['settings']['content_id'])) {
-    _fivestar_update_field_value($form_state['settings']['content_type'], $form_state['settings']['entity'], $form_state['settings']['field_name'], $form_state['settings']['langcode'], $form_state['values']['vote']);
+    $entity = entity_load($form_state['settings']['entity_type'], array($form_state['settings']['entity_id']));
+    $entity = reset($entity);
+    _fivestar_update_field_value($form_state['settings']['content_type'], $entity, $form_state['settings']['field_name'], $form_state['settings']['langcode'], $form_state['values']['vote']);
     $votes = _fivestar_cast_vote($form_state['settings']['content_type'], $form_state['settings']['content_id'], $form_state['values']['vote'], $form_state['settings']['tag']);
   }
-
 
   $values = array();
   $values['user'] = isset($votes['user']['value']) ? $votes['user']['value'] : 0;

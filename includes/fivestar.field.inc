@@ -485,7 +485,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     $settings = _fivestar_custom_widget_settings($entity_type, $instance, $display, $id, $tag, $widget);
     // Store entity and field data for later reuse.
     $settings += array(
-      'entity' => $entity,
+      'entity_id' => $id,
+      'entity_type' => $entity_type,
       'field_name' => $instance['field_name'],
       'langcode' => $langcode,
     );
