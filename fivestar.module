@@ -367,16 +367,23 @@ function fivestar_form_comment_form_alter(&$form, &$form_state, $form_id) {
  *   file for a fivestar widget. Each value should be the name of the widget.
  */
 function fivestar_fivestar_widgets() {
-  $files = &drupal_static(__FUNCTION__);
-  if (!isset($files)) {
+  $widgets = &drupal_static(__FUNCTION__);
+  if (!isset($widgets)) {
+    $cache = cache_get(__FUNCTION__);
+    if ($cache) {
+      $widgets = $cache->data;
+    }
+  }
+
+  if (!isset($widgets)) {
     $widgets_directory = drupal_get_path('module', 'fivestar') . '/widgets';
     $files = file_scan_directory($widgets_directory, '/\.css$/');
-  }
-  $widgets = array();
-  foreach ($files as $file) {
-    if (strpos($file->filename, '-rtl.css') === FALSE) {
-      $widgets[$file->uri] = drupal_ucfirst(str_replace('-color', '', $file->name));
+    foreach ($files as $file) {
+      if (strpos($file->filename, '-rtl.css') === FALSE) {
+        $widgets[$file->uri] = drupal_ucfirst(str_replace('-color', '', $file->name));
+      }
     }
+    cache_set(__FUNCTION__, $widgets);
   }
   return $widgets;
 }
