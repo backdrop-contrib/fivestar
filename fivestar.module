@@ -434,6 +434,7 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
     '#stars' => $settings['stars'],
     '#auto_submit' => isset($settings['autosubmit']) ? $settings['autosubmit'] : TRUE,
     '#allow_clear' => $settings['allow_clear'],
+    '#allow_revote' => $settings['allow_revote'],
     '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
     '#widget' => isset($settings['widget']) ? $settings['widget'] : array('name' => 'default', 'css' => 'default'),
     '#values' => $values,
@@ -487,7 +488,7 @@ function fivestar_ajax_submit($form, $form_state) {
   $new_element = fivestar_expand($form['vote']);
   // Update the description. Since it doesn't account of our cast vote above.
   // TODO: Look into all this, I honestly don't like it and it's a bit weird.
-  $form['vote']['vote']['#description'] = $new_element['vote']['#description'];
+  $form['vote']['vote']['#description'] = isset($new_element['vote']['#description']) ? $new_element['vote']['#description'] : '';
 
   return array(
     '#type' => 'ajax',
@@ -510,6 +511,7 @@ function fivestar_element_info() {
     '#input' => TRUE,
     '#stars' => 5,
     '#allow_clear' => FALSE,
+    '#allow_revote' => FALSE,
     '#auto_submit' => FALSE,
     '#process' => array('fivestar_expand'),
     '#theme_wrappers' => array('form_element'),
@@ -534,6 +536,10 @@ function fivestar_element_info() {
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
+  if (!_fivestar_allow_revote($element)) {
+    $element['#input'] = FALSE;
+  }
+
   // Add CSS and JS
   $path = drupal_get_path('module', 'fivestar');
   $element['#attached']['js'][] = $path . '/js/fivestar.js';
@@ -556,8 +562,8 @@ function fivestar_expand($element) {
     '#type' => 'select',
     '#options' => $options,
     '#required' => $element['#required'],
-    '#theme' => 'fivestar_select',
     '#attributes' => $element['#attributes'],
+    '#theme' => _fivestar_allow_revote($element) ? 'fivestar_select' : 'fivestar_static',
     '#default_value' => _fivestar_get_element_default_value($element),
     '#weight' => -2,
   );
@@ -605,6 +611,9 @@ function fivestar_expand($element) {
         'microdata' => $settings['microdata'],
       ));
       $class[] = ' fivestar-combo-text';
+      break;
+    case 'none':
+      $element['vote']['#description'] = NULL;
       break;
   }
 
@@ -920,4 +929,24 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
     'entity_id' => $entity->nid,
     'entity_type' => 'node',
   );
+}
+
+/**
+ * Helper function to determine if a user can vote on content.
+ *
+ * @return Boolean
+ */
+function _fivestar_allow_revote($element) {
+  global $user;
+  if ($element['#allow_revote']) {
+    return TRUE;
+  }
+
+  $criteria = array(
+    'entity_id' => isset($element['#settings']['content_id']) ? $element['#settings']['content_id'] : NULL,
+    'entity_type' => isset($element['#settings']['content_type']) ? $element['#settings']['content_type'] : NULL,
+    'uid' => $user->uid,
+  );
+
+  return !$element['#allow_revote'] && !votingapi_select_votes($criteria);
 }

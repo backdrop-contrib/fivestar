@@ -77,6 +77,13 @@ function fivestar_field_instance_settings_form($field, $instance) {
     '#return_value' => 1,
   );
 
+  $form['allow_revote'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow users to re-vote on already voted content.'),
+    '#default_value' => isset($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : FALSE,
+    '#return_value' => 1,
+  );
+
   $options = fivestar_get_targets($field, $instance);
   $form['target'] = array(
     '#title' => t('Voting target'),
@@ -291,6 +298,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     $settings = array(
       'stars' => $instance['settings']['stars'],
       'allow_clear' => !empty($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
+      'allow_revote' => !empty($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : FALSE,
       'style' => 'user',
       'text' => 'none',
       'widget' => $widget,
@@ -301,6 +309,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
       '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
+      '#allow_revote' => isset($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : FALSE,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : (isset($instance['default_value'][$delta]['rating']) ? $instance['default_value'][$delta]['rating'] : 0),
       '#widget' => $widget,
       '#settings' => $settings,
@@ -617,6 +626,7 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
   $settings = array(
     'stars' => (!empty($instance['settings']['stars'])) ? $instance['settings']['stars'] : 5,
     'allow_clear' => (!empty($instance['settings']['allow_clear'])) ? $instance['settings']['allow_clear'] : 0,
+    'allow_revote' => (!empty($instance['settings']['allow_revote'])) ? $instance['settings']['allow_revote'] : 0,
     'style' => $settings['style'],
     'text' => $settings['text'],
     'content_type' => $entity_type,

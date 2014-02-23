@@ -52,6 +52,14 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // Load the instance settings so we can change certain settings.
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
 
+    // Lets see if visitors is able to re-vote.
+    // §see http://drupal.org/node/356605
+    $instance['settings']['allow_revote'] = 1;
+    field_update_instance($instance);
+    $this->drupalGet('node/' . $node->nid);
+    $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//select[contains(@name,'vote')]");
+    $this->assertEqual(count($result), TRUE, 'Visitors can re-vote');
+
     // Lets test to make sure the cancel option is not available if disabled.
     // @see http://drupal.org/node/1269276
     $this->assertNoRaw(t('Cancel rating'), 'User cannot cancel his vote.');

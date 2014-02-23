@@ -37,7 +37,7 @@ function fivestar_update_7201() {
   drupal_load('module', 'fivestar');
   $fields = field_read_fields(array('module' => 'fivestar'));
   $tags_numeric = array_values(fivestar_get_tags());
-  
+
   foreach ($fields as $field) {
     if (is_numeric($field['settings']['axis'])) {
       $field['settings']['axis'] = $tags_numeric[$field['settings']['axis']];
@@ -60,7 +60,7 @@ function fivestar_update_7202() {
   }
 }
 
-  
+
 /**
  * Convert all existing fivestar/node_type settings into fields with exposed fivestar formatters
  */
@@ -127,7 +127,7 @@ function fivestar_update_7203() {
           );
           $field = field_create_field($field_values);
         }
-        
+
         // Create an instance of the field in this bundle
         $instance = field_read_instance('node', $field['field_name'], $type, array('include_deleted' => TRUE));
         if (empty($instance)) {
@@ -160,13 +160,13 @@ function fivestar_update_7203() {
               'settings' => $settings,
             );
           }
-          
+
           field_create_instance($instance_info);
         }
       }
     }
   }
-  
+
   // Rebuild the menu to remove the node type tag form paths
   menu_rebuild();
   _field_info_collate_fields(TRUE);
@@ -224,6 +224,24 @@ function fivestar_update_7205() {
         // Update the instance
         field_update_instance($instance);
       }
+    }
+  }
+}
+
+/**
+ * Preserve setting after new feature preventing re-votes
+ * @see http://drupal.org/node/356605
+ */
+function fivestar_update_7206() {
+  $fields = field_read_fields(array('type' => 'fivestar'));
+  foreach ($fields as $field) {
+    // Iterate through the instances of the field.
+    $instances = field_read_instances(array('field_name' => $field['field_name']));
+    foreach ($instances as $instance) {
+      // The default should be to allow re-voting.
+      $instance['settings']['allow_revote'] = TRUE;
+        // Update the instance
+        field_update_instance($instance);
     }
   }
 }
