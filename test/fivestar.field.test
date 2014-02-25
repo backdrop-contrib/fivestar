@@ -21,6 +21,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
     $this->drupalLogin($this->admin_user);
     // Add an author-rated fivestar field to the test_node_type content type.
     $this->createFivestarField(array('widget_type' => 'stars'));
+    // Load the instance settings so we can set allow_ownvote.
+    $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
+    $instance['settings']['allow_ownvote'] = 1;
+    field_update_instance($instance);
     // Save an test_node_typee node with a two-star rating.
     $edit = array(
       'title' => $this->randomString(),

@@ -245,3 +245,21 @@ function fivestar_update_7206() {
     }
   }
 }
+
+/**
+ * Preserve setting after new feature preventing own votes
+ * @see http://drupal.org/node/189527
+ */
+function fivestar_update_7207() {
+  $fields = field_read_fields(array('type' => 'fivestar'));
+  foreach ($fields as $field) {
+    // Iterate through the instances of the field.
+    $instances = field_read_instances(array('field_name' => $field['field_name']));
+    foreach ($instances as $instance) {
+      // The default should be to allow own votes.
+      $instance['settings']['allow_ownvote'] = TRUE;
+        // Update the instance
+        field_update_instance($instance);
+    }
+  }
+}

@@ -435,6 +435,7 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
     '#auto_submit' => isset($settings['autosubmit']) ? $settings['autosubmit'] : TRUE,
     '#allow_clear' => $settings['allow_clear'],
     '#allow_revote' => $settings['allow_revote'],
+    '#allow_ownvote' => $settings['allow_ownvote'],
     '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
     '#widget' => isset($settings['widget']) ? $settings['widget'] : array('name' => 'default', 'css' => 'default'),
     '#values' => $values,
@@ -512,6 +513,7 @@ function fivestar_element_info() {
     '#stars' => 5,
     '#allow_clear' => FALSE,
     '#allow_revote' => FALSE,
+    '#allow_ownvote' => FALSE,
     '#auto_submit' => FALSE,
     '#process' => array('fivestar_expand'),
     '#theme_wrappers' => array('form_element'),
@@ -536,7 +538,7 @@ function fivestar_element_info() {
  * Process callback for fivestar_element -- see fivestar_element()
  */
 function fivestar_expand($element) {
-  if (!_fivestar_allow_revote($element)) {
+  if (!_fivestar_allow_vote($element)){
     $element['#input'] = FALSE;
   }
 
@@ -563,7 +565,7 @@ function fivestar_expand($element) {
     '#options' => $options,
     '#required' => $element['#required'],
     '#attributes' => $element['#attributes'],
-    '#theme' => _fivestar_allow_revote($element) ? 'fivestar_select' : 'fivestar_static',
+    '#theme' => _fivestar_allow_vote($element) ? 'fivestar_select' : 'fivestar_static',
     '#default_value' => _fivestar_get_element_default_value($element),
     '#weight' => -2,
   );
@@ -936,17 +938,37 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
  *
  * @return Boolean
  */
-function _fivestar_allow_revote($element) {
+function _fivestar_allow_vote($element) {
   global $user;
+
+  // check allowed to re-vote
+  $can_revote = FALSE;
   if ($element['#allow_revote']) {
+    $can_revote = TRUE;
+  }
+  else {
+    $criteria = array(
+      'entity_id' => isset($element['#settings']['content_id']) ? $element['#settings']['content_id'] : NULL,
+      'entity_type' => isset($element['#settings']['content_type']) ? $element['#settings']['content_type'] : NULL,
+      'uid' => $user->uid,
+    );
+
+  $can_revote = !votingapi_select_votes($criteria);
+  }
+  if (!$can_revote) {
+    return FALSE;
+  }
+  // check allowed own vote
+  if ($element['#allow_ownvote']) {
     return TRUE;
   }
-
-  $criteria = array(
-    'entity_id' => isset($element['#settings']['content_id']) ? $element['#settings']['content_id'] : NULL,
-    'entity_type' => isset($element['#settings']['content_type']) ? $element['#settings']['content_type'] : NULL,
-    'uid' => $user->uid,
-  );
-
-  return !$element['#allow_revote'] && !votingapi_select_votes($criteria);
+  else {
+    $entity_id = $element['#settings']['entity_id'];
+    //$entity = entity_load($element['#settings']['entity_type'], array($element['#settings']['entity_id']));
+    $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
+    $entity = $entity[$entity_id];
+    $uid1 = $entity->uid;
+    $uid2 = $user->uid;
+    return $entity->uid != $user->uid;
+  }
 }

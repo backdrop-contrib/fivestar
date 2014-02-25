@@ -31,6 +31,7 @@ function theme_fivestar_preview_widget($variables) {
     '#auto_submit' => FALSE,
     '#allow_clear' => TRUE,
     '#allow_revote' => TRUE,
+    '#allow_ownvote' => TRUE,
     '#widget' => array(
       'name' => isset($variables['name']) ? $variables['name'] : 'default',
       'css' => isset($variables['css']) && $variables['css'] != 'default' ? $variables['css'] : FALSE,
@@ -69,6 +70,7 @@ function theme_fivestar_preview($variables) {
     'stars' => $stars,
     'allow_clear' => $unvote,
     'allow_revote' => $revote,
+    'allow_ownvote' => $ownvote,
     'style' => $style,
     'text' => $text,
     'title' => $title,
