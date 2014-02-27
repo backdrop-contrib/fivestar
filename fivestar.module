@@ -142,7 +142,7 @@ function _fivestar_variables() {
  * voting, etc...
  */
 
-function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE) {
+function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE, $vote_source = NULL) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
   $uid = isset($uid) ? $uid : $user->uid;
@@ -159,8 +159,16 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
     // Get the user's current vote.
     $criteria = array('entity_type' => $entity_type, 'entity_id' => $id, 'tag' => $tag, 'uid' => $uid);
     // Get the unique identifier for the user (IP Address if anonymous).
-    $user_criteria = votingapi_current_user_identifier();
-    $user_votes = votingapi_select_votes($criteria + $user_criteria);
+    
+    if ($vote_source != NULL) {
+      $user_criteria = array('vote_source' => $vote_source);
+      $limit = 1;
+    }
+    else {
+      $user_criteria = votingapi_current_user_identifier();
+      $limit = 0;
+    }
+    $user_votes = votingapi_select_votes($criteria + $user_criteria, $limit);
 
     if ($value == 0) {
       votingapi_delete_votes($user_votes);
@@ -456,6 +464,7 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
  * Submit handler for the above form (non-javascript version).
  */
 function fivestar_form_submit($form, &$form_state) {
+
   // Cast the vote.
   _fivestar_cast_vote($form_state['settings']['content_type'], $form_state['settings']['content_id'], $form_state['values']['vote'], $form_state['settings']['tag']);
 

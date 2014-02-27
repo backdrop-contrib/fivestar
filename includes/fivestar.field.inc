@@ -133,9 +133,15 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
     else {
       $rating = (isset($items[$delta]['rating'])) ? $items[$delta]['rating'] : 0;
     }
-    $target = _fivestar_field_target($entity, $field, $instance, $item, $langcode);
+    $target = _fivestar_field_target($entity, $field, $instance, $item, $langcode);    
     if (!empty($target)) {
-      _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE);
+      if ($entity_type == 'comment' && $op == 'delete') {
+        $target['vote_source'] = $entity->hostname;
+      }
+      else {
+        $target['vote_source'] = NULL;
+      }
+      _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE, $target['vote_source']);
       votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
     }
     // The original callback is only called for a single updated field, but the Field API
