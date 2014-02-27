@@ -54,6 +54,9 @@ Drupal.behaviors.fivestar = {
 
       // Attach the new widget and hide the existing widget.
       $select.after($container).css('display', 'none');
+
+      // Allow other modules to modify the widget.
+      Drupal.attachBehaviors($this);
     });
   },
   rate: function(event) {
