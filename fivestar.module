@@ -53,6 +53,9 @@ function fivestar_microdata_suggestions() {
     'average_rating' => array(
       '#itemprop' => array('ratingValue'),
     ),
+    'rating_count' => array(
+      '#itemprop' => array('ratingCount'),
+    ),
   );
 
   return $mappings;

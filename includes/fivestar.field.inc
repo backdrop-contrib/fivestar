@@ -774,6 +774,11 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
       'type' => 'text',
       'microdata' => TRUE,
     ),
+    'rating_count' => array(
+      'label' => t('Rating count'),
+      'type' => 'text',
+      'microdata' => TRUE,
+    ),
   );
 }
 
