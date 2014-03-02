@@ -104,6 +104,7 @@ function fivestar_update_7203() {
         'feedback_enable' => variable_get('fivestar_feedback_' . $var_suffix, 1),
         'style' => variable_get('fivestar_style_' . $var_suffix, 'average'),
         'text' => variable_get('fivestar_text_' . $var_suffix, 'dual'),
+        'title' => variable_get('fivestar_title_' . $var_suffix, 1),
       );
 
       if (variable_get('fivestar_' . $var_suffix, FALSE)) {
@@ -131,10 +132,6 @@ function fivestar_update_7203() {
         // Create an instance of the field in this bundle
         $instance = field_read_instance('node', $field['field_name'], $type, array('include_deleted' => TRUE));
         if (empty($instance)) {
-          $settings['allow_clear'] = $settings['unvote_enable'];
-          $settings['style'] = $settings['star_display'];
-          $settings['text'] = $settings['text_display'];
-
           $instance_info = array(
             'field_name' => $field['field_name'],
             'entity_type' => 'node',
@@ -160,6 +157,10 @@ function fivestar_update_7203() {
               'settings' => $settings,
             );
           }
+
+          // Set the widget.
+          $widget = variable_get('fivestar_widget' . $var_suffix, 'default');
+          $instance_info['widget']['settings']['widget']['fivestar_widget'] = $widget;
 
           field_create_instance($instance_info);
         }
