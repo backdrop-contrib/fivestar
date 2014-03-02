@@ -263,3 +263,28 @@ function fivestar_update_7207() {
     }
   }
 }
+
+/**
+ * Change field formatters to ensure unique.
+ * @see http://drupal.org/node/1063754
+ */
+function fivestar_update_7208() {
+  $fields = field_read_fields(array('type' => 'fivestar'));
+  foreach ($fields as $field) {
+    // Iterate through the instances of the field.
+    $instances = field_read_instances(array('field_name' => $field['field_name']));
+    foreach ($instances as $instance) {
+      $updated = FALSE;
+      foreach ($instance['display'] as &$display) {
+        if (in_array($display['type'], array('default', 'percentage', 'rating'))) {
+          $updated = TRUE;
+          $display['type'] = 'fivestar_formatter_' . $display['type'];
+        }
+      }
+      if ($updated) {
+        // Only trigger instance update if we actually changed anything.
+        field_update_instance($instance);
+      }
+    }
+  }
+}
