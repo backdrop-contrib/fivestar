@@ -162,7 +162,7 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
     // Get the user's current vote.
     $criteria = array('entity_type' => $entity_type, 'entity_id' => $id, 'tag' => $tag, 'uid' => $uid);
     // Get the unique identifier for the user (IP Address if anonymous).
-    
+
     if ($vote_source != NULL) {
       $user_criteria = array('vote_source' => $vote_source);
       $limit = 1;
@@ -953,7 +953,7 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
 function _fivestar_allow_vote($element) {
   global $user;
 
-  // check allowed to re-vote
+  // Check allowed to re-vote.
   $can_revote = FALSE;
   if ($element['#allow_revote']) {
     $can_revote = TRUE;
@@ -970,17 +970,18 @@ function _fivestar_allow_vote($element) {
   if (!$can_revote) {
     return FALSE;
   }
-  // check allowed own vote
+  // Check allowed own vote.
   if ($element['#allow_ownvote']) {
     return TRUE;
   }
-  else {
-    $entity_id = $element['#settings']['entity_id'];
-    //$entity = entity_load($element['#settings']['entity_type'], array($element['#settings']['entity_id']));
-    $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
-    $entity = $entity[$entity_id];
-    $uid1 = $entity->uid;
-    $uid2 = $user->uid;
-    return $entity->uid != $user->uid;
+  // Check that we have entity details, allow if not.
+  if (!isset($element['#settings']['entity_id']) || !isset($element['#settings']['entity_type'])) {
+    return TRUE;
   }
+  $entity_id = $element['#settings']['entity_id'];
+  $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
+  $entity = $entity[$entity_id];
+  $uid1 = $entity->uid;
+  $uid2 = $user->uid;
+  return $entity->uid != $user->uid;
 }
