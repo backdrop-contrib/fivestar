@@ -953,6 +953,10 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
 function _fivestar_allow_vote($element) {
   global $user;
 
+  // Check if this is an average Fivestar, can't vote if it is.
+  if (isset($element['#settings']['style']) && $element['#settings']['style'] == 'average') {
+    return FALSE;
+  }
   // Check allowed to re-vote.
   $can_revote = FALSE;
   if ($element['#allow_revote']) {
