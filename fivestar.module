@@ -350,19 +350,18 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
  * suggestion by ChristianAdamski in issue 1289832-3.
  */
 function fivestar_form_comment_form_alter(&$form, &$form_state, $form_id) {
-  $is_fivestar = FALSE;
+  $fivestar_field_keys = array();
   if (isset($form['comment_output_below'])) {
     foreach($form['comment_output_below'] as $key => $value) {
-      if (is_array($value) && !empty($value['#field_type'])) {
-        if ($value['#field_type'] =='fivestar') {
-          $is_fivestar = TRUE;
-          $fivestar_key = $key;
-        }
+      if (is_array($value) && !empty($value['#field_type']) && $value['#field_type'] == 'fivestar') {
+        $fivestar_field_keys[] = $key;
       }
     }
   }
-  if ($is_fivestar) {
-    unset($form['comment_output_below'][$fivestar_key]);
+  if ($fivestar_field_keys) {
+    foreach ($fivestar_field_keys as $key) {
+      unset($form['comment_output_below'][$key]);
+    }
   }
 }
 
