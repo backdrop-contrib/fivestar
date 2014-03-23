@@ -497,7 +497,8 @@ function fivestar_ajax_submit($form, $form_state) {
 
   // We need to process the 'fivestar' element with the new values.
   $form['vote']['#values'] = $values;
-  $new_element = fivestar_expand($form['vote']);
+  // Also need to pass on form_state and the complete form, just like form_builder() does.
+  $new_element = fivestar_expand($form['vote'], $form_state, $form_state['complete form']);
   // Update the description. Since it doesn't account of our cast vote above.
   // TODO: Look into all this, I honestly don't like it and it's a bit weird.
   $form['vote']['vote']['#description'] = isset($new_element['vote']['#description']) ? $new_element['vote']['#description'] : '';
@@ -548,7 +549,7 @@ function fivestar_element_info() {
 /**
  * Process callback for fivestar_element -- see fivestar_element()
  */
-function fivestar_expand($element) {
+function fivestar_expand($element, $form_state, $complete_form) {
   if (!_fivestar_allow_vote($element)){
     $element['#input'] = FALSE;
   }
@@ -561,10 +562,19 @@ function fivestar_expand($element) {
   $values = $element['#values'];
   $class[] = 'clearfix';
 
+  $title = 'it';
+  if (isset($element['#settings']['entity_id']) && isset($element['#settings']['entity_type'])) {
+    $entity_id = $element['#settings']['entity_id'];
+    $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
+    $entity = $entity[$entity_id];
+    $title = $entity->title;
+  } else {
+    $title = $complete_form['#node']->title;
+  }
   $options = array('-' => t('Select rating'));
   for ($i = 1; $i <= $element['#stars']; $i++) {
     $this_value = ceil($i * 100/$element['#stars']);
-    $options[$this_value] = t('Give it @star/@count', array('@star' => $i, '@count' => $element['#stars']));
+    $options[$this_value] = t('Give @title @star/@count', array('@title' => $title, '@star' => $i, '@count' => $element['#stars']));
   }
   // Display clear button only if enabled.
   if ($element['#allow_clear'] == TRUE) {
