@@ -568,7 +568,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
     $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
     $entity = $entity[$entity_id];
     $title = $entity->title;
-  } else {
+  } elseif (isset($complete_form['#node'])) {
     $title = $complete_form['#node']->title;
   }
   $options = array('-' => t('Select rating'));
