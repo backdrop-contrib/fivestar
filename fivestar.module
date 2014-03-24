@@ -69,7 +69,7 @@ function fivestar_microdata_suggestions() {
 function fivestar_permission() {
   return array(
     'rate content' => array(
-      'title' => t('rate content'),
+      'title' => t('Use Fivestar to rate content'),
     ),
   );
 }
