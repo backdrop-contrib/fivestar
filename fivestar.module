@@ -439,15 +439,35 @@ function fivestar_custom_widget($form, &$form_state, $values, $settings) {
 
   $form_state['settings'] = $settings;
 
+  // Define default settings.
+  $default_settings = array(
+    'allow_clear' => FALSE,
+    // Taken from installation file.
+    'allow_ownvote' => TRUE,
+    'allow_revote' => TRUE,
+    'autosubmit' => TRUE,
+    'description' => '',
+    'required' => FALSE,
+    'stars' => 5,
+    'tag' => 'vote',
+    'widget' => array(
+      'name' => 'default',
+      'css' => 'default',
+    ),
+  );
+
+  // Merge default settings.
+  $settings = $settings + $default_settings;
+
   $form['vote'] = array(
     '#type' => 'fivestar',
     '#stars' => $settings['stars'],
-    '#auto_submit' => isset($settings['autosubmit']) ? $settings['autosubmit'] : TRUE,
+    '#auto_submit' => $settings['autosubmit'],
     '#allow_clear' => $settings['allow_clear'],
     '#allow_revote' => $settings['allow_revote'],
     '#allow_ownvote' => $settings['allow_ownvote'],
-    '#required' => isset($settings['required']) ? $settings['required'] : FALSE,
-    '#widget' => isset($settings['widget']) ? $settings['widget'] : array('name' => 'default', 'css' => 'default'),
+    '#required' => $settings['required'],
+    '#widget' => $settings['widget'],
     '#values' => $values,
     '#settings' => $settings,
     '#description' => $settings['description'],
