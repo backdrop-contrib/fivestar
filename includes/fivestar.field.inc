@@ -358,11 +358,11 @@ function fivestar_field_formatter_info() {
       ),
     ),
     'fivestar_formatter_rating' => array(
-      'label' => t('Rating (i.e. 4.2/5)'),
+      'label' => t('Rating (e.g. 4.2/5)'),
       'field types' => array('fivestar'),
     ),
     'fivestar_formatter_percentage' => array(
-      'label' => t('Percentage (i.e. 92)'),
+      'label' => t('Percentage (e.g. 92)'),
       'field types' => array('fivestar'),
     ),
   );
