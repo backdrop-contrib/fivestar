@@ -4,5 +4,6 @@ package = Voting
 core = 7.x
 dependencies[] = votingapi
 configure = admin/config/content/fivestar
+files[] = fivestar.migrate.inc
 files[] = test/fivestar.base.test
 files[] = test/fivestar.field.test
