@@ -10,7 +10,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
    * Test that authors can rate their own content.
    */
   public function testAuthorRating() {
-    $this->drupalLogin($this->admin_user);
+    $this->backdropLogin($this->admin_user);
     // Add an author-rated fivestar field to the test_node_type content type.
     $this->createFivestarField(array('widget_type' => 'stars'));
     // Load the instance settings so we can set allow_ownvote.
@@ -22,7 +22,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
       'title' => $this->randomString(),
       'fivestar_test[und][0][rating]' => '40' // Equals a rating of 2 stars.
     );
-    $this->drupalPost('node/add/test_node_type', $edit, t('Save'));
+    $this->backdropPost('node/add/test_node_type', $edit, t('Save'));
     // Make sure the two-star rating shows on the node view.
     $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//div[contains(@class,'star-first')]/span");
     $this->assertEqual($result[0][0], '2', 'Content authors can rate their own content using the stars widget.');
@@ -34,15 +34,15 @@ class FivestarTestCase extends FivestarBaseTestCase {
   public function testViewerRating() {
     $this->createFivestarField(array('widget_type' => 'exposed'));
     // Add an test_node_type to rate.
-    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
-    $this->drupalGet('node/' . $node->nid);
-    $this->drupalLogin($this->voter_user);
+    $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
+    $this->backdropGet('node/' . $node->nid);
+    $this->backdropLogin($this->voter_user);
 
     // Rate the test_node_type.
     $edit = array(
       'vote' => '60',
     );
-    $this->drupalPost('node/' . $node->nid, $edit, t('Rate'));
+    $this->backdropPost('node/' . $node->nid, $edit, t('Rate'));
     $this->assertNoRaw(t('No votes yet'), 'Visitors can rate content using the exposed widget.');
 
     // Load the instance settings so we can change certain settings.
@@ -52,7 +52,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // §see http://drupal.org/node/356605
     $instance['settings']['allow_revote'] = 1;
     field_update_instance($instance);
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//select[contains(@name,'vote')]");
     $this->assertEqual(count($result), TRUE, 'Visitors can re-vote');
 
@@ -61,14 +61,14 @@ class FivestarTestCase extends FivestarBaseTestCase {
     $this->assertNoRaw(t('Cancel rating'), 'User cannot cancel his vote.');
     $instance['settings']['allow_clear'] = 1;
     field_update_instance($instance);
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertRaw(t('Cancel rating'), 'User can cancel his vote.');
 
     // Now lets change the field to have exposed off and make sure the value is still there.
     // @see http://drupal.org/node/1242082
     $instance['display']['default']['settings']['expose'] = FALSE;
     field_update_instance($instance);
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertFalse($this->xpath("//form[contains(@class, 'fivestar-widget')]"));
     // Make sure the three-star rating still shows on the node view.
     $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//div[contains(@class,'star-first')]/span");
@@ -95,10 +95,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
       ),
     ));
     // Add an test_node_type to test static widget.
-    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
+    $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
     // Rate the test_node_type.
-    $this->drupalLogin($this->voter_user);
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropLogin($this->voter_user);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertRaw(t('No votes yet'), 'Fivestar field has no votes.');
     $this->assertFalse($this->xpath("//form[contains(@class, 'fivestar-widget')]"));
   }
@@ -110,13 +110,13 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // Add a viewer-rated fivestar field to the test_node_type content type.
     $this->createFivestarField(array('widget_type' => 'exposed'));
     // Add an test_node_type to rate.
-    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
+    $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
     // Rate the test_node_type.
-    $this->drupalLogin($this->voter_user);
+    $this->backdropLogin($this->voter_user);
     $edit = array(
       'vote' => '60',
     );
-    $commands = $this->drupalPostAJAX('node/' . $node->nid, $edit, "vote",
+    $commands = $this->backdropPostAJAX('node/' . $node->nid, $edit, "vote",
       NULL, array(), array(), "fivestar-custom-widget");
     $expected = array(
       'command' => 'fivestarUpdate',
@@ -147,10 +147,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
     ));
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
     // Add an test_node_type to test widget against.
-    $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
+    $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
 
     // Test the Default Widget.
-    $this->drupalGet('node/' . $node->nid);
+    $this->backdropGet('node/' . $node->nid);
     $this->assertTrue($this->xpath("//div[contains(@class, 'fivestar-default')]//div[contains(@class,'star-first')]/span"));
 
     $widgets = module_invoke_all('fivestar_widgets');
@@ -158,7 +158,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
       $instance['display']['default']['settings']['widget']['fivestar_widget'] = $path;
       field_update_instance($instance);
       $widget_class = 'fivestar-' . drupal_strtolower($name);
-      $this->drupalGet('node/' . $node->nid);
+      $this->backdropGet('node/' . $node->nid);
       $result = $this->xpath("//div[contains(@class, '" . $widget_class . "')]//div[contains(@class,'star-first')]/span");
       $this->assertEqual($result[0][0], '0', t('The @name fivestar widget is properly display.', array('@name' => $name)));
     }

@@ -60,6 +60,7 @@ function hook_fivestar_access($entity_type, $id, $tag, $uid) {
     // We are never going to allow the admin user case a fivestar vote.
     return FALSE;
   }
+  return TRUE;
 }
 
 /**

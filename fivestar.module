@@ -185,6 +185,7 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
     votingapi_recalculate_results($entity_type, $id);
     return fivestar_get_votes($entity_type, $id, $tag, $uid);
   }
+  return [];
 }
 
 /**
@@ -298,6 +299,7 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
       return FALSE;
     }
   }
+  return FALSE;
 }
 
 /**
@@ -338,6 +340,7 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
       }
     }
   }
+  return NULL;
 }
 
 /**
@@ -504,6 +507,7 @@ function fivestar_form_submit($form, &$form_state) {
  */
 function fivestar_ajax_submit($form, $form_state) {
   if (!empty($form_state['settings']['content_id'])) {
+    // TODO: Errors in the next 2 lines, according to PHPStorm.
     $entity = entity_load($form_state['settings']['entity_type'], array($form_state['settings']['entity_id']));
     $entity = reset($entity);
     _fivestar_update_field_value($form_state['settings']['content_type'], $entity, $form_state['settings']['field_name'], $form_state['settings']['langcode'], $form_state['values']['vote']);
@@ -585,6 +589,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
   $title = 'it';
   if (isset($element['#settings']['entity_id']) && isset($element['#settings']['entity_type'])) {
     $entity_id = $element['#settings']['entity_id'];
+    // TODO: Error in the next line, according to PHPStorm.
     $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
     $entity = $entity[$entity_id];
     $title = $entity->title;
@@ -807,7 +812,7 @@ function fivestar_votingapi_metadata_alter(&$data) {
 }
 
 function fivestar_get_tags() {
-  $tags_txt = variable_get('fivestar_tags', 'vote');
+  $tags_txt = config_get('fivestar.settings', 'fivestar_tags');
   $tags_exploded = explode(',', $tags_txt);
 
   $tags = array();
@@ -842,6 +847,7 @@ function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, 
       return call_user_func($targets[$key]['callback'], $entity, $field, $instance, $langcode);
     }
   }
+  return [];
 }
 
 /**
@@ -983,7 +989,6 @@ function _fivestar_allow_vote($element) {
   global $user;
 
   // Check allowed to re-vote.
-  $can_revote = FALSE;
   if ($element['#allow_revote']) {
     $can_revote = TRUE;
   }
@@ -993,8 +998,7 @@ function _fivestar_allow_vote($element) {
       'entity_type' => isset($element['#settings']['content_type']) ? $element['#settings']['content_type'] : NULL,
       'uid' => $user->uid,
     );
-
-  $can_revote = !votingapi_select_votes($criteria);
+    $can_revote = !votingapi_select_votes($criteria);
   }
   if (!$can_revote) {
     return FALSE;
@@ -1008,9 +1012,19 @@ function _fivestar_allow_vote($element) {
     return TRUE;
   }
   $entity_id = $element['#settings']['entity_id'];
+  // TODO: Error in the next line, according to PHPStorm.
   $entity = entity_load($element['#settings']['entity_type'], array($entity_id));
   $entity = $entity[$entity_id];
-  $uid1 = $entity->uid;
-  $uid2 = $user->uid;
   return $entity->uid != $user->uid;
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function fivestar_config_info() {
+  $prefixes['fivestar.settings'] = array(
+    'label' => t('Settings'),
+    'group' => t('Fivestar'),
+  );
+  return $prefixes;
 }

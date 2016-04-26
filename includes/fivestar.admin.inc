@@ -21,7 +21,7 @@ function fivestar_settings($form, $form_state) {
   $form['tags']['tags'] = array(
     '#type' => 'textfield',
     '#title' => t('Tags'),
-    '#default_value' => variable_get('fivestar_tags', 'vote'),
+    '#default_value' => config_get('fivestar.settings', 'fivestar_tags'),
     '#required' => TRUE,
     '#description' => t('Separate multiple tags with commas.'),
    );
@@ -38,7 +38,7 @@ function fivestar_settings($form, $form_state) {
 }
 
 function fivestar_settings_submit($form, &$form_state) {
-  drupal_set_message(t('Your settings have been saved.'));
-  // TODO We could delete all variables for removed tags
-  variable_set('fivestar_tags', $form_state['values']['tags']);
+  // TODO We could delete all config for removed tags
+  config_set('fivestar.settings', 'fivestar_tags', $form_state['values']['tags']);
+  backdrop_set_message(t('The configuration options have been saved.'));
 }

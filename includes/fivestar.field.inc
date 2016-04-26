@@ -30,7 +30,6 @@ function fivestar_field_info() {
 
 function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $field = $form['#field'];
-  $instance = $form['#instance'];
   if ($field['type'] == 'fivestar') {
     // Multiple values is not supported with Fivestar.
     $form['field']['cardinality']['#access'] = FALSE;
@@ -376,7 +375,7 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
   $settings = $display['settings'];
 
   if ($display['type'] != 'fivestar_formatter_default') {
-    return;
+    return NULL;
   }
 
   $element['widget'] = array(
@@ -444,7 +443,7 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
   $settings = $display['settings'];
 
   if ($display['type'] != 'fivestar_formatter_default') {
-    return;
+    return NULL;
   }
 
   $widgets = module_invoke_all('fivestar_widgets');
@@ -737,13 +736,13 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
     }
     if(!empty($exposed_widgets)) {
       $votes = fivestar_get_votes_multiple($entity_type, $exposed_widgets, $field['settings']['axis']);
-      foreach($votes[$entity_type] as $id => $vote) {
+      foreach($votes[$entity_type] as $vote_id => $vote) {
         // Populating the $items[$id] array even for items with no value forces
         // the render system to output a widget.
         $values['user'] = isset($vote['user']['value']) ? $vote['user']['value'] : 0;
         $values['average'] = isset($vote['average']['value']) ? $vote['average']['value'] : 0;
         $values['count'] = isset($vote['count']['value']) ? $vote['count']['value'] : 0;
-        $items[$id] = array($values);
+        $items[$vote_id] = array($values);
       }
     }
   }
