@@ -8,19 +8,6 @@
 include_once dirname(__FILE__) . '/includes/fivestar.field.inc';
 
 /**
- * Implementation of hook_help().
- */
-function fivestar_help($path, $arg) {
-  $output = '';
-  switch ($path) {
-    case 'admin/config/content/fivestar':
-      $output = t('This page is used to configure site-wide features of the Fivestar module.');
-    break;
-  }
-  return $output;
-}
-
-/**
  * Implementation of hook_menu().
  */
 function fivestar_menu() {

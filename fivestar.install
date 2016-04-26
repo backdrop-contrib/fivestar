@@ -34,9 +34,9 @@ function fivestar_update_last_removed() {
 }
 
 /**
- * Move book settings from variables to config.
+ * Move Fivestar settings from variables to config.
  */
-function book_update_1201() {
+function fivestar_update_1201() {
   // Migrate variables to config.
   $config = config('fivestar.settings');
   $config->set('fivestar_tags', update_variable_get('fivestar_tags', array('vote')));
