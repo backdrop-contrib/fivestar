@@ -23,7 +23,7 @@ function theme_fivestar_preview_widget($variables) {
   $form_state = form_state_defaults();
   $form_state['values'] = array();
   $form_state['process_input'] = array();
-  $form_state['complete form'] = array();
+  $form_state['complete_form'] = array();
 
   $form['vote'] = array(
     '#type' => 'fivestar',

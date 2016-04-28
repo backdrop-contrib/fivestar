@@ -125,6 +125,10 @@ function fivestar_field_delete($entity_type, $entity, $field, $instance, $langco
 }
 
 function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, &$items, $op = '') {
+  // Seem to have an extra level in $items for Backdrop sometimes
+  if (array_key_exists(0, $items) && array_key_exists(0, $items[0])) {
+    $items = $items[0];
+  }
   foreach ($items as $delta => $item) {
     if ((isset($entity->status) && !$entity->status) || $op == 'delete') {
       $rating = 0;
@@ -193,6 +197,10 @@ function _fivestar_update_field_value($entity_type, $entity, $field_name, $langc
  * Implementation of hook_field_is_empty().
  */
 function fivestar_field_is_empty($item, $field) {
+  // Seem to have an extra level in $item for Backdrop sometimes
+  if (array_key_exists(0, $item) ) {
+    $item = $item[0];
+  }
   return empty($item['rating']) || $item['rating'] == '-';
 }
 
@@ -204,12 +212,12 @@ function fivestar_field_widget_info() {
     'exposed' => array(
       'label' => t('Stars (rated while viewing)'),
       'field types' => array('fivestar'),
-      'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
+      //'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
     ),
     'stars' => array(
       'label' => t('Stars (rated while editing)'),
       'field types' => array('fivestar'),
-      'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
+      //'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
       'settings' => array(
         'widget' => array(
           'fivestar_widget' => 'default',
@@ -219,7 +227,7 @@ function fivestar_field_widget_info() {
     'fivestar_select' => array(
       'label' => t('Select list (rated while editing)'),
       'field types' => array('fivestar'),
-      'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
+      //'behaviors' => array('multiple values' => FIELD_BEHAVIOR_NONE),
     ),
   );
 }
@@ -796,17 +804,11 @@ function _fivestar_get_microdata_property_info($entity_type, $entity, $field, $i
     $microdata = array(
       '#attributes' => array(),
     );
-    // If Entity API is enabled, we can use that to get the properties.
-    // Otherwise, replicate the Entity API logic for getting the properties.
-    if (module_exists('entity')) {
-      $entity_info = entity_get_all_property_info($entity_type);
-    }
-    else {
-      $info = array();
-      $info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']] = array();
-      fivestar_property_info_callback($info, $entity_type, $field, $instance, 'fivestar');
-      $entity_info = $info[$entity_type]['bundles'][$instance['bundle']]['properties'];
-    }
+    // Replicate the Drupal 7 Entity API logic for getting the properties.
+    $info = array();
+    $info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']] = array();
+    fivestar_property_info_callback($info, $entity_type, $field, $instance, 'fivestar');
+    $entity_info = $info[$entity_type]['bundles'][$instance['bundle']]['properties'];
     foreach ($entity_info[$field['field_name']]['property info'] as $property_name => $property) {
       $microdata[$property_name]['#attributes'] = array();
     }
