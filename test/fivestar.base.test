@@ -1,8 +1,11 @@
 <?php
 /**
+ *
  * @file
  * Based test file for the Fivestar module.
  */
+
+require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/ajax.test';
 
 class FivestarBaseTestCase extends AJAXTestCase {
   // Using testing profile.

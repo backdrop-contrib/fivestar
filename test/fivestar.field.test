@@ -4,6 +4,8 @@
  * Simpletests for the Fivestar module.
  */
 
+require_once(drupal_get_path('module', 'fivestar') . '/test/fivestar.base.test');
+
 class FivestarTestCase extends FivestarBaseTestCase {
 
   /**
