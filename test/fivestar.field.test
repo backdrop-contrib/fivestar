@@ -4,7 +4,7 @@
  * Simpletests for the Fivestar module.
  */
 
-require_once(drupal_get_path('module', 'fivestar') . '/test/fivestar.base.test');
+require_once(backdrop_get_path('module', 'fivestar') . '/test/fivestar.base.test');
 
 class FivestarTestCase extends FivestarBaseTestCase {
 
@@ -19,10 +19,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
     $instance['settings']['allow_ownvote'] = 1;
     field_update_instance($instance);
-    // Save an test_node_typee node with a two-star rating.
+    // Save a test_node_type node with a two-star rating.
     $edit = array(
       'title' => $this->randomString(),
-      'fivestar_test[und][0][rating]' => '40' // Equals a rating of 2 stars.
+      'fivestar_test[und][0][0][rating]' => '40' // Equals a rating of 2 stars.
     );
     $this->backdropPost('node/add/test_node_type', $edit, t('Save'));
     // Make sure the two-star rating shows on the node view.
@@ -35,10 +35,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
    */
   public function testViewerRating() {
     $this->createFivestarField(array('widget_type' => 'exposed'));
-    // Add an test_node_type to rate.
+    // Add a test_node_type to rate.
     $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
-    $this->backdropGet('node/' . $node->nid);
     $this->backdropLogin($this->voter_user);
+    $this->backdropGet('node/' . $node->nid);
 
     // Rate the test_node_type.
     $edit = array(
@@ -96,7 +96,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
         ),
       ),
     ));
-    // Add an test_node_type to test static widget.
+    // Add a test_node_type to test static widget.
     $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
     // Rate the test_node_type.
     $this->backdropLogin($this->voter_user);
@@ -148,9 +148,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
       ),
     ));
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
-    // Add an test_node_type to test widget against.
+    // Add a test_node_type to test widget against.
     $node = $this->backdropCreateNode(array('type' => 'test_node_type'));
 
+    $this->backdropLogin($this->voter_user);
     // Test the Default Widget.
     $this->backdropGet('node/' . $node->nid);
     $this->assertTrue($this->xpath("//div[contains(@class, 'fivestar-default')]//div[contains(@class,'star-first')]/span"));
@@ -159,7 +160,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
     foreach ($widgets as $path => $name) {
       $instance['display']['default']['settings']['widget']['fivestar_widget'] = $path;
       field_update_instance($instance);
-      $widget_class = 'fivestar-' . drupal_strtolower($name);
+      $widget_class = 'fivestar-' . backdrop_strtolower($name);
       $this->backdropGet('node/' . $node->nid);
       $result = $this->xpath("//div[contains(@class, '" . $widget_class . "')]//div[contains(@class,'star-first')]/span");
       $this->assertEqual($result[0][0], '0', t('The @name fivestar widget is properly display.', array('@name' => $name)));

@@ -65,7 +65,7 @@ function fivestar_field_instance_settings_form($field, $instance) {
   $form['stars'] = array(
     '#type' => 'select',
     '#title' => check_plain($widget_title),
-    '#options' => drupal_map_assoc(range(1, 10)),
+    '#options' => backdrop_map_assoc(range(1, 10)),
     '#default_value' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
   );
 
@@ -256,7 +256,7 @@ function fivestar_field_widget_settings_form($field, $instance) {
       '#default_value' => isset($instance['widget']['settings']['widget']['fivestar_widget']) ? $instance['widget']['settings']['widget']['fivestar_widget'] : 'default',
       '#attributes' => array('class' => array('fivestar-widgets', 'clearfix')),
       '#pre_render' => array('fivestar_previews_expand'),
-      '#attached' => array('css' => array(drupal_get_path('module', 'fivestar') . '/css/fivestar-admin.css')),
+      '#attached' => array('css' => array(backdrop_get_path('module', 'fivestar') . '/css/fivestar-admin.css')),
     );
   }
 
@@ -404,7 +404,7 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
     '#default_value' => isset($settings['widget']['fivestar_widget']) ? $settings['widget']['fivestar_widget'] : 'default',
     '#attributes' => array('class' => array('fivestar-widgets', 'clearfix')),
     '#pre_render' => array('fivestar_previews_expand'),
-    '#attached' => array('css' => array(drupal_get_path('module', 'fivestar') . '/css/fivestar-admin.css')),
+    '#attached' => array('css' => array(backdrop_get_path('module', 'fivestar') . '/css/fivestar-admin.css')),
   );
 
   if ($instance['widget']['type'] == 'exposed') {
@@ -479,7 +479,7 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
  * This function returns a renderable array for each fivestar field
  * to be displayed when viewing a node (in any view mode).
  * The render array will be either a form array created with
- * drupal_get_form() or a custom render array, to be sent to a
+ * backdrop_get_form() or a custom render array, to be sent to a
  * fivestar theme function.
  *
  * @param $items
@@ -524,7 +524,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     // If microdata module is enabled, attach the microdata attributes.
     $settings['microdata'] = module_exists('microdata') ? $entity->microdata[$field['field_name']] : array();
 
-    $element[0] = drupal_get_form('fivestar_custom_widget', $values, $settings);
+    $element[0] = backdrop_get_form('fivestar_custom_widget', $values, $settings);
     // Our work here is done.
     return $element;
   }

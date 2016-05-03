@@ -15,14 +15,22 @@ class FivestarBaseTestCase extends AJAXTestCase {
   // Set up our basic users.
   protected $admin_user;
   protected $voter_user;
-  
+
   public function setUp() {
     parent::setUp(array('fivestar', 'dblog'));
 
-    // $type isn't used anywhere, but may be needed as the tests get expanded
-    //$type = $this->backdropCreateContentType(array('type' => 'test_node_type', 'name' => 'test_node_type'));
-    $this->admin_user = $this->backdropCreateUser(array('create test_node_type content', 'rate content'));
-    $this->voter_user = $this->backdropCreateUser(array('rate content'));
+    $type = $this->backdropCreateContentType(array('type' => 'test_node_type', 'name' => 'test_node_type'));
+    $admin_perms = array(
+      'create test_node_type content',
+      'access content',
+      'rate content',
+    );
+    $this->admin_user = $this->backdropCreateUser($admin_perms);
+    $voter_perms = array(
+      'access content',
+      'rate content',
+    );
+    $this->voter_user = $this->backdropCreateUser($voter_perms);
  }
 
   /**

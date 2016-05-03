@@ -12,7 +12,7 @@
  */
 (function($){ // Create local scope.
 
-Drupal.behaviors.fivestar = {
+Backdrop.behaviors.fivestar = {
   attach: function (context) {
     $(context).find('div.fivestar-form-item').once('fivestar', function() {
       var $this = $(this);
@@ -47,16 +47,16 @@ Drupal.behaviors.fivestar = {
       }
       $container.addClass('fivestar-widget-' + ($options.length));
       $container.find('a')
-        .bind('click', $this, Drupal.behaviors.fivestar.rate)
-        .bind('mouseover', $this, Drupal.behaviors.fivestar.hover);
+        .bind('click', $this, Backdrop.behaviors.fivestar.rate)
+        .bind('mouseover', $this, Backdrop.behaviors.fivestar.hover);
 
-      $container.bind('mouseover mouseout', $this, Drupal.behaviors.fivestar.hover);
+      $container.bind('mouseover mouseout', $this, Backdrop.behaviors.fivestar.hover);
 
       // Attach the new widget and hide the existing widget.
       $select.after($container).css('display', 'none');
 
       // Allow other modules to modify the widget.
-      Drupal.attachBehaviors($this);
+      Backdrop.attachBehaviors($this);
     });
   },
   rate: function(event) {

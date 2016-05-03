@@ -9,7 +9,7 @@
  * Show a preview of a widget using a custom CSS file.
  */
 function theme_fivestar_preview_widget($variables) {
-  $path = drupal_get_path('module', 'fivestar');
+  $path = backdrop_get_path('module', 'fivestar');
   $form = array(
     '#post' => array(),
     '#programmed' => FALSE,
@@ -48,12 +48,12 @@ function theme_fivestar_preview_widget($variables) {
     'feedbackVoteDeleted' => t('Your vote has been deleted.'),
   );
 
-  drupal_add_js(array('fivestar' => $settings), 'setting');
+  backdrop_add_js(array('fivestar' => $settings), 'setting');
 
   $form = form_builder('fivestar_preview', $form, $form_state);
 
   $output = '<div class="fivestar-star-preview fivestar-' . $form['vote']['#widget']['name'] . '">';
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   $output .= '</div>';
 
   return $output;
@@ -78,8 +78,8 @@ function theme_fivestar_preview($variables) {
     'tag' => 'vote',
   );
 
-  $form = drupal_get_form('fivestar_custom_widget', $values, $settings);
-  $form = drupal_render($form);
+  $form = backdrop_get_form('fivestar_custom_widget', $values, $settings);
+  $form = backdrop_render($form);
   // This regex is sadly necessary because having duplicate form_tokens or
   // form_id elements can cause the content type form to choke. Forms inside of
   // forms is also frowned upon, so this removes the wrapping form tag as well.
@@ -107,9 +107,9 @@ function theme_fivestar_formatter_default($variables) {
   }
 
   // Add CSS and JS
-  $path = drupal_get_path('module', 'fivestar');
-  drupal_add_js($path . '/js/fivestar.js');
-  drupal_add_css($path . '/css/fivestar.css');
+  $path = backdrop_get_path('module', 'fivestar');
+  backdrop_add_js($path . '/js/fivestar.js');
+  backdrop_add_css($path . '/css/fivestar.css');
 
   $variables = array(
     'rating' => $element['#rating'],
@@ -169,7 +169,7 @@ function theme_fivestar_select($variables) {
   $element = $variables['element'];
   element_set_attributes($element, array('id', 'name', 'size'));
   _form_set_class($element, array('form-select'));
-  return '<select' . drupal_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
+  return '<select' . backdrop_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
 }
 /**
  * Display a plain HTML view-only version of the widget with a specified rating.
@@ -189,9 +189,9 @@ function theme_fivestar_static($variables) {
   $tag = $variables['tag'];
   $widget = $variables['widget'];
   if ($widget['name'] != 'default') {
-    $path = drupal_get_path('module', 'fivestar');
-    drupal_add_css($path . '/css/fivestar.css');
-    drupal_add_css($widget['css']);
+    $path = backdrop_get_path('module', 'fivestar');
+    backdrop_add_css($path . '/css/fivestar.css');
+    backdrop_add_css($widget['css']);
   }
 
   $output = '<div class="fivestar-' . $widget['name'] . '">';
@@ -270,7 +270,7 @@ function theme_fivestar_summary($variables) {
 
     $average_stars = round(($average_rating * $stars) / 100, 1);
     if (!empty($microdata['average_rating']['#attributes'])) {
-      $average_rating_microdata = drupal_attributes($microdata['average_rating']['#attributes']);
+      $average_rating_microdata = backdrop_attributes($microdata['average_rating']['#attributes']);
     }
     $output .= '<span class="average-rating">' . t('Average: !stars',
       array('!stars' => "<span $average_rating_microdata>$average_stars</span>")) . '</span>';
@@ -285,7 +285,7 @@ function theme_fivestar_summary($variables) {
     }
     else {
       if (!empty($microdata['rating_count']['#attributes'])) {
-        $rating_count_microdata = drupal_attributes($microdata['rating_count']['#attributes']);
+        $rating_count_microdata = backdrop_attributes($microdata['rating_count']['#attributes']);
       }
       // We don't directly substitute $votes (i.e. use '@count') in format_plural,
       // because it has a span around it which is not translatable.

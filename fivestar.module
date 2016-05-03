@@ -15,7 +15,7 @@ function fivestar_menu() {
   $items['admin/config/content/fivestar'] = array(
     'title'             => 'Fivestar',
     'description'       => 'Configure site-wide widgets used for Fivestar rating.',
-    'page callback'     => 'drupal_get_form',
+    'page callback'     => 'backdrop_get_form',
     'page arguments'    => array('fivestar_settings'),
     'access callback'   => 'user_access',
     'access arguments'  => array('administer site configuration'),
@@ -367,7 +367,7 @@ function fivestar_form_comment_form_alter(&$form, &$form_state, $form_id) {
  *   file for a fivestar widget. Each value should be the name of the widget.
  */
 function fivestar_fivestar_widgets() {
-  $widgets = &drupal_static(__FUNCTION__);
+  $widgets = &backdrop_static(__FUNCTION__);
   if (!isset($widgets)) {
     $cache = cache_get(__FUNCTION__);
     if ($cache) {
@@ -376,11 +376,11 @@ function fivestar_fivestar_widgets() {
   }
 
   if (!isset($widgets)) {
-    $widgets_directory = drupal_get_path('module', 'fivestar') . '/widgets';
+    $widgets_directory = backdrop_get_path('module', 'fivestar') . '/widgets';
     $files = file_scan_directory($widgets_directory, '/\.css$/');
     foreach ($files as $file) {
       if (strpos($file->filename, '-rtl.css') === FALSE) {
-        $widgets[$file->uri] = drupal_ucfirst(str_replace('-color', '', $file->name));
+        $widgets[$file->uri] = backdrop_ucfirst(str_replace('-color', '', $file->name));
       }
     }
     cache_set(__FUNCTION__, $widgets);
@@ -392,7 +392,7 @@ function fivestar_fivestar_widgets() {
  * Form builder; Build a custom Fivestar rating widget with arbitrary settings.
  *
  * This function is usually not called directly, instead call
- * drupal_get_form('fivestar_custom_widget', $values, $settings) when wanting
+ * backdrop_get_form('fivestar_custom_widget', $values, $settings) when wanting
  * to display a widget.
  *
  * @param $form_state
@@ -482,10 +482,10 @@ function fivestar_form_submit($form, &$form_state) {
 
   // Set a message that the vote was received.
   if ($form_state['values']['vote'] === '0') {
-    drupal_set_message(t('Your vote has been cleared.'));
+    backdrop_set_message(t('Your vote has been cleared.'));
   }
   elseif (is_numeric($form_state['values']['vote'])) {
-    drupal_set_message(t('Thank you for your vote.'));
+    backdrop_set_message(t('Thank you for your vote.'));
   }
 }
 
@@ -519,7 +519,7 @@ function fivestar_ajax_submit($form, $form_state) {
     '#commands' => array(
       array(
         'command' => 'fivestarUpdate',
-        'data' => drupal_render($form['vote']),
+        'data' => backdrop_render($form['vote']),
       ),
     ),
   );
@@ -566,7 +566,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
   }
 
   // Add CSS and JS
-  $path = drupal_get_path('module', 'fivestar');
+  $path = backdrop_get_path('module', 'fivestar');
   $element['#attached']['js'][] = $path . '/js/fivestar.js';
   $element['#attached']['css'][] = $path . '/css/fivestar.css';
   $settings = $element['#settings'];
@@ -696,7 +696,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
   if ($element['#widget']['name'] != 'default') {
     $element['#attached']['css'][] = $element['#widget']['css'];
   }
-  $element['#prefix'] = '<div ' . drupal_attributes(array('class' => $class)) . '>';
+  $element['#prefix'] = '<div ' . backdrop_attributes(array('class' => $class)) . '>';
   $element['#suffix'] = '</div>';
 
   // Add AJAX handling if necessary.
