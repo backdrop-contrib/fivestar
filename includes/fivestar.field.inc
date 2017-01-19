@@ -286,10 +286,10 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     }
     $element['rating'] = array(
       '#type' => 'select',
-      '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
+      '#title' => check_plain(isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE),
       '#options' => $options,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : NULL,
-      '#description' => isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE,
+      '#description' => check_plain(isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE),
       '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
@@ -319,8 +319,8 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     );
 
     $element['rating'] = array(
-      '#type'=> 'fivestar',
-      '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
+      '#type' => 'fivestar',
+      '#title' => check_plain(isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE),
       '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
       '#allow_revote' => isset($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : FALSE,
@@ -329,7 +329,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#widget' => $widget,
       '#settings' => $settings,
       '#values' => $values,
-      '#description' => isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE,
+      '#description' => check_plain(isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE),
       '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
@@ -735,9 +735,9 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
         $items[$id] = array($values);
       }
     }
-    if(!empty($exposed_widgets)) {
+    if (!empty($exposed_widgets)) {
       $votes = fivestar_get_votes_multiple($entity_type, $exposed_widgets, $field['settings']['axis']);
-      foreach($votes[$entity_type] as $id => $vote) {
+      foreach ($votes[$entity_type] as $id => $vote) {
         // Populating the $items[$id] array even for items with no value forces
         // the render system to output a widget.
         $values['user'] = isset($vote['user']['value']) ? $vote['user']['value'] : 0;

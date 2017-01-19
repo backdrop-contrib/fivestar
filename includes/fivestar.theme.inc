@@ -281,7 +281,7 @@ function theme_fivestar_summary($variables) {
       $div_class = 'count';
     }
     if ($votes === 0) {
-      $output = '<span class="empty">'. t('No votes yet') .'</span>';
+      $output = '<span class="empty">' . t('No votes yet') . '</span>';
     }
     else {
       if (!empty($microdata['rating_count']['#attributes'])) {
