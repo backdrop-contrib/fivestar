@@ -522,7 +522,9 @@ function fivestar_ajax_submit($form, $form_state) {
   // Update the description. Since it doesn't account of our cast vote above.
   // TODO: Look into all this, I honestly don't like it and it's a bit weird.
   $form['vote']['vote']['#description'] = isset($new_element['vote']['#description']) ? $new_element['vote']['#description'] : '';
-
+  if (!$form['vote']['#allow_revote'] && !$form['vote']['#allow_clear']) {
+    $form['vote'] = $new_element;
+  }
   return array(
     '#type' => 'ajax',
     '#commands' => array(
