@@ -1018,3 +1018,96 @@ function _fivestar_allow_vote($element) {
   $uid2 = $user->uid;
   return $entity->uid != $user->uid;
 }
+
+/**
+ * Implementation of hook_ctools_content_subtype_alter()
+ */
+function fivestar_ctools_content_subtype_alter(&$subtype, &$plugin) {
+  if ($plugin['name'] == 'entity_field' && isset($subtype['subtype_id'])) {
+    list($entity_type, $field_name) = explode(':', $subtype['subtype_id'], 2);
+    $field = field_info_field($field_name);
+    if ($field['type'] == 'fivestar') {
+      $subtype['render callback'] = 'fivestar_fivestar_field_content_type_render';
+    }
+  }
+}
+
+/**
+ * Render the custom content type.
+ */
+function fivestar_fivestar_field_content_type_render($subtype, $conf, $panel_args, $context) {
+  if (empty($context) || empty($context->data)) {
+    return;
+  }
+
+  // Get a shortcut to the entity.
+  $entity = $context->data;
+  list($entity_type, $field_name) = explode(':', $subtype, 2);
+
+  // Load the entity type's information for this field.
+  $ids = entity_extract_ids($entity_type, $entity);
+  $field = field_info_instance($entity_type, $field_name, $ids[2]);
+
+  // Do not render if the entity type does not have this field.
+  if (empty($field)) {
+    return;
+  }
+  $language = field_language($entity_type, $entity, $field_name);
+
+  if (empty($conf['label']) || $conf['label'] == 'title') {
+    $label = 'hidden';
+    $conf['label'] = 'title';
+  }
+  else {
+    $label = $conf['label'];
+  }
+
+  $field_settings = array(
+    'label' => $label,
+    'type' => $conf['formatter'],
+    // Pass all entity field panes settings to field display settings.
+    'pane_settings' => $conf,
+  );
+
+  // Get the field output, and the title.
+  if (!empty($conf['formatter_settings'])) {
+    $field_settings['settings'] = $conf['formatter_settings'];
+  }
+
+  $all_values = field_get_items($entity_type, $entity, $field_name, $language);
+
+  if (!$all_values) {
+    $all_values = array();
+  }
+
+  // Reverse values.
+  if (isset($conf['delta_reversed']) && $conf['delta_reversed']) {
+    $all_values = array_reverse($all_values, TRUE);
+  }
+
+  if (isset($conf['delta_limit'])) {
+    $offset = intval($conf['delta_offset']);
+    $limit = !empty($conf['delta_limit']) ? $conf['delta_limit'] : NULL;
+    $all_values = array_slice($all_values, $offset, $limit, TRUE);
+  }
+
+  $clone = clone $entity;
+  $clone->{$field_name}[$language] = $all_values;
+  $field_output = field_view_field($entity_type, $clone, $field_name, $field_settings, $language);
+
+  if (!empty($field_output) && !empty($conf['override_title'])) {
+    $field_output['#title'] = filter_xss_admin($conf['override_title_text']);
+  }
+
+  // Build the content type block.
+  $block = new stdClass();
+  $block->module  = 'entity_field';
+  if ($conf['label'] == 'title' && isset($field_output['#title'])) {
+    $block->title = $field_output['#title'];
+  }
+
+  $block->content = $field_output;
+  $block->delta   = $ids[0];
+
+  return $block;
+}
