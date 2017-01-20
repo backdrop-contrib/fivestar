@@ -125,6 +125,18 @@ function fivestar_field_delete($entity_type, $entity, $field, $instance, $langco
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, 'delete');
 }
 
+/**
+ * Implements hook_field_views_data().
+ */
+function fivestar_field_views_data($field) {
+  $data = field_views_field_default_views_data($field);
+  foreach ($data as $table_name => $table_data) {
+    // Add our handler to the rating views field.
+    $data[$table_name][$field['field_name'] . '_rating']['filter']['handler'] = 'fivestar_views_handler_filter_in_operator';
+  }
+  return $data;
+}
+
 function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, &$items, $op = '') {
   foreach ($items as $delta => $item) {
     if ((isset($entity->status) && !$entity->status) || $op == 'delete') {

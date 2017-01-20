@@ -136,6 +136,17 @@ function fivestar_theme() {
   );
 }
 
+/**
+ * Implements hook_views_api().
+ */
+function fivestar_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'fivestar') . '/includes',
+  );
+}
+
+
 function _fivestar_variables() {
   return array('fivestar', 'fivestar_unvote', 'fivestar_style', 'fivestar_stars', 'fivestar_comment', 'fivestar_position', 'fivestar_position_teaser', 'fivestar_labels_enable', 'fivestar_labels', 'fivestar_text', 'fivestar_title', 'fivestar_feedback');
 }
