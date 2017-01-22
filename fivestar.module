@@ -11,13 +11,34 @@ include_once dirname(__FILE__) . '/includes/fivestar.field.inc';
  * Implementation of hook_help().
  */
 function fivestar_help($path, $arg) {
-  $output = '';
-  switch ($path) {
+switch ($path) {
+
     case 'admin/config/content/fivestar':
       $output = t('This page is used to configure site-wide features of the Fivestar module.');
-    break;
+      return $output;
+
+    case 'admin/help#fivestar':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The <a href="@fivestar">Fivestar</a> voting module is a very simple rating module that provides the possibility to rate items with stars or similar items. This gives you the possibilities to rate various items or even to create online forms for evaluations and assessments with different questions to be answered.
+For more information, see the online documentation for the <a href="@doco">Fivestar module</a>.',
+      array(
+          '@fivestar' => 'http://drupal.org/project/fivestar',
+          '@doco' => 'https://drupal.org/handbook/modules/fivestar',
+        )) . '</p>';
+      $output .= '<h3>' . t('Uses') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('General') . '</dt>';
+      $output .= '<dd>' . t('The Fivestar module can be used to easily rate various types of content on your website. These ratings can be used on the content itself or even from the comments of that piece of content.') . '</dd>';
+      $output .= '<dt>' . t('Basic Concepts and Features') . '</dt>';
+      $output .= '<dd>' . t('Fivestar is an excellent voting widget first made available for use on Drupal 5 websites. The D5 module included the ability to create a voting widget for nodes. With Drupal 6 came the ability to add comments. And with Drupal 7, the web developer was given the ability to create the voting widget with any entity.') . '</dd>';
+      $output .= '<dt>' . t('Advanced Use Cases') . '</dt>';
+      $output .= '<dd>' . t('There are many excellent resources online describing the many Fivestar features, such as the excellent article <a href="@features">"In-Depth features of Drupal Fivestar" </a>.',
+        array(
+          '@features' => 'https://www.greengeeks.com/kb/3233/drupal-fivestar/',)) . '</dd>';
+      $output .= '</dl>';
+      return $output;
   }
-  return $output;
 }
 
 /**
