@@ -775,6 +775,7 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
   $name = $field['field_name'];
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
+  $property['getter callback'] = '_fivestar_field_property_values';
   $property['property info'] = array(
     'average_rating' => array(
       'label' => t('Average Rating'),
@@ -792,6 +793,31 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
       'microdata' => TRUE,
     ),
   );
+}
+
+/**
+ * Callback for getting field property values.
+ */
+function _fivestar_field_property_values($entity, array $options, $name, $entity_type, $info) {
+  $field = field_info_field($name);
+  $langcode = field_language($entity_type, $entity, $name, isset($options['language']) ? $options['language']->language : NULL);
+  $values = array();
+  if (isset($entity->{$name}[$langcode])) {
+    foreach ($entity->{$name}[$langcode] as $delta => $data) {
+      $values[$delta]['user_rating'] = $data['rating'];
+      $result = array();
+      $result = votingapi_select_results(array(
+        'entity_type' => $entity_type,
+        'entity_id' => entity_id($entity_type, $entity),
+        'value_type' => 'percent',
+        'tag' => $field['settings']['axis'],
+        'function' => 'average',
+      ));
+      $values[$delta]['average_rating'] = (isset($result[0]['value']) ? $result[0]['value'] : 0);
+    }
+  }
+  // For an empty single-valued field, we have to return NULL.
+  return $field['cardinality'] == 1 ? ($values ? reset($values) : NULL) : $values;
 }
 
 /**
