@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Provides the view handling functions for fivestar
+ */
 
 class fivestar_views_handler_filter_in_operator extends views_handler_filter_in_operator {
 

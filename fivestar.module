@@ -35,7 +35,7 @@ For more information, see the online documentation for the <a href="@doco">Fives
       $output .= '<dt>' . t('Advanced Use Cases') . '</dt>';
       $output .= '<dd>' . t('There are many excellent resources online describing the many Fivestar features, such as the excellent article <a href="@features">"In-Depth features of Drupal Fivestar" </a>.',
         array(
-          '@features' => 'https://www.greengeeks.com/kb/3233/drupal-fivestar/',)) . '</dd>';
+          '@features' => 'https://www.greengeeks.com/kb/3233/drupal-fivestar/', )) . '</dd>';
       $output .= '</dl>';
       return $output;
   }
