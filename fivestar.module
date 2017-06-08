@@ -539,7 +539,7 @@ function fivestar_ajax_submit($form, $form_state) {
     $entity = entity_load($form_state['settings']['entity_type'], array($form_state['settings']['entity_id']));
     $entity = reset($entity);
     _fivestar_update_field_value($form_state['settings']['content_type'], $entity, $form_state['settings']['field_name'], $form_state['settings']['langcode'], $form_state['values']['vote']);
-    $votes = _fivestar_cast_vote($form_state['settings']['content_type'], $form_state['settings']['content_id'], $form_state['values']['vote'], $form_state['settings']['tag']);
+    $votes = _fivestar_cast_vote($form_state['settings']['entity_type'], $form_state['settings']['content_id'], $form_state['values']['vote'], $form_state['settings']['tag']);
   }
 
   $values = array();
@@ -1028,6 +1028,7 @@ function _fivestar_allow_vote($element) {
     $criteria = array(
       'entity_id' => isset($element['#settings']['content_id']) ? $element['#settings']['content_id'] : NULL,
       'entity_type' => isset($element['#settings']['content_type']) ? $element['#settings']['content_type'] : NULL,
+      'tag' => isset($element['#settings']['tag']) ? $element['#settings']['tag'] : NULL,
       'uid' => $user->uid,
     );
 
