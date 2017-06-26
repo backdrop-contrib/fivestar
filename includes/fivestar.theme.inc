@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides the theming functions for fivestar
+ * Provides the theming functions for fivestar.
  */
 
 /**
@@ -38,7 +38,7 @@ function theme_fivestar_preview_widget($variables) {
     ),
   );
 
-  // Attach necessary JS settings
+  // Attach necessary JS settings.
   $settings = array(
     'titleUser' => t('Your rating') . ': ',
     'titleAverage' => t('Average') . ': ',
@@ -59,6 +59,9 @@ function theme_fivestar_preview_widget($variables) {
   return $output;
 }
 
+/**
+ *
+ */
 function theme_fivestar_preview($variables) {
   extract($variables, EXTR_SKIP);
   $values = array(
@@ -88,6 +91,9 @@ function theme_fivestar_preview($variables) {
   return $form;
 }
 
+/**
+ *
+ */
 function theme_fivestar_preview_wrapper($variables) {
   return '<div class="fivestar-preview fivestar-preview-' . $variables['type'] . '">' . $variables['content'] . '</div>';
 }
@@ -106,7 +112,7 @@ function theme_fivestar_formatter_default($variables) {
     $element['#instance_settings']['stars'] = 5;
   }
 
-  // Add CSS and JS
+  // Add CSS and JS.
   $path = drupal_get_path('module', 'fivestar');
   drupal_add_js($path . '/js/fivestar.js');
   drupal_add_css($path . '/css/fivestar.css');
@@ -133,7 +139,7 @@ function theme_fivestar_formatter_rating($variables) {
   $stars = (empty($element['#instance_settings']['stars'])) ? 5 : $element['#instance_settings']['stars'];
   $average = $element['#item']['average'];
   // Rating is X out of Y stars.
-  $rating = round(($average/100) * $stars, 1);
+  $rating = round(($average / 100) * $stars, 1);
   $output = $rating . '/' . $stars;
 
   return $output;
@@ -171,6 +177,7 @@ function theme_fivestar_select($variables) {
   _form_set_class($element, array('form-select'));
   return '<select' . drupal_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
 }
+
 /**
  * Display a plain HTML view-only version of the widget with a specified rating.
  *
@@ -180,11 +187,12 @@ function theme_fivestar_select($variables) {
  *   The total number of stars this rating is out of.
  * @param $tag
  *   Allows multiple ratings per node.
+ *
  * @return
  *   A themed HTML string representing the star widget.
  */
 function theme_fivestar_static($variables) {
-  $rating  = $variables['rating'];
+  $rating = $variables['rating'];
   $stars = $variables['stars'];
   $tag = $variables['tag'];
   $widget = $variables['widget'];
@@ -199,10 +207,10 @@ function theme_fivestar_static($variables) {
   if (empty($stars)) {
     $stars = 5;
   }
-  $numeric_rating = $rating/(100/$stars);
-  for ($n=1; $n <= $stars; $n++) {
-    $star_value = ceil((100/$stars) * $n);
-    $prev_star_value = ceil((100/$stars) * ($n-1));
+  $numeric_rating = $rating / (100 / $stars);
+  for ($n = 1; $n <= $stars; $n++) {
+    $star_value = ceil((100 / $stars) * $n);
+    $prev_star_value = ceil((100 / $stars) * ($n - 1));
     $zebra = ($n % 2 == 0) ? 'even' : 'odd';
     $first = $n == 1 ? ' star-first' : '';
     $last = $n == $stars ? ' star-last' : '';
@@ -217,7 +225,9 @@ function theme_fivestar_static($variables) {
     else {
       $output .= '<span class="off">';
     }
-    if ($n == 1)$output .= $numeric_rating;
+    if ($n == 1) {
+      $output .= $numeric_rating;
+    }
     $output .= '</span></div>';
   }
   $output .= '</div></div>';
@@ -242,6 +252,7 @@ function theme_fivestar_static($variables) {
  *   The total number of votes.
  * @param $stars
  *   The number of stars being displayed.
+ *
  * @return
  *   A themed HTML string representing the star widget.
  */
@@ -290,7 +301,8 @@ function theme_fivestar_summary($variables) {
       // We don't directly substitute $votes (i.e. use '@count') in format_plural,
       // because it has a span around it which is not translatable.
       $votes_str = format_plural($votes, '!cnt vote', '!cnt votes', array(
-        '!cnt' => '<span ' . $rating_count_microdata . '>' . intval($votes) . '</span>'));
+        '!cnt' => '<span ' . $rating_count_microdata . '>' . intval($votes) . '</span>',
+      ));
       if (isset($user_rating) || isset($average_rating)) {
         $output .= ' <span class="total-votes">(' . $votes_str . ')</span>';
       }
@@ -299,7 +311,6 @@ function theme_fivestar_summary($variables) {
       }
     }
   }
-
 
   $output = '<div class="fivestar-summary fivestar-summary-' . $div_class . '">' . $output . '</div>';
   return $output;

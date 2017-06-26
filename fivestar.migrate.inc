@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Base integration with the Migrate API class.
@@ -20,10 +21,16 @@ function fivestar_migrate_api() {
  */
 class MigrateFivestarFieldHandler extends MigrateFieldHandler {
 
+  /**
+   *
+   */
   public function __construct() {
     $this->registerTypes(array('fivestar'));
   }
 
+  /**
+   *
+   */
   public function fields($type, $parent_field, $migration = NULL) {
     $fields = array(
       'target' => t('Ratings: The target of the rating.'),
@@ -31,6 +38,9 @@ class MigrateFivestarFieldHandler extends MigrateFieldHandler {
     return $fields;
   }
 
+  /**
+   *
+   */
   public function prepare($entity, array $field_info, array $instance, array $values) {
     $arguments = array();
     if (isset($values['arguments'])) {
@@ -46,4 +56,5 @@ class MigrateFivestarFieldHandler extends MigrateFieldHandler {
 
     return isset($return) ? $return : NULL;
   }
+
 }

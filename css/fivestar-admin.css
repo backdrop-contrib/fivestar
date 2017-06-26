@@ -29,7 +29,8 @@ div.fivestar-widgets div.form-item {
   float: left; /* RTL */
   width: 12em;
 }
-.color-form .form-text, .color-form .form-select {
+.color-form .form-text,
+.color-form .form-select {
   float: left; /* RTL */
 }
 .color-form .form-text {

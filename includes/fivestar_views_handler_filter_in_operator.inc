@@ -1,15 +1,19 @@
 <?php
+
 /**
  * @file
- * Provides the view handling functions for fivestar
+ * Provides the view handling functions for fivestar.
  */
 
+/**
+ *
+ */
 class fivestar_views_handler_filter_in_operator extends views_handler_filter_in_operator {
 
   /**
    * Initialize handler.
    */
-  function init(&$view, &$options) {
+  public function init(&$view, &$options) {
     parent::init($view, $options);
     // We handle empty/not empty ourselves.
     $this->definition['allow empty'] = FALSE;
@@ -18,7 +22,7 @@ class fivestar_views_handler_filter_in_operator extends views_handler_filter_in_
   /**
    * Get the possible options (the number of stars).
    */
-  function get_value_options() {
+  public function get_value_options() {
     if (isset($this->value_options)) {
       return;
     }
@@ -43,7 +47,7 @@ class fivestar_views_handler_filter_in_operator extends views_handler_filter_in_
   /**
    * Operator callback.
    */
-  function op_simple() {
+  public function op_simple() {
     if (empty($this->value)) {
       return;
     }

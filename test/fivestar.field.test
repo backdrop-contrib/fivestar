@@ -1,11 +1,18 @@
 <?php
+
 /**
  * @file
  * Simpletests for the Fivestar module.
  */
 
+/**
+ *
+ */
 class FivestarTestCase extends FivestarBaseTestCase {
 
+  /**
+   *
+   */
   public static function getInfo() {
     return array(
       'name' => 'Fivestar widgets',
@@ -28,7 +35,8 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // Save an test_node_typee node with a two-star rating.
     $edit = array(
       'title' => $this->randomString(),
-      'fivestar_test[und][0][rating]' => '40' // Equals a rating of 2 stars.
+    // Equals a rating of 2 stars.
+      'fivestar_test[und][0][rating]' => '40',
     );
     $this->drupalPost('node/add/test_node_type', $edit, t('Save'));
     // Make sure the two-star rating shows on the node view.
@@ -171,4 +179,5 @@ class FivestarTestCase extends FivestarBaseTestCase {
       $this->assertEqual($result[0][0], '0', t('The @name fivestar widget is properly display.', array('@name' => $name)));
     }
   }
+
 }

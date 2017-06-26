@@ -5,12 +5,15 @@
  * Installation file for fivestar module.
  */
 
+/**
+ *
+ */
 function fivestar_uninstall() {
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
 }
 
 /**
- * hook_field_schema().
+ * Hook_field_schema().
  */
 function fivestar_field_schema() {
   return array(
@@ -19,19 +22,19 @@ function fivestar_field_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => FALSE,
-        'sortable' => TRUE
+        'sortable' => TRUE,
       ),
       'target' => array(
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => FALSE
+        'not null' => FALSE,
       ),
     ),
   );
 }
 
 /**
- * Fixes the axis value stored for fivestar fields
+ * Fixes the axis value stored for fivestar fields.
  */
 function fivestar_update_7201() {
   drupal_load('module', 'fivestar');
@@ -46,7 +49,7 @@ function fivestar_update_7201() {
 }
 
 /**
- * Moves the field settings to field instance settings
+ * Moves the field settings to field instance settings.
  */
 function fivestar_update_7202() {
   $fields = field_read_fields(array('module' => 'fivestar'));
@@ -60,12 +63,11 @@ function fivestar_update_7202() {
   }
 }
 
-
 /**
- * Convert all existing fivestar/node_type settings into fields with exposed fivestar formatters
+ * Convert all existing fivestar/node_type settings into fields with exposed fivestar formatters.
  */
 function fivestar_update_7203() {
-  // Gather the node types
+  // Gather the node types.
   $query = db_select('node_type', 'n');
   $query->addField('n', 'type');
   $result = $query->execute();
@@ -108,7 +110,7 @@ function fivestar_update_7203() {
       );
 
       if (variable_get('fivestar_' . $var_suffix, FALSE)) {
-        // Check to see if a field for this tag exists and create one if needed
+        // Check to see if a field for this tag exists and create one if needed.
         $field_name = 'field_' . $tag;
         $field = field_read_field($field_name . $suffix, array('include_deleted' => TRUE));
 
@@ -129,7 +131,7 @@ function fivestar_update_7203() {
           $field = field_create_field($field_values);
         }
 
-        // Create an instance of the field in this bundle
+        // Create an instance of the field in this bundle.
         $instance = field_read_instance('node', $field['field_name'], $type, array('include_deleted' => TRUE));
         if (empty($instance)) {
           $instance_info = array(
@@ -168,7 +170,7 @@ function fivestar_update_7203() {
     }
   }
 
-  // Rebuild the menu to remove the node type tag form paths
+  // Rebuild the menu to remove the node type tag form paths.
   menu_rebuild();
   _field_info_collate_fields(TRUE);
 }
@@ -203,14 +205,15 @@ function fivestar_update_7204() {
           }
         }
       }
-      // Update the instance
+      // Update the instance.
       field_update_instance($instance);
     }
   }
 }
 
 /**
- * Rename fivestar 'select' widget to 'fivestar_select'
+ * Rename fivestar 'select' widget to 'fivestar_select'.
+ *
  * @see http://drupal.org/node/1285456
  */
 function fivestar_update_7205() {
@@ -222,7 +225,7 @@ function fivestar_update_7205() {
       // If the widget type is select, lets change it.
       if ($instance['widget']['type'] == 'select') {
         $instance['widget']['type'] = 'fivestar_select';
-        // Update the instance
+        // Update the instance.
         field_update_instance($instance);
       }
     }
@@ -230,7 +233,8 @@ function fivestar_update_7205() {
 }
 
 /**
- * Preserve setting after new feature preventing re-votes
+ * Preserve setting after new feature preventing re-votes.
+ *
  * @see http://drupal.org/node/356605
  */
 function fivestar_update_7206() {
@@ -241,14 +245,15 @@ function fivestar_update_7206() {
     foreach ($instances as $instance) {
       // The default should be to allow re-voting.
       $instance['settings']['allow_revote'] = TRUE;
-        // Update the instance
-        field_update_instance($instance);
+      // Update the instance.
+      field_update_instance($instance);
     }
   }
 }
 
 /**
- * Preserve setting after new feature preventing own votes
+ * Preserve setting after new feature preventing own votes.
+ *
  * @see http://drupal.org/node/189527
  */
 function fivestar_update_7207() {
@@ -259,14 +264,15 @@ function fivestar_update_7207() {
     foreach ($instances as $instance) {
       // The default should be to allow own votes.
       $instance['settings']['allow_ownvote'] = TRUE;
-        // Update the instance
-        field_update_instance($instance);
+      // Update the instance.
+      field_update_instance($instance);
     }
   }
 }
 
 /**
  * Change field formatters to ensure unique.
+ *
  * @see http://drupal.org/node/1063754
  */
 function fivestar_update_7208() {

@@ -47,6 +47,7 @@ div.fivestar-widget .cancel a {
 div.fivestar-widget div.on a {
   background-position: right -16px;
 }
-div.fivestar-widget div.hover a, div.rating div a:hover {
+div.fivestar-widget div.hover a,
+div.rating div a:hover {
   background-position: right -32px;
 }

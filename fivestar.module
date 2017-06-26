@@ -11,7 +11,7 @@ include_once dirname(__FILE__) . '/includes/fivestar.field.inc';
  * Implementation of hook_help().
  */
 function fivestar_help($path, $arg) {
-switch ($path) {
+  switch ($path) {
 
     case 'admin/config/content/fivestar':
       $output = t('This page is used to configure site-wide features of the Fivestar module.');
@@ -23,9 +23,9 @@ switch ($path) {
       $output .= '<p>' . t('The <a href="@fivestar">Fivestar</a> voting module is a very simple rating module that provides the possibility to rate items with stars or similar items. This gives you the possibilities to rate various items or even to create online forms for evaluations and assessments with different questions to be answered.
 For more information, see the online documentation for the <a href="@doco">Fivestar module</a>.',
       array(
-          '@fivestar' => 'http://drupal.org/project/fivestar',
-          '@doco' => 'https://drupal.org/handbook/modules/fivestar',
-        )) . '</p>';
+        '@fivestar' => 'http://drupal.org/project/fivestar',
+        '@doco' => 'https://drupal.org/handbook/modules/fivestar',
+      )) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('General') . '</dt>';
@@ -35,7 +35,8 @@ For more information, see the online documentation for the <a href="@doco">Fives
       $output .= '<dt>' . t('Advanced Use Cases') . '</dt>';
       $output .= '<dd>' . t('There are many excellent resources online describing the many Fivestar features, such as the excellent article <a href="@features">"In-Depth features of Drupal Fivestar" </a>.',
         array(
-          '@features' => 'https://www.greengeeks.com/kb/3233/drupal-fivestar/', )) . '</dd>';
+          '@features' => 'https://www.greengeeks.com/kb/3233/drupal-fivestar/',
+        )) . '</dd>';
       $output .= '</dl>';
       return $output;
   }
@@ -66,7 +67,7 @@ function fivestar_menu() {
 function fivestar_microdata_suggestions() {
   $mappings = array();
 
-  // Add the review mapping for Schema.org
+  // Add the review mapping for Schema.org.
   $mappings['fields']['fivestar']['schema.org'] = array(
     '#itemprop' => array('aggregateRating'),
     '#is_item' => TRUE,
@@ -167,7 +168,9 @@ function fivestar_views_api() {
   );
 }
 
-
+/**
+ *
+ */
 function _fivestar_variables() {
   return array('fivestar', 'fivestar_unvote', 'fivestar_style', 'fivestar_stars', 'fivestar_comment', 'fivestar_position', 'fivestar_position_teaser', 'fivestar_labels_enable', 'fivestar_labels', 'fivestar_text', 'fivestar_title', 'fivestar_feedback');
 }
@@ -176,7 +179,6 @@ function _fivestar_variables() {
  * Internal function to handle vote casting, flood control, XSS, IP based
  * voting, etc...
  */
-
 function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL, $skip_validation = FALSE, $vote_source = NULL) {
   global $user;
   $tag = empty($tag) ? 'vote' : $tag;
@@ -194,7 +196,6 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
     // Get the user's current vote.
     $criteria = array('entity_type' => $entity_type, 'entity_id' => $id, 'tag' => $tag, 'uid' => $uid);
     // Get the unique identifier for the user (IP Address if anonymous).
-
     if ($vote_source != NULL) {
       $user_criteria = array('vote_source' => $vote_source);
       $limit = 1;
@@ -234,6 +235,7 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
  *   The VotingAPI tag for which to retrieve votes.
  * @param $uid
  *   Optional. A user ID for which to retrieve votes.
+ *
  * @return
  *   An array of the following keys:
  *   - average: An array of VotingAPI results, including the average 'value'.
@@ -297,6 +299,9 @@ function fivestar_get_votes_multiple($entity_type, $ids, $tag = 'vote', $uid = N
   return $votes;
 }
 
+/**
+ *
+ */
 function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
   $multiple = fivestar_get_votes_multiple($entity_type, array($id), $tag, $uid);
   return $multiple[$entity_type][$id];
@@ -314,7 +319,7 @@ function fivestar_get_votes($entity_type, $id, $tag = 'vote', $uid = NULL) {
  * @param $uid
  *   The user trying to cast the vote.
  *
- * @return boolean
+ * @return bool
  */
 function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
   if (!isset($uid)) {
@@ -464,7 +469,7 @@ function fivestar_fivestar_widgets() {
 function fivestar_custom_widget($form, &$form_state, $values, $settings) {
   $form = array(
     '#attributes' => array(
-      'class' => array('fivestar-widget')
+      'class' => array('fivestar-widget'),
     ),
   );
   $form['#submit'][] = 'fivestar_form_submit';
@@ -532,7 +537,7 @@ function fivestar_form_submit($form, &$form_state) {
 }
 
 /**
- * AJAX submit handler for fivestar_custom_widget
+ * AJAX submit handler for fivestar_custom_widget.
  */
 function fivestar_ajax_submit($form, $form_state) {
   if (!empty($form_state['settings']['content_id'])) {
@@ -571,7 +576,7 @@ function fivestar_ajax_submit($form, $form_state) {
 /**
  * Implementation of hook_elements().
  *
- * Defines 'fivestar' form element type
+ * Defines 'fivestar' form element type.
  */
 function fivestar_element_info() {
   $type['fivestar'] = array(
@@ -608,7 +613,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
     $element['#input'] = FALSE;
   }
 
-  // Add CSS and JS
+  // Add CSS and JS.
   $path = drupal_get_path('module', 'fivestar');
   $element['#attached']['js'][] = $path . '/js/fivestar.js';
   $element['#attached']['css'][] = $path . '/css/fivestar.css';
@@ -630,7 +635,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
   }
   $options = array('-' => t('Select rating'));
   for ($i = 1; $i <= $element['#stars']; $i++) {
-    $this_value = ceil($i * 100/$element['#stars']);
+    $this_value = ceil($i * 100 / $element['#stars']);
     $options[$this_value] = t('Give @title @star/@count', array('@title' => $title, '@star' => $i, '@count' => $element['#stars']));
   }
   // Display clear button only if enabled.
@@ -662,6 +667,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
       ));
       $class[] = 'fivestar-user-text';
       break;
+
     case 'average':
       $element['vote']['#description'] = $settings['style'] == 'dual' ? NULL : theme('fivestar_summary', array(
         'average_rating' => $values['average'],
@@ -671,6 +677,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
       ));
       $class[] = 'fivestar-average-text';
       break;
+
     case 'smart':
       $element['vote']['#description'] = ($settings['style'] == 'dual' && !$values['user']) ? NULL : theme('fivestar_summary', array(
         'user_rating' => $values['user'],
@@ -682,6 +689,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
       $class[] = 'fivestar-smart-text';
       $class[] = $values['user'] ? 'fivestar-user-text' : 'fivestar-average-text';
       break;
+
     case 'dual':
       $element['vote']['#description'] = theme('fivestar_summary', array(
         'user_rating' => $values['user'],
@@ -692,6 +700,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
       ));
       $class[] = ' fivestar-combo-text';
       break;
+
     case 'none':
       $element['vote']['#description'] = NULL;
       break;
@@ -701,12 +710,15 @@ function fivestar_expand($element, $form_state, $complete_form) {
     case 'average':
       $class[] = 'fivestar-average-stars';
       break;
+
     case 'user':
       $class[] = 'fivestar-user-stars';
       break;
+
     case 'smart':
       $class[] = 'fivestar-smart-stars ' . ($values['user'] ? 'fivestar-user-stars' : 'fivestar-average-stars');
       break;
+
     case 'dual':
       $class[] = 'fivestar-combo-stars';
       $static_average = theme('fivestar_static', array(
@@ -781,6 +793,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
  *
  * @param $element
  *   The fivestar element
+ *
  * @return
  *   The default value for the element.
  */
@@ -793,23 +806,27 @@ function _fivestar_get_element_default_value($element) {
       case 'average':
         $default_value = $element['#values']['average'];
         break;
+
       case 'user':
         $default_value = $element['#values']['user'];
         break;
+
       case 'smart':
         $default_value = (!empty($element['#values']['user']) ? $element['#values']['user'] : $element['#values']['average']);
         break;
+
       case 'dual':
         $default_value = $element['#values']['user'];
         break;
+
       default:
         $default_value = $element['#values']['average'];
     }
   }
 
   for ($i = 0; $i <= $element['#stars']; $i++) {
-    $this_value = ceil($i * 100/$element['#stars']);
-    $next_value = ceil(($i+1) * 100/$element['#stars']);
+    $this_value = ceil($i * 100 / $element['#stars']);
+    $next_value = ceil(($i + 1) * 100 / $element['#stars']);
 
     // Round up the default value to the next exact star value if needed.
     if ($this_value < $default_value && $next_value > $default_value) {
@@ -843,6 +860,9 @@ function fivestar_votingapi_metadata_alter(&$data) {
   }
 }
 
+/**
+ *
+ */
 function fivestar_get_tags() {
   $tags_txt = variable_get('fivestar_tags', 'vote');
   $tags_exploded = explode(',', $tags_txt);
@@ -865,6 +885,9 @@ function fivestar_get_tags() {
   return $tags;
 }
 
+/**
+ *
+ */
 function fivestar_get_targets($field, $instance, $key = FALSE, $entity = FALSE, $langcode = LANGUAGE_NONE) {
   $options = array();
   $targets = module_invoke_all('fivestar_target_info', $field, $instance);
@@ -901,7 +924,7 @@ function fivestar_fivestar_target_info($field, $instance) {
         foreach ($field_instances as $field_instance) {
           $options[$field_instance['field_name']] = array(
             'title' => t('Node reference: @field', array('@field' => $field_instance['field_name'])),
-            'callback' => '_fivestar_target_node_reference'
+            'callback' => '_fivestar_target_node_reference',
           );
         }
       }
@@ -917,7 +940,7 @@ function fivestar_fivestar_target_info($field, $instance) {
         foreach ($field_instances as $field_instance) {
           $options[$field_instance['field_name']] = array(
             'title' => t('Entity reference: @field', array('@field' => $field_instance['field_name'])),
-            'callback' => '_fivestar_target_entityreference'
+            'callback' => '_fivestar_target_entityreference',
           );
         }
       }
@@ -933,7 +956,7 @@ function fivestar_fivestar_target_info($field, $instance) {
         foreach ($field_instances as $field_instance) {
           $options[$field_instance['field_name']] = array(
             'title' => t('User reference: @field', array('@field' => $field_instance['field_name'])),
-            'callback' => '_fivestar_target_user_reference'
+            'callback' => '_fivestar_target_user_reference',
           );
         }
       }
@@ -944,7 +967,7 @@ function fivestar_fivestar_target_info($field, $instance) {
   if ($instance['entity_type'] == 'comment') {
     $options['parent_node'] = array(
       'title' => t('Parent Node'),
-      'callback' => '_fivestar_target_comment_parent_node'
+      'callback' => '_fivestar_target_comment_parent_node',
     );
   }
 
@@ -1004,6 +1027,9 @@ function _fivestar_target_user_reference($entity, $field, $instance, $langcode) 
   return $target;
 }
 
+/**
+ *
+ */
 function _fivestar_target_comment_parent_node($entity, $field, $instance, $langcode) {
   return array(
     'entity_id' => $entity->nid,
@@ -1014,7 +1040,7 @@ function _fivestar_target_comment_parent_node($entity, $field, $instance, $langc
 /**
  * Helper function to determine if a user can vote on content.
  *
- * @return Boolean
+ * @return bool
  */
 function _fivestar_allow_vote($element) {
   global $user;
@@ -1032,7 +1058,7 @@ function _fivestar_allow_vote($element) {
       'uid' => $user->uid,
     );
 
-  $can_revote = !votingapi_select_votes($criteria);
+    $can_revote = !votingapi_select_votes($criteria);
   }
   if (!$can_revote) {
     return FALSE;
@@ -1135,7 +1161,7 @@ function fivestar_fivestar_field_content_type_render($subtype, $conf, $panel_arg
 
   // Build the content type block.
   $block = new stdClass();
-  $block->module  = 'entity_field';
+  $block->module = 'entity_field';
   if ($conf['label'] == 'title' && isset($field_output['#title'])) {
     $block->title = $field_output['#title'];
   }
