@@ -2,7 +2,7 @@ Fivestar
 ========
 
 The Fivestar voting module adds a clean, attractive voting widget to nodes and
-comments in Drupal.
+comments in Backdrop.
 
 It features:
 
@@ -21,38 +21,35 @@ It features:
 Installation
 ------------
 
-- Install this module using the official Backdrop CMS instructions at
-  https://backdropcms.org/guide/modules
+- Install this module using the official 
+  [Backdrop CMS instructions](https://backdropcms.org/guide/modules)
 
-- Visit the configuration page under Administration > Configuration >
-  Content authoring > Fivestar (admin/config/content/fivestar) and enter the
+- Visit the configuration page under **Administration > Configuration >
+  Content authoring > Fivestar** (admin/config/content/fivestar) and enter the
   required information.
 
 Documentation
 -------------
 
-Additional documentation is located in the Wiki:
-https://github.com/backdrop-contrib/fivestar/wiki/Documentation
+Additional documentation is located in the [Wiki](https://github.com/backdrop-contrib/fivestar/wiki)
 
 Issues
 ------
 
-Bugs and Feature requests should be reported in the Issue Queue:
-https://github.com/backdrop-contrib/fivestar/issues
+Bugs and Feature requests should be reported in the [Issue Queue](https://github.com/backdrop-contrib/fivestar/issues)
 
 Current Maintainers
 -------------------
 
-- Philip White (https://github.com/whiteph/)
+- [Laryn Kragt Bakker](https://github.com/laryn) - [CEDC.org](https://cedc.org)
 
 Credits
 -------
 
-- Ported to Backdrop CMS by Philip White (https://github.com/whiteph).
-- Originally written for Drupal by Nate Haug (https://github.com/quicksketch)
-  and Jeff Eaton (https://github.com/eaton).
-- See the original Drupal project
-  (https://www.drupal.org/project/fivestar) for more information.
+- Ported to Backdrop CMS by [Philip White](https://github.com/whiteph).
+- Originally written for Drupal by [Nate Haug](https://github.com/quicksketch)
+  and [Jeff Eaton](https://github.com/eaton).
+- See the original [Drupal project](https://www.drupal.org/project/fivestar) for more information.
 
 License
 -------
