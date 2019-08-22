@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Provides CCK integration for fivestar module
+ * Provides CCK integration for fivestar module.
  */
 
 /**
@@ -28,6 +28,9 @@ function fivestar_field_info() {
   );
 }
 
+/**
+ *
+ */
 function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $field = $form['#field'];
   if ($field['type'] == 'fivestar') {
@@ -58,6 +61,9 @@ function fivestar_field_settings_form($field, $instance) {
   return $form;
 }
 
+/**
+ *
+ */
 function fivestar_field_instance_settings_form($field, $instance) {
   $form = array();
 
@@ -124,6 +130,21 @@ function fivestar_field_delete($entity_type, $entity, $field, $instance, $langco
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, 'delete');
 }
 
+/**
+ * Implements hook_field_views_data().
+ */
+function fivestar_field_views_data($field) {
+  $data = field_views_field_default_views_data($field);
+  foreach ($data as $table_name => $table_data) {
+    // Add our handler to the rating views field.
+    $data[$table_name][$field['field_name'] . '_rating']['filter']['handler'] = 'fivestar_views_handler_filter_in_operator';
+  }
+  return $data;
+}
+
+/**
+ *
+ */
 function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, &$items, $op = '') {
   // Seem to have an extra level in $items for Backdrop sometimes
   if (array_key_exists(0, $items) && array_key_exists(0, $items[0])) {
@@ -221,8 +242,8 @@ function fivestar_field_widget_info() {
       'settings' => array(
         'widget' => array(
           'fivestar_widget' => 'default',
-        )
-      )
+        ),
+      ),
     ),
     'fivestar_select' => array(
       'label' => t('Select list (rated while editing)'),
@@ -263,6 +284,9 @@ function fivestar_field_widget_settings_form($field, $instance) {
   return $form;
 }
 
+/**
+ *
+ */
 function fivestar_previews_expand($element) {
 
   foreach (element_children($element) as $css) {
@@ -293,10 +317,10 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     }
     $element['rating'] = array(
       '#type' => 'select',
-      '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
+      '#title' => check_plain(isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE),
       '#options' => $options,
       '#default_value' => isset($items[$delta]['rating']) ? $items[$delta]['rating'] : NULL,
-      '#description' => isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE,
+      '#description' => check_plain(isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE),
       '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
@@ -326,8 +350,8 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
     );
 
     $element['rating'] = array(
-      '#type'=> 'fivestar',
-      '#title' => isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE,
+      '#type' => 'fivestar',
+      '#title' => check_plain(isset($instance['label']) ? (($i18n) ? i18n_field_translate_property($instance, 'label') : t($instance['label'])) : FALSE),
       '#stars' => isset($instance['settings']['stars']) ? $instance['settings']['stars'] : 5,
       '#allow_clear' => isset($instance['settings']['allow_clear']) ? $instance['settings']['allow_clear'] : FALSE,
       '#allow_revote' => isset($instance['settings']['allow_revote']) ? $instance['settings']['allow_revote'] : FALSE,
@@ -336,7 +360,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
       '#widget' => $widget,
       '#settings' => $settings,
       '#values' => $values,
-      '#description' => isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE,
+      '#description' => check_plain(isset($instance['description']) ? (($i18n) ? i18n_field_translate_property($instance, 'description') : t($instance['description'])) : FALSE),
       '#required' => isset($instance['required']) ? $instance['required'] : FALSE,
     );
   }
@@ -352,7 +376,7 @@ function fivestar_field_formatter_info() {
     'fivestar_formatter_default' => array(
       'label' => t('As Stars'),
       'field types' => array('fivestar'),
-      'settings' =>  array(
+      'settings' => array(
         // Note: Do not set to widget to 'default' by
         // default. "Stars (rated while editing)" should
         // default to whatever was selected as a widget
@@ -412,7 +436,7 @@ function fivestar_field_formatter_settings_form($field, $instance, $view_mode, $
       '#type' => 'checkbox',
       '#title' => t('Allow voting on the entity.'),
       '#default_value' => $settings['expose'],
-      '#return_value' => 1
+      '#return_value' => 1,
     );
   }
 
@@ -461,14 +485,16 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
       '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? strtolower($widgets[$settings['widget']['fivestar_widget']]) : t('default'),
       '@expose' => ($settings['expose']) ? 'yes' : 'no',
       '@style' => strtolower($settings['style']),
-      '@text' => strtolower($settings['text'])));
+      '@text' => strtolower($settings['text']),
+    ));
     return $summary;
   }
 
   $summary = t("Style: @widget, Stars display: @style, Text display: @text", array(
     '@widget' => isset($widgets[$settings['widget']['fivestar_widget']]) ? $widgets[$settings['widget']['fivestar_widget']] : t('default'),
     '@style' => strtolower($settings['style']),
-    '@text' => strtolower($settings['text'])));
+    '@text' => strtolower($settings['text']),
+  ));
 
   return $summary;
 }
@@ -483,12 +509,12 @@ function fivestar_field_formatter_settings_summary($field, $instance, $view_mode
  * fivestar theme function.
  *
  * @param $items
- *  Array. Generated by fivestar_field_prepare_view(). This array contains
- *  processed voting info.
+ *   Array. Generated by fivestar_field_prepare_view(). This array contains
+ *   processed voting info.
  *
- * @return $element
- *  Renderable array. This array will always be $element[0], with only one
- *  top level item, because Fivestar does not offer multi-value fields.
+ * @return element
+ *   Renderable array. This array will always be $element[0], with only one
+ *   top level item, because Fivestar does not offer multi-value fields.
  */
 function fivestar_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
@@ -503,7 +529,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
   // fivestar_custom_widget form, and let it take care of the rest.
   // Note: Stars will only be displayed in a form in the following circumstance:
   // - Fivestar widget selected is "Stars (rated while viewing)"
-  // - Fivestar display setting = "exposed"
+  // - Fivestar display setting = "exposed".
   $is_form = ($instance['widget']['type'] == 'exposed'
               && user_access('rate content')
               && $display['type'] == 'fivestar_formatter_default'
@@ -591,7 +617,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
     'votes' => NULL,
   );
 
- $summary_options['microdata'] = _fivestar_get_microdata_property_info($entity_type, $entity, $field, $instance);
+  $summary_options['microdata'] = _fivestar_get_microdata_property_info($entity_type, $entity, $field, $instance);
 
   // If we're displaying both user and average ratings, add a description to
   // both the 'user' and 'average' elements.
@@ -640,8 +666,8 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
  *
  * @params
  *
- * @return $settings
- *  Array. @see fivestar_custom_widget().
+ * @return settings
+ *   Array. @see fivestar_custom_widget().
  */
 function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id, $tag, $widget) {
   $settings = $display['settings'];
@@ -668,17 +694,17 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
 
 /**
  * @param $widgets
- *  Array, $widgets = module_invoke_all('fivestar_widgets');
- *  $widgets = array('path/to/css' => 'Widget Name', 'path/to/more/css' => 'Widget 2');
+ *   Array, $widgets = module_invoke_all('fivestar_widgets');
+ *   $widgets = array('path/to/css' => 'Widget Name', 'path/to/more/css' => 'Widget 2');
  *
  * @param $display
- *  Array. This is the $display parameter passed to fivestar_field_formatter_view().
+ *   Array. This is the $display parameter passed to fivestar_field_formatter_view().
  *
  * @param $instance
- *  Array. This is the $instance parameter passed to fivestar_field_formatter_view().
+ *   Array. This is the $instance parameter passed to fivestar_field_formatter_view().
  *
- * @return $widget
- *  Array. $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
+ * @return widget
+ *   Array. $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
  */
 function _fivestar_get_widget($widgets, $display, $instance) {
   // If the type doesn't required widgets lets get out of here.
@@ -701,7 +727,7 @@ function _fivestar_get_widget($widgets, $display, $instance) {
     }
     elseif ($type == 'stars') {
       // Stars rated while editing, that is, $type = stars,
-      // falls back on whatever the user selected to be displayed on node/add and node/%/edit
+      // falls back on whatever the user selected to be displayed on node/add and node/%/edit.
       $fivestar_widget = $instance['widget']['settings']['widget']['fivestar_widget'];
     }
   }
@@ -742,9 +768,9 @@ function fivestar_field_prepare_view($entity_type, $entities, $field, $instances
         $items[$id] = array($values);
       }
     }
-    if(!empty($exposed_widgets)) {
+    if (!empty($exposed_widgets)) {
       $votes = fivestar_get_votes_multiple($entity_type, $exposed_widgets, $field['settings']['axis']);
-      foreach($votes[$entity_type] as $vote_id => $vote) {
+      foreach ($votes[$entity_type] as $vote_id => $vote) {
         // Populating the $items[$id] array even for items with no value forces
         // the render system to output a widget.
         $values['user'] = isset($vote['user']['value']) ? $vote['user']['value'] : 0;
@@ -770,6 +796,7 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
   $name = $field['field_name'];
   $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
 
+  $property['getter callback'] = '_fivestar_field_property_values';
   $property['property info'] = array(
     'average_rating' => array(
       'label' => t('Average Rating'),
@@ -787,6 +814,31 @@ function fivestar_property_info_callback(&$info, $entity_type, $field, $instance
       'microdata' => TRUE,
     ),
   );
+}
+
+/**
+ * Callback for getting field property values.
+ */
+function _fivestar_field_property_values($entity, array $options, $name, $entity_type, $info) {
+  $field = field_info_field($name);
+  $langcode = field_language($entity_type, $entity, $name, isset($options['language']) ? $options['language']->language : NULL);
+  $values = array();
+  if (isset($entity->{$name}[$langcode])) {
+    foreach ($entity->{$name}[$langcode] as $delta => $data) {
+      $values[$delta]['user_rating'] = $data['rating'];
+      $result = array();
+      $result = votingapi_select_results(array(
+        'entity_type' => $entity_type,
+        'entity_id' => entity_id($entity_type, $entity),
+        'value_type' => 'percent',
+        'tag' => $field['settings']['axis'],
+        'function' => 'average',
+      ));
+      $values[$delta]['average_rating'] = (isset($result[0]['value']) ? $result[0]['value'] : 0);
+    }
+  }
+  // For an empty single-valued field, we have to return NULL.
+  return $field['cardinality'] == 1 ? ($values ? reset($values) : NULL) : $values;
 }
 
 /**

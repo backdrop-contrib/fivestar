@@ -5,7 +5,6 @@
  * Provides API documentation for the fivestar module.
  */
 
-
 /**
  * Implementation of hook_fivestar_widgets().
  *
@@ -91,7 +90,7 @@ function hook_fivestar_target_info($field, $instance) {
     // node's author instead of the actual node.
     'example_node_author' => array(
       'title' => t('Node Author'),
-      'callback' => '_example_target_node_author'
+      'callback' => '_example_target_node_author',
     ),
   );
 

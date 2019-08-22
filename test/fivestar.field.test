@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Simpletests for the Fivestar module.
@@ -22,7 +23,8 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // Save a test_node_type node with a two-star rating.
     $edit = array(
       'title' => $this->randomString(),
-      'fivestar_test[und][0][0][rating]' => '40' // Equals a rating of 2 stars.
+      // 40 equals a rating of 2 stars.
+      'fivestar_test[und][0][0][rating]' => '40',
     );
     $this->backdropPost('node/add/test_node_type', $edit, t('Save'));
     // Make sure the two-star rating shows on the node view.
@@ -166,4 +168,5 @@ class FivestarTestCase extends FivestarBaseTestCase {
       $this->assertEqual($result[0][0], '0', t('The @name fivestar widget is properly display.', array('@name' => $name)));
     }
   }
+
 }

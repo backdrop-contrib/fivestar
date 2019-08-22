@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * @file
@@ -7,19 +8,30 @@
 
 require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/ajax.test';
 
+/**
+ *
+ */
 class FivestarBaseTestCase extends AJAXTestCase {
   // Using testing profile.
-  // @see http://groups.drupal.org/node/217189
+  /**
+   * @see http://groups.drupal.org/node/217189
+   */
   protected $profile = 'testing';
 
-  // Set up our basic users.
+  /**
+   * Set up our basic users.
+   */
   protected $admin_user;
   protected $voter_user;
 
   public function setUp() {
     parent::setUp(array('fivestar', 'dblog'));
 
-    $type = $this->backdropCreateContentType(array('type' => 'test_node_type', 'name' => 'test_node_type'));
+    $content_type = array(
+      'type' => 'test_node_type',
+      'name' => 'test_node_type',
+    );
+    $type = $this->backdropCreateContentType($content_type);
     $admin_perms = array(
       'create test_node_type content',
       'access content',
@@ -76,4 +88,5 @@ class FivestarBaseTestCase extends AJAXTestCase {
     field_create_field($field);
     field_create_instance($instance);
   }
+
 }

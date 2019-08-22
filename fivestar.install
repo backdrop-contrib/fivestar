@@ -6,7 +6,7 @@
  */
 
 /**
- * hook_field_schema().
+ * Hook_field_schema().
  */
 function fivestar_field_schema() {
   return array(
@@ -15,19 +15,19 @@ function fivestar_field_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => FALSE,
-        'sortable' => TRUE
+        'sortable' => TRUE,
       ),
       'target' => array(
         'type' => 'int',
         'unsigned' => TRUE,
-        'not null' => FALSE
+        'not null' => FALSE,
       ),
     ),
   );
 }
 
 /**
- *  * Implements hook_update_last_removed().
+ * Implements hook_update_last_removed().
  */
 function fivestar_update_last_removed() {
   return 7208;
@@ -45,4 +45,3 @@ function fivestar_update_1201() {
   // Delete variables.
   update_variable_del('fivestar_tags');
 }
-
