@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_fivestar_widgets().
+ * Implements hook_fivestar_widgets().
  *
  * This hook allows other modules to create additional custom widgets for
  * the fivestar module.
@@ -29,7 +29,7 @@ function hook_fivestar_widgets() {
 }
 
 /**
- * Implementation of hook_fivestar_access().
+ * Implements hook_fivestar_access().
  *
  * This hook is called before every vote is cast through Fivestar. It allows
  * modules to allow or deny voting on any type of entity, such as nodes, users, or
@@ -44,7 +44,7 @@ function hook_fivestar_widgets() {
  * @param $uid
  *   The user ID trying to cast the vote.
  *
- * @return boolean or NULL
+ * @return bool|NULL
  *   Returns TRUE if voting is supported on this object.
  *   Returns NULL if voting is not supported on this object by this module.
  *   If needing to absolutely deny all voting on this object, regardless
@@ -62,7 +62,7 @@ function hook_fivestar_access($entity_type, $id, $tag, $uid) {
 }
 
 /**
- * Implementation of hook_fivestar_target_info().
+ * Implements hook_fivestar_target_info().
  *
  * @param $field
  *   The field structure for the operation.

@@ -32,10 +32,10 @@ class FivestarTestCase extends FivestarBaseTestCase {
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
     $instance['settings']['allow_ownvote'] = 1;
     field_update_instance($instance);
-    // Save an test_node_typee node with a two-star rating.
+    // Save a test_node_type node with a two-star rating.
     $edit = array(
       'title' => $this->randomString(),
-    // Equals a rating of 2 stars.
+      // Equals a rating of 2 stars.
       'fivestar_test[und][0][rating]' => '40',
     );
     $this->drupalPost('node/add/test_node_type', $edit, t('Save'));
@@ -49,7 +49,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
    */
   public function testViewerRating() {
     $this->createFivestarField(array('widget_type' => 'exposed'));
-    // Add an test_node_type to rate.
+    // Add a test_node_type to rate.
     $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
     $this->drupalGet('node/' . $node->nid);
     $this->drupalLogin($this->voter_user);
@@ -64,15 +64,15 @@ class FivestarTestCase extends FivestarBaseTestCase {
     // Load the instance settings so we can change certain settings.
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
 
-    // Lets see if visitors is able to re-vote.
-    // §see http://drupal.org/node/356605
+    // Let's see if visitors is able to re-vote.
+    // @see http://drupal.org/node/356605
     $instance['settings']['allow_revote'] = 1;
     field_update_instance($instance);
     $this->drupalGet('node/' . $node->nid);
     $result = $this->xpath("//div[contains(@class, 'field-name-fivestar-test')]//select[contains(@name,'vote')]");
     $this->assertEqual(count($result), TRUE, 'Visitors can re-vote');
 
-    // Lets test to make sure the cancel option is not available if disabled.
+    // Let's test to make sure the cancel option is not available if disabled.
     // @see http://drupal.org/node/1269276
     $this->assertNoRaw(t('Cancel rating'), 'User cannot cancel his vote.');
     $instance['settings']['allow_clear'] = 1;
@@ -80,7 +80,8 @@ class FivestarTestCase extends FivestarBaseTestCase {
     $this->drupalGet('node/' . $node->nid);
     $this->assertRaw(t('Cancel rating'), 'User can cancel his vote.');
 
-    // Now lets change the field to have exposed off and make sure the value is still there.
+    // Now let's change the field to have exposed off and make sure the value
+    // is still there.
     // @see http://drupal.org/node/1242082
     $instance['display']['default']['settings']['expose'] = FALSE;
     field_update_instance($instance);
@@ -110,7 +111,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
         ),
       ),
     ));
-    // Add an test_node_type to test static widget.
+    // Add a test_node_type to test static widget.
     $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
     // Rate the test_node_type.
     $this->drupalLogin($this->voter_user);
@@ -125,7 +126,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
   public function testViewerRatingAjax() {
     // Add a viewer-rated fivestar field to the test_node_type content type.
     $this->createFivestarField(array('widget_type' => 'exposed'));
-    // Add an test_node_type to rate.
+    // Add a test_node_type to rate.
     $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
     // Rate the test_node_type.
     $this->drupalLogin($this->voter_user);
@@ -136,7 +137,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
       NULL, array(), array(), "fivestar-custom-widget");
     $expected = array(
       'command' => 'fivestarUpdate',
-      // TODO: we should text the data being returned.
+      // @todo We should test the data being returned.
     );
     $this->assertCommand($commands, $expected, "The fivestarUpdate AJAX command was returned.");
   }
@@ -162,7 +163,7 @@ class FivestarTestCase extends FivestarBaseTestCase {
       ),
     ));
     $instance = field_read_instance('node', 'fivestar_test', 'test_node_type');
-    // Add an test_node_type to test widget against.
+    // Add a test_node_type to test widget against.
     $node = $this->drupalCreateNode(array('type' => 'test_node_type'));
 
     // Test the Default Widget.

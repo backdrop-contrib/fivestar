@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_field_info().
+ * Implements hook_field_info().
  */
 function fivestar_field_info() {
   return array(
@@ -46,7 +46,7 @@ function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
 }
 
 /**
- * Implementation of hook_field_settings_form().
+ * Implements hook_field_settings_form().
  */
 function fivestar_field_settings_form($field, $instance) {
   $form['axis'] = array(
@@ -111,21 +111,21 @@ function fivestar_field_instance_settings_form($field, $instance) {
 }
 
 /**
- * Implementation of hook_field_insert().
+ * Implements hook_field_insert().
  */
 function fivestar_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
- * Implementation of hook_field_update().
+ * Implements hook_field_update().
  */
 function fivestar_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items);
 }
 
 /**
- * Implementation of hook_field_delete().
+ * Implements hook_field_delete().
  */
 function fivestar_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
   _fivestar_field_helper($entity_type, $entity, $field, $instance, $langcode, $items, 'delete');
@@ -212,14 +212,14 @@ function _fivestar_update_field_value($entity_type, $entity, $field_name, $langc
 }
 
 /**
- * Implementation of hook_field_is_empty().
+ * Implements hook_field_is_empty().
  */
 function fivestar_field_is_empty($item, $field) {
   return empty($item['rating']) || $item['rating'] == '-';
 }
 
 /**
- * Implementation of hook_field_widget_info().
+ * Implements hook_field_widget_info().
  */
 function fivestar_field_widget_info() {
   return array(
@@ -247,7 +247,7 @@ function fivestar_field_widget_info() {
 }
 
 /**
- * Implementation of hook_field_widget_settings_form().
+ * Implements hook_field_widget_settings_form().
  */
 function fivestar_field_widget_settings_form($field, $instance) {
   $form = array();
@@ -294,7 +294,7 @@ function fivestar_previews_expand($element) {
 }
 
 /**
- * Implementation of hook_field_widget_form().
+ * Implements hook_field_widget_form().
  */
 function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $element['#tree'] = TRUE;
@@ -362,7 +362,7 @@ function fivestar_field_widget_form(&$form, &$form_state, $field, $instance, $la
 }
 
 /**
- * Implementation of hook_field_formatter_info().
+ * Implements hook_field_formatter_info().
  */
 function fivestar_field_formatter_info() {
   return array(
@@ -528,7 +528,7 @@ function fivestar_field_formatter_view($entity_type, $entity, $field, $instance,
               && $display['type'] == 'fivestar_formatter_default'
               && $display['settings']['expose']) ? TRUE : FALSE;
   if ($is_form) {
-    // TODO. Get rid of voting categories setting, then change this so
+    // @todo Get rid of voting categories setting, then change this so
     // axis = field name.
     $tag = (isset($field['settings']['axis'])) ? $field['settings']['axis'] : 'vote';
     list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
@@ -701,7 +701,7 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
  */
 function _fivestar_get_widget($widgets, $display, $instance) {
   // If the type doesn't required widgets lets get out of here.
-  // TODO: Implement this WAY better.
+  // @todo Implement this WAY better.
   if (in_array($display['type'], array('fivestar_formatter_rating', 'fivestar_formatter_percentage'))) {
     return FALSE;
   }
@@ -737,7 +737,7 @@ function _fivestar_get_widget($widgets, $display, $instance) {
  * Implements hook_field_prepare_view().
  */
 function fivestar_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
-  // TODO: Clean this function up!
+  // @todo Clean this function up!
   $exposed_widgets = array();
   foreach ($entities as $id => $entity) {
     // Ensure the items aren't processed twice.
