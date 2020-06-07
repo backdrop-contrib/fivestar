@@ -1,79 +1,82 @@
+CONTENTS OF THIS FILE
+---------------------
+
+ * Introduction
+ * Requirements
+ * Installation
+ * Configuration
+ * Maintainers
+
+
+INTRODUCTION
+------------
 
 The Fivestar voting module adds a clean, attractive voting widget to nodes and
 comments in Drupal. It features:
 
- * jQuery rollover effects and AJAX no-reload voting
+ * jQuery (1.0 - 1.8) rollover effects and AJAX no-reload voting
  * Customizable star sets
- * Graceful degradation to an HTML rating form when JavaScript is turned off
- * Per-nodetype configurability
- * Support for anonymous voters
- * Spam protection to keep users from filling your DB with bogus votes
- * Easy-to-use integration with Views module for lists sorted by rating, or
-   filtered by min/max ratings
- * A Fivestar CCK field for use in custom node types
+ * Graceful degradation to a HTML rating form when JavaScript is disabled
+ * Configurability per node type
+ * Anonymous voting support
+ * Voting spam protection
+ * Easy-to-use integration with Views for lists sorted by rating, or filtered
+   by min/max ratings
+ * A Fivestar field for use in custom node types
  * An easy-to-use Form API element type for use in other modules
 
-Fivestar was designed by Nate Haug and Jeff Eaton.
+ * For a full description of the module, visit the project page:
+   https://www.drupal.org/project/fivestar
 
-This Module Made by Robots: http://www.lullabot.com
+ * To submit bug reports and feature suggestions, or track changes:
+   https://www.drupal.org/project/issues/fivestar
+
+ * For more information on module usage, visit the documentation guide:
+   https://www.drupal.org/docs/7/modules/fivestar
 
 
-Dependencies
+REQUIREMENTS
 ------------
- * votingapi
 
-Fivestar also provides additional features for both the CCK and Views modules.
+This module requires the following modules:
 
-Install
--------
-Installing the Fivestar voting module is simple:
+ * Voting API (https://www.drupal.org/project/votingapi)
 
-1) Copy the fivestar folder to the modules folder in your installation.
 
-2) Enable the module using Administer -> Modules (/admin/build/modules)
+INSTALLATION
+------------
 
-Note: Aggressive caching will complain that fivestar doesn't work, but it
-actually causes no problems. To improve performance, the module implements
-hook_init() -- and the caching advisor screen uses that as the only metric to
-determine whether a module will work with the caching system. Activate it
-without fear, friends -- Fivestar will continue to hum happily along.
+ * Install as you would normally install a contributed Drupal module. Visit
+   https://www.drupal.org/node/1897420 for further information.
 
-Upgrading from Drupal 5
------------------------
-The Drupal 6 version of VotingAPI has been significantly improved for both
-efficiency and flexibility. Because Fivestar depends on VotingAPI for much of
-its functionality, these changes have affected Fivestar.
 
-The Fivestar Anonymous vote interval set in admin/settings/fivestar is no
-longer available. We use the same setting as defined in VotingAPI now, set at
-admin/settings/votingapi. It has the same effect as the previous Fivestar
-setting.
+CONFIGURATION
+-------------
 
-Configuration for Simple Rating
--------------------------------
+Fivestar has two configuration modes:
 
-Fivestar has two completely separate modes of operation. The first is letting an
-end-user rate a piece of content. The settings for this are on the content type
-settings page. These settings let you expose a rating widget when viewing the
-node, not editing it. Clicking on the widget registers a vote for that node, and
-never anything else.
+ * End-user rating a piece of content: These settings are located on the content
+   type settings page. These settings let you expose a rating widget when
+   viewing the node, not editing it. Clicking on the widget registers a vote for
+   that node, and never anything else.
 
 The configuration for Fivestar is spread between the content type settings page,
 Fivestar site settings page, and access permissions. To configure:
 
-1) Configure the site-wide setting for Fivestar, Administer -> Settings ->
-   Fivestar.
+1) Configure the site-wide setting for Fivestar, Administer -> Configuration ->
+   Fivestar (or go directly to /admin/config/content/fivestar)
 
 2) Activate voting on each content type. For example, if you want Fivestar to
-   appear on story nodes, use Administer -> Content Management ->
-   Content Types -> Story, and check the "Enable Fivestar rating" box under
+   appear on "Article" nodes, use Administer -> Structure -> Content Types ->
+   Article, and check the "Enable Fivestar rating" box under
    the "Fivestar ratings" heading. Repeat for each content type desired.
 
 3) Enable anonymous voting.
    If you want to allow anonymous voting, you'll need to set permissions for
-   that. Use Administer -> User Management -> Access Control, and check the
-   "rate content" and "view ratings" checkboxes for the roles you'd like.
-   You'll find these permission items under the "fivestar module" heading.
+   that. Use Administer -> People -> Permissions, and check the
+   "Use Fivestar to rate content" checkboxe for the role(s) you'd like.
+   You'll find this permission under the "Fivestar" module heading.
+
 
 Configuration for Reviews of Content
 ------------------------------------
@@ -84,12 +87,13 @@ submit a rating on the *original piece of content* along with their comment.
 Visitors will not be rating the comments themselves. Fivestar does not allow for
 the rating of comments.
 
-1) If it's not already enabled, turn on comment module at Administer ->
-   Site Building -> Modules.
+1) If it's not already enabled, turn on the comment module at
+   Administer -> Modules.
 
 2) Visit the content type you want to enable reviews, such as Administer ->
-   Content Management -> Content Types -> Story, and select an option under
+   Structure -> Content Types -> Article, and select an option under
    the "Comment widget" section.
+
 
 Configuration as a CCK field / Advanced Rating
 ----------------------------------------------
@@ -110,7 +114,7 @@ accompany their rating.
 
 To configure a CCK field for rating a node while creating a new 'review' node:
 
-1) Create a new node type called 'review' at Administer -> Content Management ->
+1) Create a new node type called 'review' at Administer -> Structure ->
 Content Types. Configure the type. Do NOT set any fivestar settings on the
 content type form! We don't want users to actually be able to rate the reviews
 themselves!
@@ -132,6 +136,7 @@ select the nodecomment parent as the target of the vote.
 Save your field. Now when making new nodes of type 'review', the user will
 select a star that will register a vote on the value of the Node ID field.
 
+
 Views Integration
 -----------------
 Fivestar depends on the views integration provided by VotinAPI, but adds some
@@ -143,6 +148,7 @@ be displayed as Fivestar ratings.
 
 Fivestar also provides handling for the display of Fivestar CCK fields, they are
 in the Field list under "Fivestar Rating: [Field name]".
+
 
 Creating a Fivestar Set
 -----------------------
@@ -157,7 +163,7 @@ Creating a Fivestar Set
    and bottom thirds of the image. Change the middle and bottom copies to your
    liking. Fivestar will use the top, middle, and bottom images for each state
    of the star.
-   
+
    Top      -> Off
    Middle   -> On
    Bottom   -> Hover
@@ -183,14 +189,24 @@ Creating a Fivestar Set
    image as necessary. If you're making a larger or smaller size for your stars
    than 16x16 pixels, the "Minimal" and "Outline" sets make for a good example.
 
+
 Contributing
 ------------
 Have a sweet set of stars you'd like to contribute to the Fivestar module?
-Post them to the Fivestar issue queue: http://drupal.org/project/issues/fivestar
+Post them to the issue queue: https://drupal.org/project/issues/fivestar
+
 
 Support
 -------
 If you experience a problem with fivestar or have a problem, file a
 request or issue on the fivestar queue at
-http://drupal.org/project/issues/fivestar. DO NOT POST IN THE FORUMS. Posting in
-the issue queues is a direct line of communication with the module authors.
+https://drupal.org/project/issues/fivestar. DO NOT POST IN THE FORUMS. Posting
+in the issue queues is a direct line of communication with the module authors.
+
+
+MAINTAINERS
+-----------
+
+Fivestar was designed by Nate Haug and Jeff Eaton.
+
+This Module Made by Robots: http://www.lullabot.com
