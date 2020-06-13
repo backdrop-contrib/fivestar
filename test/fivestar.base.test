@@ -2,43 +2,49 @@
 
 /**
  * @file
- * Based test file for the Fivestar module.
+ * Test base for the Fivestar module.
  */
 
 /**
- *
+ * Base class for Fivestar Ajax tests.
  */
 class FivestarBaseTestCase extends AJAXTestCase {
-  // Using testing profile.
+
   /**
+   * Use testing profile.
+   *
    * @see http://groups.drupal.org/node/217189
    */
   protected $profile = 'testing';
 
   /**
-   * Set up our basic users.
+   * A user with permission to administer Fivestar.
    */
-  protected $admin_user;
-  protected $voter;
+  protected $adminUser;
 
   /**
-   *
+   * A user with permission to vote.
+   */
+  protected $voterUser;
+
+  /**
+   * {@inheritdoc}
    */
   public function setUp() {
     parent::setUp(array('fivestar', 'dblog'));
 
     $type = $this->drupalCreateContentType(array('type' => 'test_node_type', 'name' => 'test_node_type'));
-    $this->admin_user = $this->drupalCreateUser(array('create test_node_type content', 'rate content'));
-    $this->voter_user = $this->drupalCreateUser(array('rate content'));
+    $this->adminUser = $this->drupalCreateUser(array('create test_node_type content', 'rate content'));
+    $this->voterUser = $this->drupalCreateUser(array('rate content'));
   }
 
   /**
    * Add a fivestar field to a content type.
    *
-   * @param $options
+   * @param array $options
    *   An associative array of options for the field and instance.
    */
-  public function createFivestarField($options = array()) {
+  public function createFivestarField(array $options = array()) {
     $options = $options + array(
       'content_type' => 'test_node_type',
       'widget_type' => 'stars',
