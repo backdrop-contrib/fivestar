@@ -165,15 +165,16 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
       _fivestar_cast_vote($target['entity_type'], $target['entity_id'], $rating, $field['settings']['axis'], $entity->uid, TRUE, $target['vote_source']);
       votingapi_recalculate_results($target['entity_type'], $target['entity_id']);
     }
-    // The original callback is only called for a single updated field, but the Field API
-    // then updates all fields of the entity. For an update, the Field API first deletes
-    // the equivalent row in the database and then adds a new row based on the
-    // information in $items here. If there are multiple Fivestar fields on an entity, the
-    // one being updated is handled ok ('rating' having already been set to the new value),
-    // but other Fivestar fields are set to NULL as 'rating' isn't set - not what an update
-    // would be expected to do. So set 'rating' for all of the Fivestar fields from the
-    // existing user data in $items. This preserves the user vote thru Field API's
-    // delete/re-insert process.
+    // The original callback is only called for a single updated field, but the
+    // Field API then updates all fields of the entity. For an update, the Field
+    // API first deletes the equivalent row in the database and then adds a new
+    // row based on the information in $items here. If there are multiple
+    // Fivestar fields on an entity, the one being updated is handled OK
+    // ('rating' having already been set to the new value), but other Fivestar
+    // fields are set to NULL as 'rating' isn't set - not what an update would
+    // be expected to do. So set 'rating' for all of the Fivestar fields from
+    // the existing user data in $items. This preserves the user vote thru Field
+    // API's delete/re-insert process.
     if (!isset($items[$delta]['rating'])) {
       $items[$delta]['rating'] = $items[$delta]['user'];
     }
@@ -696,8 +697,8 @@ function _fivestar_custom_widget_settings($entity_type, $instance, $display, $id
  * @param $instance
  *   Array. This is the $instance parameter passed to fivestar_field_formatter_view().
  *
- * @return widget
- *   Array. $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
+ * @return array
+ *   $widget = array('name' => 'my widget', 'css' => 'sites/all/mymodule/mywidget.css');
  */
 function _fivestar_get_widget($widgets, $display, $instance) {
   // If the type doesn't required widgets lets get out of here.

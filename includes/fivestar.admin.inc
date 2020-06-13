@@ -38,7 +38,7 @@ function fivestar_settings($form, $form_state) {
 }
 
 /**
- *
+ * Submit handler for fivestar_settings() form.
  */
 function fivestar_settings_submit($form, &$form_state) {
   drupal_set_message(t('Your settings have been saved.'));

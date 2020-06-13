@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Installation file for fivestar module.
+ * Install, update, and uninstall functions the Fivestar module.
  */
 
 /**
- *
+ * Implements hook_uninstall().
  */
 function fivestar_uninstall() {
   db_query("DELETE FROM {variable} WHERE name LIKE 'fivestar_%'");
@@ -64,7 +64,7 @@ function fivestar_update_7202() {
 }
 
 /**
- * Convert all existing fivestar/node_type settings into fields with exposed fivestar formatters.
+ * Converts all existing fivestar/node_type settings into fields with exposed fivestar formatters.
  */
 function fivestar_update_7203() {
   // Gather the node types.
@@ -176,8 +176,7 @@ function fivestar_update_7203() {
 }
 
 /**
- * Preserve settings from fivestar_formatter_exposed_stars and convert to
- * fivestar_formatter_default.
+ * Preserve settings from fivestar_formatter_exposed_stars and convert to fivestar_formatter_default.
  */
 function fivestar_update_7204() {
   $fields = field_read_fields(array('type' => 'fivestar'));

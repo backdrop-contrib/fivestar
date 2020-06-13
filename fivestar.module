@@ -291,8 +291,8 @@ function fivestar_get_votes_multiple($entity_type, $ids, $tag = 'vote', $uid = N
     }
     else {
       // If the user is anonymous, we never bother loading their existing votes.
-      // Not only would it be hit-or-miss, it would break page caching. Safer to always
-      // show the 'fresh' version to anon users.
+      // Not only would it be hit-or-miss, it would break page caching. Safer to
+      // always show the 'fresh' version to anon users.
       $votes[$result['entity_type']][$result['entity_id']]['user'] = array('value' => 0);
     }
   }
@@ -555,7 +555,8 @@ function fivestar_ajax_submit($form, $form_state) {
 
   // We need to process the 'fivestar' element with the new values.
   $form['vote']['#values'] = $values;
-  // Also need to pass on form_state and the complete form, just like form_builder() does.
+  // Also need to pass on form_state and the complete form,
+  // just like form_builder() does.
   $new_element = fivestar_expand($form['vote'], $form_state, $form_state['complete form']);
   // Update the description. Since it doesn't account of our cast vote above.
   // @todo Look into all this, I honestly don't like it and it's a bit weird.
