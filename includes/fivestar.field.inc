@@ -819,7 +819,7 @@ function _fivestar_field_property_values($entity, array $options, $name, $entity
   $values = array();
   if (isset($entity->{$name}[$langcode])) {
     foreach ($entity->{$name}[$langcode] as $delta => $data) {
-      $values[$delta]['user_rating'] = $data['rating'];
+      $values[$delta]['user_rating'] = isset($data['rating']) ? $data['rating'] : NULL;
       $result = array();
       $result = votingapi_select_results(array(
         'entity_type' => $entity_type,
