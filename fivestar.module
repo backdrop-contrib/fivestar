@@ -129,7 +129,7 @@ function fivestar_theme() {
 function fivestar_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'fivestar') . '/includes',
+    'path' => backdrop_get_path('module', 'fivestar') . '/includes',
   );
 }
 
