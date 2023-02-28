@@ -85,7 +85,7 @@ function hook_fivestar_target_info($field, $instance) {
   $bundle = $instance['bundle'];
 
   $options = array(
-    // Declase a new Target Type.
+    // Declare a new Target Type.
     // This will allow users to vote on a Node and have the vote cast against the
     // node's author instead of the actual node.
     'example_node_author' => array(

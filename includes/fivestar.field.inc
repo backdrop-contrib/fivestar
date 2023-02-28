@@ -173,8 +173,8 @@ function _fivestar_field_helper($entity_type, $entity, $field, $instance, $langc
     // ('rating' having already been set to the new value), but other Fivestar
     // fields are set to NULL as 'rating' isn't set - not what an update would
     // be expected to do. So set 'rating' for all of the Fivestar fields from
-    // the existing user data in $items. This preserves the user vote thru Field
-    // API's delete/re-insert process.
+    // the existing user data in $items. This preserves the user vote through
+    // the Field API's delete/re-insert process.
     if (!isset($items[$delta]['rating'])) {
       $items[$delta]['rating'] = $items[$delta]['user'];
     }
