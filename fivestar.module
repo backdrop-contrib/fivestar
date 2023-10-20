@@ -836,7 +836,8 @@ function fivestar_votingapi_metadata_alter(&$data) {
  *
  */
 function fivestar_get_tags() {
-  $tags_exploded = config_get('fivestar.settings', 'fivestar_tags');
+  $tags_txt = config_get('fivestar.settings', 'fivestar_tags');
+  $tags_exploded = explode(',', $tags_txt);
 
   $tags = array();
   $got_vote = FALSE;
