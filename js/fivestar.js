@@ -65,7 +65,7 @@ Backdrop.behaviors.fivestar = {
     var value = this.hash.replace('#', '');
     $('select', $widget).val(value).change();
     var $this_star = (value == 0) ? $this.parent().parent().find('.star') : $this.closest('.star');
-    $this_star.prevAll('.star').andSelf().addClass('on');
+    $this_star.prevAll('.star').addBack().addClass('on');
     $this_star.nextAll('.star').removeClass('on');
     if(value==0){
       $this_star.removeClass('on');
