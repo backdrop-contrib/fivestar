@@ -6,7 +6,7 @@
  */
 
 /**
- * Implementation of hook_fivestar_widgets().
+ * Implements hook_fivestar_widgets().
  *
  * This hook allows other modules to create additional custom widgets for
  * the fivestar module.
@@ -29,11 +29,11 @@ function hook_fivestar_widgets() {
 }
 
 /**
- * Implementation of hook_fivestar_access().
+ * Implements hook_fivestar_access().
  *
  * This hook is called before every vote is cast through Fivestar. It allows
- * modules to allow or deny voting on any type of entity, such as nodes, users, or
- * comments.
+ * modules to allow or deny voting on any type of entity, such as nodes, users,
+ * or comments.
  *
  * @param $entity_type
  *   Type entity.
@@ -44,7 +44,7 @@ function hook_fivestar_widgets() {
  * @param $uid
  *   The user ID trying to cast the vote.
  *
- * @return boolean or NULL
+ * @return bool|null
  *   Returns TRUE if voting is supported on this object.
  *   Returns NULL if voting is not supported on this object by this module.
  *   If needing to absolutely deny all voting on this object, regardless
@@ -63,7 +63,7 @@ function hook_fivestar_access($entity_type, $id, $tag, $uid) {
 }
 
 /**
- * Implementation of hook_fivestar_target_info().
+ * Implements hook_fivestar_target_info().
  *
  * @param $field
  *   The field structure for the operation.
@@ -71,11 +71,12 @@ function hook_fivestar_access($entity_type, $id, $tag, $uid) {
  *   The instance structures for the $field.
  *
  * @return array
- *   An array of key => value pairs. Each key must be unique the identifier for this
- *   target selection. The Value is an array of key => value pairs for a title and a
- *   callback function. The title value is used for displaying in the #options array
- *   of the target selection option. The callback function is used when trying to decided
- *   which target the current vote should be cast against.
+ *   An array of key => value pairs. Each key must be unique the identifier for
+ *   this target selection. The Value is an array of key => value pairs for a
+ *   title and a callback function. The title value is used for displaying in
+ *   the #options array of the target selection option. The callback function
+ *   is used when trying to decided which target the current vote should be
+ *   cast against.
  *
  * @see fivestar_get_targets()
  * @see fivestar_fivestar_target_info()
@@ -85,7 +86,7 @@ function hook_fivestar_target_info($field, $instance) {
   $bundle = $instance['bundle'];
 
   $options = array(
-    // Declase a new Target Type.
+    // Declare a new Target Type.
     // This will allow users to vote on a Node and have the vote cast against the
     // node's author instead of the actual node.
     'example_node_author' => array(
@@ -112,10 +113,10 @@ function hook_fivestar_target_info($field, $instance) {
  *   The language associated with $items.
  *
  * @return array
- *   An array of key => value pairs. The return array must contain an entity_id key
- *   and a entity_type key. The value os the entity_id and entity_type is what the
- *   fivestar vote is going to be cast against when a user has selected this option
- *   as the target selection.
+ *   An array of key => value pairs. The return array must contain an entity_id
+ *   key and a entity_type key. The value os the entity_id and entity_type is
+ *   what the fivestar vote is going to be cast against when a user has selected
+ *   this option as the target selection.
  *
  * @see _fivestar_target_comment_parent_node()
  * @see _fivestar_target_node_reference()

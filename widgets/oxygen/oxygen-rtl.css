@@ -1,4 +1,4 @@
-/* Adjust the background position when using this widget with a RTL langauge. */
+/* Adjust the background position when using this widget with a RTL language. */
 .fivestar-oxygen div.fivestar-widget-static .star span.on {
   background-position: right -32px;
 }

@@ -49,7 +49,7 @@ function fivestar_microdata_suggestions() {
 }
 
 /**
- * Implementation of hook_permission().
+ * Implements hook_permission().
  *
  * Exposes permissions for rating content.
  */
@@ -62,7 +62,7 @@ function fivestar_permission() {
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function fivestar_theme() {
   return array(
@@ -179,7 +179,8 @@ function _fivestar_cast_vote($entity_type, $id, $value, $tag = NULL, $uid = NULL
       votingapi_set_votes($votes);
     }
 
-    // Moving the calculationg after saving/deleting the vote but before getting the votes.
+    // Moving the calculation after saving/deleting the vote but before
+    // getting the votes.
     votingapi_recalculate_results($entity_type, $id);
     return fivestar_get_votes($entity_type, $id, $tag, $uid);
   }
@@ -256,8 +257,8 @@ function fivestar_get_votes_multiple($entity_type, $ids, $tag = 'vote', $uid = N
     }
     else {
       // If the user is anonymous, we never bother loading their existing votes.
-      // Not only would it be hit-or-miss, it would break page caching. Safer to always
-      // show the 'fresh' version to anon users.
+      // Not only would it be hit-or-miss, it would break page caching. Safer to
+      // always show the 'fresh' version to anon users.
       $votes[$result['entity_type']][$result['entity_id']]['user'] = array('value' => 0);
     }
   }
@@ -305,7 +306,7 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
 }
 
 /**
- * Implementation of hook_fivestar_access().
+ * Implements hook_fivestar_access().
  *
  * This hook is called before every vote is cast through Fivestar. It allows
  * modules to allow voting on any type of entity, such as nodes, users, or
@@ -320,7 +321,7 @@ function fivestar_validate_target($entity_type, $id, $tag, $uid = NULL) {
  * @param $uid
  *   The user ID trying to cast the vote.
  *
- * @return boolean or NULL
+ * @return bool|NULL
  *   Returns TRUE if voting is supported on this object.
  *   Returns NULL if voting is not supported on this object by this module.
  *   If needing to absolutely deny all voting on this object, regardless
@@ -346,7 +347,7 @@ function fivestar_fivestar_access($entity_type, $id, $tag, $uid) {
 }
 
 /**
- * Implementation of hook_form_comment_form_alter().
+ * Implements hook_form_comment_form_alter().
  *
  * This hook removes the parent node, together with the fivestar field, from
  * the comment preview page. If this is left in, when the user presses the
@@ -371,7 +372,7 @@ function fivestar_form_comment_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- * Implementation of hook_fivestar_widgets().
+ * Implements hook_fivestar_widgets().
  *
  * This hook allows other modules to create additional custom widgets for
  * the fivestar module.
@@ -523,10 +524,11 @@ function fivestar_ajax_submit($form, $form_state) {
 
   // We need to process the 'fivestar' element with the new values.
   $form['vote']['#values'] = $values;
-  // Also need to pass on form_state and the complete_form, just like form_builder() does.
-  $new_element = fivestar_expand($form['vote'], $form_state, $form_state['complete_form']);
+  // Also need to pass on form_state and the complete form,
+  // just like form_builder() does.
+  $new_element = fivestar_expand($form['vote'], $form_state, $form_state['complete form']);
   // Update the description. Since it doesn't account of our cast vote above.
-  // TODO: Look into all this, I honestly don't like it and it's a bit weird.
+  // @todo Look into all this, I honestly don't like it and it's a bit weird.
   $form['vote']['vote']['#description'] = isset($new_element['vote']['#description']) ? $new_element['vote']['#description'] : '';
   if (!$form['vote']['#allow_revote'] && !$form['vote']['#allow_clear']) {
     $form['vote'] = $new_element;
@@ -543,7 +545,7 @@ function fivestar_ajax_submit($form, $form_state) {
 }
 
 /**
- * Implementation of hook_elements().
+ * Implements hook_elements().
  *
  * Defines 'fivestar' form element type.
  */
@@ -817,7 +819,7 @@ function fivestar_validate($element, &$form_state) {
 }
 
 /**
- * Implementation of hook_votingapi_metadata_alter().
+ * Implements hook_votingapi_metadata_alter().
  */
 function fivestar_votingapi_metadata_alter(&$data) {
   foreach (fivestar_get_tags() as $tag) {
@@ -1051,8 +1053,8 @@ function _fivestar_allow_vote($element) {
  */
 function fivestar_config_info() {
   $prefixes['fivestar.settings'] = array(
-    'label' => t('Settings'),
-    'group' => t('Fivestar'),
+    'label' => t('Fivestar settings'),
+    'group' => t('Configuration'),
   );
   return $prefixes;
 }

@@ -298,8 +298,9 @@ function theme_fivestar_summary($variables) {
       if (!empty($microdata['rating_count']['#attributes'])) {
         $rating_count_microdata = backdrop_attributes($microdata['rating_count']['#attributes']);
       }
-      // We don't directly substitute $votes (i.e. use '@count') in format_plural,
-      // because it has a span around it which is not translatable.
+      // We don't directly substitute $votes (i.e. use '@count') in
+      // format_plural(), because it has a span around it which is not
+      // translatable.
       $votes_str = format_plural($votes, '!cnt vote', '!cnt votes', array(
         '!cnt' => '<span ' . $rating_count_microdata . '>' . intval($votes) . '</span>',
       ));

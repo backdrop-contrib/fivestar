@@ -3,26 +3,28 @@
 /**
  *
  * @file
- * Based test file for the Fivestar module.
+ * Test base for the Fivestar module.
  */
 
 require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/ajax.test';
 
 /**
- *
+ * Base class for Fivestar Ajax tests.
  */
 class FivestarBaseTestCase extends AJAXTestCase {
-  // Using testing profile.
+
   /**
+   * Use testing profile.
+   *
    * @see http://groups.drupal.org/node/217189
    */
   protected $profile = 'testing';
 
-  /**
-   * Set up our basic users.
-   */
-  protected $admin_user;
-  protected $voter_user;
+  // A user with permission to administer Fivestar.
+  protected $adminUser;
+
+  // A user with permission to vote.
+  protected $voterUser;
 
   public function setUp() {
     parent::setUp(array('fivestar', 'dblog'));
@@ -37,21 +39,21 @@ class FivestarBaseTestCase extends AJAXTestCase {
       'access content',
       'rate content',
     );
-    $this->admin_user = $this->backdropCreateUser($admin_perms);
+    $this->adminUser = $this->backdropCreateUser($admin_perms);
     $voter_perms = array(
       'access content',
       'rate content',
     );
-    $this->voter_user = $this->backdropCreateUser($voter_perms);
+    $this->voterUser = $this->backdropCreateUser($voter_perms);
  }
 
   /**
    * Add a fivestar field to a content type.
    *
-   * @param $options
+   * @param array $options
    *   An associative array of options for the field and instance.
    */
-  public function createFivestarField($options = array()) {
+  public function createFivestarField(array $options = array()) {
     $options = $options + array(
       'content_type' => 'test_node_type',
       'widget_type' => 'stars',
