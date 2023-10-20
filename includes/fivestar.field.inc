@@ -35,8 +35,8 @@ function fivestar_form_field_ui_field_edit_form_alter(&$form, $form_state) {
   $field = $form['#field'];
   if ($field['type'] == 'fivestar') {
     // Multiple values is not supported with Fivestar.
-    $form['field']['cardinality']['#access'] = FALSE;
-    $form['field']['cardinality']['#value'] = 1;
+    $form['field']['cardinality_container']['cardinality_number']['#default_value'] = 1;
+    $form['field']['cardinality_container']['#access'] = FALSE;
     // Setting "default value" here is confusing and for all practical purposes
     // with existing widgets provided by fivestar (and anything else available
     // in contrib) meaningless.
