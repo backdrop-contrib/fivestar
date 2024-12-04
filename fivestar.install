@@ -39,7 +39,7 @@ function fivestar_update_last_removed() {
 function fivestar_update_1201() {
   // Migrate variables to config.
   $config = config('fivestar.settings');
-  $config->set('fivestar_tags', update_variable_get('fivestar_tags', array('vote')));
+  $config->set('fivestar_tags', update_variable_get('fivestar_tags', 'vote'));
   $config->save();
 
   // Delete variables.
