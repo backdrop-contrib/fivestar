@@ -45,3 +45,17 @@ function fivestar_update_1201() {
   // Delete variables.
   update_variable_del('fivestar_tags');
 }
+
+/**
+ * Ensure tags setting is a string, not an array.
+ * See: https://github.com/backdrop-contrib/fivestar/issues/22
+ */
+function fivestar_update_1202() {
+  $config = config('fivestar.settings');
+  $tags = $config->get('fivestar_tags');
+  if (is_array($tags)) {
+    $tags = implode(',', $tags);
+    $config->set('fivestar_tags', $tags);
+    $config->save();
+  }
+}
