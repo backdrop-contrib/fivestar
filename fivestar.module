@@ -8,7 +8,17 @@
 include_once dirname(__FILE__) . '/includes/fivestar.field.inc';
 
 /**
- * Implementation of hook_menu().
+ * Implements hook_autoload_info().
+ */
+function fivestar_autoload_info() {
+  return array(
+    'fivestar_views_handler_filter_in_operator' => 'includes/fivestar_views_handler_filter_in_operator.inc',
+    'MigrateFivestarFieldHandler' => 'fivestar.migrate.inc',
+  );
+}
+
+/**
+ * Implements hook_menu().
  */
 function fivestar_menu() {
   $items = array();
@@ -583,7 +593,7 @@ function fivestar_expand($element, $form_state, $complete_form) {
     $element['#input'] = FALSE;
   }
 
-  // Add CSS and JS
+  // Add CSS and JS.
   $path = backdrop_get_path('module', 'fivestar');
   $element['#attached']['js'][] = $path . '/js/fivestar.js';
   $element['#attached']['css'][] = $path . '/css/fivestar.css';
